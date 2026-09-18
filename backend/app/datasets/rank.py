@@ -9,6 +9,7 @@ explain the score. No hidden heuristics.
 
 import re
 
+from app.parsing.locations import location_variants as _location_variants
 from app.schemas import ParsedRequirements
 
 WEIGHTS = {
@@ -24,13 +25,15 @@ _ID_LIKE = re.compile(r"(^|_)(id|uuid|guid|identifier|key|code|slug)(_|$)", re.I
 
 
 def _keyword_match(cand: dict, req: ParsedRequirements) -> float:
-    if not req.keywords:
+    # Locations count as matchable terms too — "chennai" in a title/description is signal.
+    terms = list(req.keywords) + [loc.lower() for loc in _location_variants(req)]
+    if not terms:
         return 0.5  # nothing to match on; neutral
     haystack = " ".join(
         filter(None, [cand.get("name", ""), cand.get("description") or "", " ".join(cand.get("tags", []))])
     ).lower()
-    hits = sum(1 for kw in req.keywords if kw.lower() in haystack)
-    return hits / len(req.keywords)
+    hits = sum(1 for term in terms if term.lower() in haystack)
+    return min(1.0, hits / len(terms))
 
 
 def _date_match(cand: dict, req: ParsedRequirements) -> float:
@@ -38,7 +41,9 @@ def _date_match(cand: dict, req: ParsedRequirements) -> float:
         return 0.5
     ds, de = cand.get("date_start"), cand.get("date_end")
     if ds is None and de is None:
-        return 0.0  # unknown temporal coverage cannot confirm the requested window
+        # Unknown temporal coverage is common on catalog sources; score it low-neutral
+        # rather than zero so datasets with strong keyword/domain matches still surface.
+        return 0.3
     cand_start = int(ds) if ds and str(ds).isdigit() else None
     cand_end = int(de) if de and str(de).isdigit() else None
     if cand_start and not cand_end:
@@ -46,7 +51,7 @@ def _date_match(cand: dict, req: ParsedRequirements) -> float:
     req_start = int(req.date_start) if req.date_start and req.date_start.isdigit() else None
     req_end = int(req.date_end) if req.date_end and req.date_end.isdigit() else None
     if cand_start is None:
-        return 0.0
+        return 0.3
     overlap_start = max(cand_start, req_start) if req_start else cand_start
     overlap_end = min(cand_end, req_end) if req_end else cand_end
     if overlap_end < overlap_start:

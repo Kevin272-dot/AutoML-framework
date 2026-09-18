@@ -17,6 +17,13 @@ def eda_task(self, dataset_id: str, job_id: str):
     run_eda(dataset_id, job_id, SessionLocal)
 
 
+@celery_app.task(name="app.workers.tasks.preprocess_task", bind=True, max_retries=0)
+def preprocess_task(self, dataset_id: str, job_id: str):
+    from app.datasets.preprocess import run_preprocessing
+
+    run_preprocessing(dataset_id, job_id, SessionLocal)
+
+
 @celery_app.task(name="app.workers.tasks.discovery_search_task", bind=True, max_retries=0)
 def discovery_search_task(self, request_id: str, job_id: str):
     from app.discovery.service import run_discovery_search

@@ -36,6 +36,9 @@ class Settings(BaseSettings):
     # Background jobs: "celery" requires Redis; "eager" runs tasks in-process (dev fallback).
     job_backend: str = "eager"
 
+    # Cap on concurrently stored (downloaded) datasets per workspace.
+    max_stored_datasets: int = 25
+
 
 @lru_cache
 def get_settings() -> Settings:

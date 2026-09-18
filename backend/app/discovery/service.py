@@ -208,8 +208,8 @@ def run_discovery_search(request_id: str, job_id: str, db_factory) -> None:
         db.close()
 
 
-def select_dataset(db: Session, candidate: DatasetCandidate, project_id: str | None) -> tuple[Dataset, Job, Job]:
-    """Create the Dataset, a download job, and a queued EDA job (runs after download)."""
+def select_dataset(db: Session, candidate: DatasetCandidate, project_id: str | None) -> tuple[Dataset, Job, Job, Job]:
+    """Create the Dataset plus a chained job set: download → EDA → preprocessing."""
     source = db.get(DataSource, candidate.source_id)
     dataset = Dataset(
         id=new_uuid(),
@@ -230,8 +230,10 @@ def select_dataset(db: Session, candidate: DatasetCandidate, project_id: str | N
 
     download_job = Job(id=new_uuid(), dataset_id=dataset.id, kind="DATASET_DOWNLOAD", status="QUEUED")
     eda_job = Job(id=new_uuid(), dataset_id=dataset.id, kind="EDA", status="QUEUED")
+    preprocess_job = Job(id=new_uuid(), dataset_id=dataset.id, kind="PREPROCESS", status="QUEUED")
     db.add(download_job)
     db.add(eda_job)
+    db.add(preprocess_job)
     db.commit()
     db.refresh(dataset)
-    return dataset, download_job, eda_job
+    return dataset, download_job, eda_job, preprocess_job

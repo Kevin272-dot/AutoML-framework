@@ -1,10 +1,24 @@
 "use client";
 
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { KeyRound, ShieldCheck, ShieldOff } from "lucide-react";
 import { UserProfile } from "@clerk/nextjs";
 import { Monitor, Moon, Sun } from "lucide-react";
 import { useTheme, type ThemePreference } from "@/components/theme/ThemeProvider";
 import { useClerkEnabled } from "@/app/providers";
-import { Card, CardHeader } from "@/components/ui/Card";
+import {
+  deleteConnection,
+  listConnections,
+  listSources,
+  saveConnection,
+  ApiError,
+} from "@/lib/api-client";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { Card, CardHeader, Spinner } from "@/components/ui/Card";
+import { ConfirmDeleteButton } from "@/components/ui/ConfirmDeleteButton";
+import { ErrorState } from "@/components/ui/States";
 import { cn } from "@/lib/utils";
 
 const THEME_OPTIONS: { value: ThemePreference; label: string; description: string; icon: typeof Sun }[] = [
@@ -47,6 +61,121 @@ function PreferencesCard() {
   );
 }
 
+const KEY_HINTS: Record<string, string> = {
+  kaggle: "Format: username:key (from kaggle.com/settings → API)",
+  "data-gov-in": "Your data.gov.in API key",
+  huggingface: "A Hugging Face access token (hf_…)",
+};
+
+function ConnectionsCard() {
+  const queryClient = useQueryClient();
+  const [secretInputs, setSecretInputs] = useState<Record<string, string>>({});
+  const [savingSource, setSavingSource] = useState<string | null>(null);
+  const [error, setError] = useState<Error | null>(null);
+
+  const { data: sources } = useQuery({ queryKey: ["sources"], queryFn: listSources });
+  const { data: connections, isLoading } = useQuery({ queryKey: ["connections"], queryFn: listConnections });
+
+  const authSources = (sources ?? []).filter((s) => s.requires_auth);
+  const bySource = new Map((connections ?? []).map((c) => [c.source_id, c]));
+
+  const save = async (sourceId: string) => {
+    const secret = secretInputs[sourceId]?.trim();
+    if (!secret) return;
+    setSavingSource(sourceId);
+    setError(null);
+    try {
+      await saveConnection(sourceId, secret);
+      setSecretInputs((prev) => ({ ...prev, [sourceId]: "" }));
+      await queryClient.invalidateQueries({ queryKey: ["connections"] });
+    } catch (err) {
+      setError(err as Error);
+    } finally {
+      setSavingSource(null);
+    }
+  };
+
+  const remove = async (sourceId: string) => {
+    setError(null);
+    try {
+      await deleteConnection(sourceId);
+      await queryClient.invalidateQueries({ queryKey: ["connections"] });
+    } catch (err) {
+      setError(err as Error);
+    }
+  };
+
+  if (!authSources.length) return null;
+
+  return (
+    <Card>
+      <CardHeader
+        title="Connections"
+        subtitle="API keys for sources that require credentials. Stored as protected, encrypted secrets — never exposed to the browser."
+      />
+      <div className="space-y-3 p-4">
+        {isLoading ? (
+          <div className="flex items-center gap-2 text-sm text-muted"><Spinner /> Loading connections…</div>
+        ) : (
+          authSources.map((source) => {
+            const conn = bySource.get(source.id);
+            return (
+              <div key={source.id} className="rounded-lg border border-border p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <KeyRound className="size-4 text-faint" />
+                    <span className="text-sm font-medium text-text">{source.name}</span>
+                    {conn ? (
+                      <Badge tone={conn.validated ? "success" : "warning"}>
+                        {conn.validated ? "validated" : "connected"}
+                      </Badge>
+                    ) : (
+                      <Badge tone="neutral">not connected</Badge>
+                    )}
+                  </div>
+                  {conn ? (
+                    <span className="flex items-center gap-2 text-xs text-faint">
+                      <ShieldCheck className="size-3.5 text-success" /> {conn.secret_hint}
+                      <ConfirmDeleteButton label="Remove" confirmLabel="Confirm remove" onConfirm={() => void remove(source.id)} />
+                    </span>
+                  ) : (
+                    <ShieldOff className="size-3.5 text-faint" />
+                  )}
+                </div>
+                <div className="mt-2 flex gap-2">
+                  <input
+                    type="password"
+                    value={secretInputs[source.id] ?? ""}
+                    onChange={(e) => setSecretInputs((prev) => ({ ...prev, [source.id]: e.target.value }))}
+                    placeholder={conn ? "Replace with a new key…" : (KEY_HINTS[source.slug] ?? "API key")}
+                    className="flex-1 rounded-md border border-border bg-elevated px-3 py-1.5 text-xs text-text placeholder:text-faint focus:border-accent focus:outline-none"
+                    aria-label={`API key for ${source.name}`}
+                  />
+                  <Button
+                    size="sm"
+                    onClick={() => void save(source.id)}
+                    disabled={savingSource === source.id || !(secretInputs[source.id] ?? "").trim()}
+                  >
+                    {savingSource === source.id ? <Spinner className="border-t-text" /> : null}
+                    Save key
+                  </Button>
+                </div>
+              </div>
+            );
+          })
+        )}
+        {error ? (
+          <ErrorState
+            what={(error as ApiError).message || "Could not save the connection."}
+            why={error instanceof ApiError && error.code === "SECRET_INVALID" ? "The source rejected this key." : undefined}
+            whatToDo="Check the key and retry."
+          />
+        ) : null}
+      </div>
+    </Card>
+  );
+}
+
 export default function ProfilePage() {
   const clerkEnabled = useClerkEnabled();
 
@@ -58,6 +187,8 @@ export default function ProfilePage() {
       </div>
 
       <PreferencesCard />
+
+      <ConnectionsCard />
 
       {clerkEnabled ? (
         <Card className="overflow-hidden">

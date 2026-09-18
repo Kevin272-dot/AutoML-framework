@@ -246,6 +246,15 @@ def run_eda(dataset_id: str, job_id: str, db_factory) -> None:
             job.progress = 1.0
             job.detail = "EDA complete."
             job.finished_at = utcnow()
+
+        # Chain preprocessing after EDA so the dataset lands ML-ready.
+        from app.workers.dispatch import dispatch_preprocess
+
+        pre_job = (
+            db.query(Job).filter(Job.dataset_id == dataset.id, Job.kind == "PREPROCESS").first()
+        )
+        if pre_job is not None:
+            dispatch_preprocess(dataset.id, pre_job.id, db_factory)
         db.commit()
     finally:
         db.close()

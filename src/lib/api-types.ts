@@ -243,5 +243,21 @@ export interface SourceSummary {
   source_type: string;
   adapter: string | null;
   status: string;
+  requires_auth?: boolean;
   last_audited_at: string | null;
+}
+
+export interface PreprocessReportOut {
+  input_shape: [number, number];
+  output_shape: [number, number];
+  missing_cells_before: number;
+  missing_cells_after: number;
+  rows_dropped_duplicates: number;
+  constant_columns_removed: string[];
+  identifier_columns_excluded: string[];
+  imputed: Record<string, string>;
+  one_hot_encoded: Record<string, number>;
+  ordinal_encoded: Record<string, number>;
+  outliers: Record<string, number>;
+  steps: string[];
 }

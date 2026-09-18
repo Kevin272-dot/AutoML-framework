@@ -132,6 +132,17 @@ export function confirmTarget(id: string, target: string, task: "classification"
   );
 }
 
+export function getPreprocessReport(id: string) {
+  return request<import("./api-types").PreprocessReportOut>(`/api/datasets/${id}/preprocess`);
+}
+
+export function startPreprocessing(id: string) {
+  return request<{ dataset_id: string; job_id?: string; status: string }>(
+    `/api/datasets/${id}/preprocess`,
+    { method: "POST" }
+  );
+}
+
 // ---------- jobs / dashboard ----------
 export function getJob(id: string) {
   return request<import("./api-types").JobOut>(`/api/jobs/${id}`);
@@ -143,4 +154,31 @@ export function getDashboardStats() {
 
 export function listSources() {
   return request<import("./api-types").SourceSummary[]>("/api/sources");
+}
+
+export interface ConnectionOut {
+  source_id: string;
+  source_name: string;
+  source_slug: string;
+  status: string;
+  validated: boolean;
+  secret_hint: string;
+  created_at: string;
+}
+
+export function listConnections() {
+  return request<ConnectionOut[]>("/api/connections");
+}
+
+export function saveConnection(sourceId: string, secret: string) {
+  return request<ConnectionOut>("/api/connections", {
+    method: "POST",
+    body: JSON.stringify({ source_id: sourceId, secret }),
+  });
+}
+
+export function deleteConnection(sourceId: string) {
+  return request<{ source_id: string; status: string }>(`/api/connections/${sourceId}`, {
+    method: "DELETE",
+  });
 }

@@ -27,24 +27,59 @@ from app.discovery.adapters.base import (
     AdapterSearchResult,
     DatasetSourceAdapter,
 )
+from app.parsing.locations import location_variants
 from app.schemas import ParsedRequirements
 
 _TAG_TO_FORMAT = {"parquet": "parquet", "csv": "csv", "json": "json"}
 
 
-def _domain_tag_filters(req: ParsedRequirements) -> list[str]:
-    """HF supports tag filters like 'domain:agriculture' on some datasets; we rely on
-    keyword search primarily and keep domain terms as additional query terms."""
-    return req.domain or []
+# Synonym expansion so queries like "weather data for chennai" also search
+# climate/temperature/rainfall vocabulary, and city queries reach country datasets.
+_DOMAIN_SYNONYMS = {
+    "agriculture": ["crop", "farming", "agricultural yield"],
+    "climate": ["weather", "temperature", "rainfall", "precipitation"],
+    "healthcare": ["medical", "hospital"],
+    "finance": ["financial", "banking"],
+    "transportation": ["traffic", "transport"],
+    "energy": ["electricity", "power consumption"],
+    "telecom": ["telecommunications", "subscriber"],
+    "ecommerce": ["retail", "sales"],
+    "environment": ["pollution", "air quality"],
+}
 
 
-def _build_query(req: ParsedRequirements) -> str:
-    parts = list(req.keywords)
-    for loc in req.location:
-        parts.append(loc)
-    if not parts:
-        parts = req.domain
-    return " ".join(parts).strip()
+def _location_variants(req: ParsedRequirements) -> list[str]:
+    """A location plus its parent regions (chennai -> tamil nadu -> india)."""
+    return location_variants(req)
+
+
+def _build_queries(req: ParsedRequirements) -> list[str]:
+    """Multiple deep-search query formulations, most specific first."""
+    locations = _location_variants(req)
+    domain_terms: list[str] = []
+    for domain in req.domain:
+        domain_terms.append(domain)
+        domain_terms.extend(_DOMAIN_SYNONYMS.get(domain, []))
+
+    queries: list[str] = []
+    base = list(req.keywords)
+
+    def add(parts: list[str]) -> None:
+        q = " ".join(p for p in parts if p).strip()
+        if q and q not in queries:
+            queries.append(q)
+
+    if base:
+        add(base + locations[:1])
+        add(base)  # keywords alone — location terms are often absent from dataset titles
+    if domain_terms:
+        add(domain_terms[:4] + locations[:1])
+        add(domain_terms[:4])
+    for loc in locations[:2]:
+        add(loc + " " + (domain_terms[0] if domain_terms else " ".join(base[:2])))
+    if not queries:
+        add(req.domain)
+    return queries[:6]
 
 
 def _guess_format(raw: dict) -> str | None:
@@ -249,27 +284,18 @@ class HuggingFaceAdapter(DatasetSourceAdapter):
         )
 
     async def search(self, requirements: ParsedRequirements) -> list[AdapterSearchResult]:
-        query = _build_query(requirements)
-        client = await self._get_client()
+        queries = _build_queries(requirements)
         results: list[AdapterSearchResult] = []
 
-        async def _run_search(params: dict) -> httpx.Response:
-            resp = await client.get(f"{self._api_base}/datasets", params=params)
-            resp.raise_for_status()
-            return resp
-
-        searches = [{"search": query, "limit": 25, "full": "false"}]
-        if _domain_tag_filters(requirements):
-            for domain in requirements.domain[:2]:
-                searches.append({"search": domain, "limit": 10, "full": "false"})
-        if requirements.task:
-            searches.append({"filter": "task_categories", "search": query, "limit": 10})
+        searches = [{"search": q, "limit": 40, "full": "false"} for q in queries]
 
         seen_ids: set[str] = set()
         for params in searches:
             try:
-                resp = await _run_search(params)
-            except httpx.HTTPError:
+                resp = await self._request_with_retry(f"{self._api_base}/datasets", params=params)
+            except (httpx.HTTPError, AdapterError):
+                continue
+            if resp.status_code != 200:
                 continue
             for item in resp.json():
                 ds_id = item.get("id")

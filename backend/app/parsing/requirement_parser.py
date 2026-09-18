@@ -8,6 +8,7 @@ Extraction is regex + lexicon based and therefore reproducible.
 """
 
 import re
+from datetime import datetime, timezone
 
 from app.schemas import ParsedRequirements
 
@@ -63,6 +64,20 @@ _YEAR = r"(?:19|20)\d{2}"
 
 def _extract_years(text: str) -> list[int]:
     return sorted({int(m.group(0)) for m in re.finditer(rf"\b{_YEAR}\b", text) if 1900 <= int(m.group(0)) <= 2100})
+
+
+def _extract_relative_years(text: str) -> tuple[str | None, str | None]:
+    """'last/past N years' → (current_year - N, current_year)."""
+    m = re.search(r"\b(?:last|past|previous|recent)\s+(\d{1,2})\s+years?\b", text, re.I)
+    if m:
+        n = int(m.group(1))
+        current = datetime.now(timezone.utc).year
+        return str(current - n), str(current)
+    m = re.search(r"\b(?:last|past|previous|recent)\s+year\b", text, re.I)
+    if m:
+        current = datetime.now(timezone.utc).year
+        return str(current - 1), str(current)
+    return None, None
 
 
 def _extract_date_range(text: str) -> tuple[str | None, str | None]:
@@ -181,6 +196,8 @@ def parse_requirements(query: str) -> ParsedRequirements:
     domains = _extract_domains(text)
     locations = _extract_locations(text)
     date_start, date_end = _extract_date_range(text)
+    if date_start is None:
+        date_start, date_end = _extract_relative_years(text)
     min_rows, max_rows = _extract_row_constraints(text)
     task = _extract_task(text)
     target_hints = [h for h in _TARGET_HINTS if re.search(rf"\b{h}\b", text, re.I)]

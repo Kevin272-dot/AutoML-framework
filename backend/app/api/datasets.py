@@ -18,6 +18,7 @@ from app.models import (
     DiscoveryRequest,
     EDAReport,
     Job,
+    SourceConnection,
 )
 from app.schemas import (
     ConfirmTargetIn,
@@ -31,6 +32,8 @@ from app.models import utcnow
 from app.workers.dispatch import dispatch_download
 
 router = APIRouter(prefix="/api/datasets", tags=["datasets"])
+
+MAX_EXPORT_ROWS = 200_000
 
 
 def _dataset_out(ds: Dataset, source: DataSource | None) -> DatasetOut:
@@ -128,8 +131,47 @@ def select(payload: SelectDatasetIn, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Dataset candidate not found.")
     if not cand.download_available:
         raise HTTPException(status_code=400, detail="This dataset does not expose downloadable files.")
+
     request = db.get(DiscoveryRequest, cand.request_id)
-    dataset, download_job, eda_job = select_dataset(db, cand, request.project_id if request else None)
+    source = db.get(DataSource, cand.source_id)
+
+    # Enforce the stored-dataset quota.
+    settings = get_settings()
+    stored_count = db.query(Dataset).count()
+    if stored_count >= settings.max_stored_datasets:
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "code": "DATASET_LIMIT_REACHED",
+                "message": (
+                    f"Download limit reached ({stored_count}/{settings.max_stored_datasets} datasets stored). "
+                    "Delete datasets you no longer need before downloading new ones."
+                ),
+            },
+        )
+
+    # Sources that require credentials (Kaggle, data.gov.in, ...) need a saved connection.
+    if source is not None and source.requires_auth:
+        connection = (
+            db.query(SourceConnection)
+            .filter(SourceConnection.source_id == source.id, SourceConnection.status == "CONNECTED")
+            .first()
+        )
+        if connection is None:
+            raise HTTPException(
+                status_code=409,
+                detail={
+                    "code": "API_KEY_REQUIRED",
+                    "message": (
+                        f"{source.name} requires an API key to extract data. "
+                        "Add it under Profile → Connections (stored as a protected secret)."
+                    ),
+                    "source_id": source.id,
+                    "source_name": source.name,
+                },
+            )
+
+    dataset, download_job, eda_job, preprocess_job = select_dataset(db, cand, request.project_id if request else None)
     if request:
         request.status = "DATASET_SELECTED"
     db.commit()
@@ -138,6 +180,7 @@ def select(payload: SelectDatasetIn, db: Session = Depends(get_db)):
         "dataset_id": dataset.id,
         "download_job_id": download_job.id,
         "eda_job_id": eda_job.id,
+        "preprocess_job_id": preprocess_job.id,
         "status": "DATASET_SELECTED",
     }
 
@@ -159,7 +202,7 @@ def delete_dataset(dataset_id: str, db: Session = Depends(get_db)):
     if ds is None:
         raise HTTPException(status_code=404, detail="Dataset not found.")
 
-    from app.models import DatasetColumn, EDAReport, Job
+    from app.models import DatasetColumn, EDAReport, Job, PreprocessReport
     from app.storage import delete_artifact
 
     deleted_artifacts = 0
@@ -174,6 +217,7 @@ def delete_dataset(dataset_id: str, db: Session = Depends(get_db)):
 
     db.query(DatasetColumn).filter(DatasetColumn.dataset_id == ds.id).delete()
     db.query(EDAReport).filter(EDAReport.dataset_id == ds.id).delete()
+    db.query(PreprocessReport).filter(PreprocessReport.dataset_id == ds.id).delete()
     db.query(Job).filter(Job.dataset_id == ds.id).delete()
     db.query(DatasetFile).filter(DatasetFile.dataset_id == ds.id).delete()
     db.delete(ds)
@@ -200,6 +244,119 @@ def get_dataset_files(dataset_id: str, db: Session = Depends(get_db)):
         }
         for f in files
     ]
+
+
+@router.get("/{dataset_id}/export")
+def export_dataset(dataset_id: str, variant: str = "raw", db: Session = Depends(get_db)):
+    """Download the dataset as a CSV file (raw data, or the preprocessed copy)."""
+    import os
+    import tempfile
+
+    import pandas as pd
+    from fastapi.responses import FileResponse
+    from starlette.background import BackgroundTask
+
+    ds = db.get(Dataset, dataset_id)
+    if ds is None:
+        raise HTTPException(status_code=404, detail="Dataset not found.")
+
+    if variant not in ("raw", "processed"):
+        raise HTTPException(status_code=400, detail="variant must be 'raw' or 'processed'.")
+
+    def _is_processed(f: DatasetFile) -> bool:
+        return (f.validation_report or {}).get("kind") == "processed"
+
+    dfile = None
+    if variant == "processed":
+        dfile = (
+            db.query(DatasetFile)
+            .filter(DatasetFile.dataset_id == ds.id, DatasetFile.file_name == "processed.parquet")
+            .first()
+        )
+        if dfile is None:
+            raise HTTPException(status_code=404, detail="No preprocessed copy available; run preprocessing first.")
+    else:
+        dfile = (
+            db.query(DatasetFile)
+            .filter(DatasetFile.dataset_id == ds.id, DatasetFile.file_name != "processed.parquet")
+            .first()
+        )
+        if dfile is None:
+            dfile = db.query(DatasetFile).filter(DatasetFile.dataset_id == ds.id).first()
+    if dfile is None:
+        raise HTTPException(status_code=404, detail="No data file available for this dataset.")
+
+    from app.storage import open_artifact
+
+    local_path = open_artifact(dfile.storage_key, dfile.storage_backend)
+    if (dfile.file_format or "csv") == "parquet":
+        df = pd.read_parquet(local_path)
+    else:
+        df = pd.read_csv(local_path, on_bad_lines="skip")
+    if df.shape[0] > MAX_EXPORT_ROWS:
+        df = df.head(MAX_EXPORT_ROWS)
+
+    safe_name = "".join(c if c.isalnum() else "-" for c in ds.name.lower()).strip("-")[:60] or "dataset"
+    suffix = "processed" if variant == "processed" or _is_processed(dfile) else "raw"
+    out_name = f"{safe_name}-{suffix}.csv"
+
+    tmp = tempfile.NamedTemporaryFile(prefix="automl-export-", suffix=".csv", delete=False)
+    df.to_csv(tmp.name, index=False)
+    tmp.close()
+    return FileResponse(
+        path=tmp.name,
+        media_type="text/csv",
+        filename=out_name,
+        background=BackgroundTask(os.unlink, tmp.name),
+    )
+
+
+@router.get("/{dataset_id}/preprocess")
+def get_preprocess_report(dataset_id: str, db: Session = Depends(get_db)):
+    from app.models import PreprocessReport
+
+    report = (
+        db.query(PreprocessReport)
+        .filter(PreprocessReport.dataset_id == dataset_id)
+        .order_by(PreprocessReport.created_at.desc())
+        .first()
+    )
+    if report is None:
+        raise HTTPException(status_code=404, detail="Preprocessing has not run for this dataset yet.")
+    return report.report
+
+
+@router.post("/{dataset_id}/preprocess")
+def start_preprocessing(dataset_id: str, db: Session = Depends(get_db)):
+    from app.db import SessionLocal
+    from app.models import PreprocessReport
+    from app.workers.dispatch import dispatch_preprocess
+
+    ds = db.get(Dataset, dataset_id)
+    if ds is None:
+        raise HTTPException(status_code=404, detail="Dataset not found.")
+    existing = (
+        db.query(PreprocessReport)
+        .filter(PreprocessReport.dataset_id == dataset_id)
+        .order_by(PreprocessReport.created_at.desc())
+        .first()
+    )
+    if existing is not None:
+        return {"dataset_id": dataset_id, "status": "ALREADY_PREPROCESSED"}
+
+    running = (
+        db.query(Job)
+        .filter(Job.dataset_id == dataset_id, Job.kind == "PREPROCESS", Job.status.in_(["QUEUED", "RUNNING"]))
+        .first()
+    )
+    if running is not None:
+        return {"dataset_id": dataset_id, "job_id": running.id, "status": running.status}
+
+    job = Job(id=new_uuid(), dataset_id=dataset_id, kind="PREPROCESS", status="QUEUED")
+    db.add(job)
+    db.commit()
+    dispatch_preprocess(dataset_id, job.id, SessionLocal)
+    return {"dataset_id": dataset_id, "job_id": job.id, "status": job.status}
 
 
 @router.get("/{dataset_id}/jobs", response_model=list[JobOut])

@@ -234,8 +234,35 @@ class DatasetColumn(Base):
     position: Mapped[int] = mapped_column(Integer, default=0)
 
 
+class SourceConnection(Base):
+    """Per-source credentials (API keys / tokens), stored as protected secrets.
+    The plaintext secret never leaves the backend; only a masked hint is returned."""
+
+    __tablename__ = "source_connections"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    source_id: Mapped[str] = mapped_column(String(36), ForeignKey("data_sources.id"), unique=True, index=True)
+    secret_encrypted: Mapped[str] = mapped_column(Text)  # Fernet-encrypted
+    secret_hint: Mapped[str] = mapped_column(String(64))  # masked hint, e.g. "abcd…wxyz"
+    status: Mapped[str] = mapped_column(String(32), default="CONNECTED")  # CONNECTED | INVALID | DISCONNECTED
+    validated: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
+
+    source = relationship("DataSource")
+
+
 class EDAReport(Base):
     __tablename__ = "eda_reports"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    dataset_id: Mapped[str] = mapped_column(String(36), ForeignKey("datasets.id"), index=True)
+    report: Mapped[dict] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class PreprocessReport(Base):
+    __tablename__ = "preprocess_reports"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     dataset_id: Mapped[str] = mapped_column(String(36), ForeignKey("datasets.id"), index=True)

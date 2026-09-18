@@ -47,6 +47,19 @@ def dispatch_eda(dataset_id: str, job_id: str, db_factory) -> str:
     return "eager"
 
 
+def dispatch_preprocess(dataset_id: str, job_id: str, db_factory) -> str:
+    settings = get_settings()
+    if settings.job_backend == "celery":
+        from app.workers.tasks import preprocess_task
+
+        preprocess_task.delay(dataset_id, job_id)
+        return "queued"
+    from app.datasets.preprocess import run_preprocessing
+
+    _run_in_thread(run_preprocessing, dataset_id, job_id, db_factory)
+    return "eager"
+
+
 def dispatch_discovery_search(request_id: str, job_id: str, db_factory) -> str:
     settings = get_settings()
     if settings.job_backend == "celery":

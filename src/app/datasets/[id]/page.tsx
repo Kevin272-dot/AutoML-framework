@@ -2,7 +2,7 @@
 
 import { use, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Bar,
   BarChart,
@@ -13,8 +13,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { getDataset, getDatasetFiles, getDatasetJobs, getEda, confirmTarget, deleteDataset } from "@/lib/api-client";
-import type { ColumnStats } from "@/lib/api-types";
+import { getDataset, getDatasetFiles, getDatasetJobs, getEda, confirmTarget, deleteDataset, getPreprocessReport, startPreprocessing } from "@/lib/api-client";
+import type { ColumnStats, PreprocessReportOut } from "@/lib/api-types";
 import { Badge, StatusBadge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card, CardHeader, MetricCard, ProgressBar, Spinner } from "@/components/ui/Card";
@@ -231,6 +231,132 @@ function TargetConfirmation({ datasetId }: { datasetId: string }) {
   );
 }
 
+function PreprocessSection({ datasetId }: { datasetId: string }) {
+  const queryClient = useQueryClient();
+  const [starting, setStarting] = useState(false);
+
+  const { data: report, error, isLoading, refetch } = useQuery({
+    queryKey: ["dataset", datasetId, "preprocess"],
+    queryFn: () => getPreprocessReport(datasetId),
+    retry: false,
+  });
+
+  const start = async () => {
+    setStarting(true);
+    try {
+      await startPreprocessing(datasetId);
+      await refetch();
+      await queryClient.invalidateQueries({ queryKey: ["dataset", datasetId, "jobs"] });
+    } finally {
+      setStarting(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <Card className="p-4 text-sm text-muted">
+        <div className="flex items-center gap-2"><Spinner /> Checking preprocessing…</div>
+      </Card>
+    );
+  }
+  if (error || !report) {
+    return (
+      <Card className="p-4">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <h3 className="text-sm font-medium text-text">Preprocessing</h3>
+            <p className="mt-0.5 text-xs text-muted">
+              Build an ML-ready copy: dedupe, impute missing values, encode categoricals, exclude IDs.
+            </p>
+          </div>
+          <Button size="sm" onClick={() => void start()} disabled={starting}>
+            {starting ? <Spinner className="border-t-text" /> : null}
+            Run preprocessing
+          </Button>
+        </div>
+      </Card>
+    );
+  }
+
+  const missingBefore = report.missing_cells_before;
+  const missingAfter = report.missing_cells_after;
+
+  return (
+    <Card>
+      <CardHeader title="Preprocessing" subtitle="What was applied to produce the ML-ready copy" />
+      <div className="space-y-4 p-4">
+        <div className="grid gap-3 sm:grid-cols-4">
+          <MetricCard
+            label="Shape"
+            value={
+              <span className="num">
+                {report.input_shape[0].toLocaleString()}×{report.input_shape[1]} → {report.output_shape[0].toLocaleString()}×
+                {report.output_shape[1]}
+              </span>
+            }
+            hint="before → after"
+          />
+          <MetricCard
+            label="Missing cells"
+            value={<span className="num">{formatNumber(missingBefore)} → {formatNumber(missingAfter)}</span>}
+          />
+          <MetricCard label="Duplicates removed" value={<span className="num">{formatNumber(report.rows_dropped_duplicates)}</span>} />
+          <MetricCard
+            label="Columns removed"
+            value={<span className="num">{report.constant_columns_removed.length + report.identifier_columns_excluded.length}</span>}
+            hint="constant + identifier-like"
+          />
+        </div>
+
+        <div className="grid gap-3 md:grid-cols-3 text-xs">
+          {Object.keys(report.imputed).length > 0 ? (
+            <div className="rounded-md border border-border p-3">
+              <h4 className="font-medium text-text">Imputed (median / mode)</h4>
+              <ul className="mt-1 space-y-0.5 text-muted">
+                {Object.entries(report.imputed).slice(0, 8).map(([col, strategy]) => (
+                  <li key={col} className="truncate font-mono">{col} → {strategy}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+          {Object.keys(report.one_hot_encoded).length + Object.keys(report.ordinal_encoded).length > 0 ? (
+            <div className="rounded-md border border-border p-3">
+              <h4 className="font-medium text-text">Encoded</h4>
+              <ul className="mt-1 space-y-0.5 text-muted">
+                {Object.entries(report.one_hot_encoded).map(([col, n]) => (
+                  <li key={col} className="truncate font-mono">{col} → one-hot ({n})</li>
+                ))}
+                {Object.entries(report.ordinal_encoded).map(([col, n]) => (
+                  <li key={col} className="truncate font-mono">{col} → ordinal ({n})</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+          {Object.keys(report.outliers).length > 0 ? (
+            <div className="rounded-md border border-border p-3">
+              <h4 className="font-medium text-text">Outliers flagged (IQR)</h4>
+              <ul className="mt-1 space-y-0.5 text-muted">
+                {Object.entries(report.outliers).slice(0, 8).map(([col, n]) => (
+                  <li key={col} className="truncate font-mono">{col}: {formatNumber(n)}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+        </div>
+
+        <div>
+          <h4 className="text-xs font-medium uppercase tracking-wider text-faint">Applied steps</h4>
+          <ol className="mt-1 list-inside list-decimal space-y-0.5 text-xs text-muted">
+            {report.steps.map((step, i) => (
+              <li key={i}>{step}</li>
+            ))}
+          </ol>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
 export default function DatasetWorkspacePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
@@ -294,6 +420,24 @@ export default function DatasetWorkspacePage({ params }: { params: Promise<{ id:
             </div>
           </div>
           <div className="flex flex-col items-end gap-2">
+            <div className="flex gap-2">
+              <a
+                href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/datasets/${id}/export?variant=raw`}
+                className="inline-flex items-center gap-1.5 rounded-md border border-border bg-elevated px-2.5 py-1.5 text-xs font-medium text-text hover:border-accent/40"
+                title="Download the raw data as CSV"
+              >
+                Download CSV
+              </a>
+              {files?.some((f) => f.file_name === "processed.parquet") ? (
+                <a
+                  href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/datasets/${id}/export?variant=processed`}
+                  className="inline-flex items-center gap-1.5 rounded-md border border-accent/60 bg-accent/15 px-2.5 py-1.5 text-xs font-medium text-accent hover:bg-accent/25"
+                  title="Download the preprocessed data as CSV"
+                >
+                  Download preprocessed CSV
+                </a>
+              ) : null}
+            </div>
             {dataset.selected_target ? (
               <Badge tone="success">
                 target: {dataset.selected_target} ({dataset.selected_task})
@@ -400,6 +544,8 @@ export default function DatasetWorkspacePage({ params }: { params: Promise<{ id:
               ))}
             </div>
           </Card>
+
+          <PreprocessSection datasetId={id} />
 
           <TargetConfirmation datasetId={id} />
         </>

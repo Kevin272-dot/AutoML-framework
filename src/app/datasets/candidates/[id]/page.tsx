@@ -4,10 +4,10 @@ import { use, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { ExternalLink, Info } from "lucide-react";
-import { getCandidate, getCandidatePreview, selectDataset } from "@/lib/api-client";
+import { ApiError, getCandidate, getCandidatePreview, selectDataset } from "@/lib/api-client";
 import type { ScoreComponents } from "@/lib/api-types";
 import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
+import { Button, ButtonLink } from "@/components/ui/Button";
 import { Card, CardHeader, Spinner } from "@/components/ui/Card";
 import { ErrorState, NotAvailableYet } from "@/components/ui/States";
 import { ScoreBreakdown } from "@/components/discovery/ResultsTable";
@@ -22,6 +22,7 @@ export default function CandidateDetailPage({ params }: { params: Promise<{ id: 
   const [showScore, setShowScore] = useState(false);
   const [selecting, setSelecting] = useState(false);
   const [selectError, setSelectError] = useState<Error | null>(null);
+  const [selectErrorCode, setSelectErrorCode] = useState<string | null>(null);
   const [selectedDatasetId, setSelectedDatasetId] = useState<string | null>(null);
 
   const { data: candidate, isLoading, isError, error } = useQuery({
@@ -50,12 +51,14 @@ export default function CandidateDetailPage({ params }: { params: Promise<{ id: 
   const doSelect = async () => {
     setSelecting(true);
     setSelectError(null);
+    setSelectErrorCode(null);
     try {
       const res = await selectDataset(candidate.id);
       setSelectedDatasetId(res.dataset_id);
       router.push(`/datasets/${res.dataset_id}`);
     } catch (err) {
-      setSelectError(err as Error);
+      setSelectError(err as ApiError);
+      setSelectErrorCode(err instanceof ApiError ? err.code : null);
     } finally {
       setSelecting(false);
     }
@@ -100,7 +103,31 @@ export default function CandidateDetailPage({ params }: { params: Promise<{ id: 
               {selecting ? <Spinner className="border-t-text" /> : null}
               {candidate.download_available ? "Select dataset" : "No downloadable files"}
             </Button>
-            {selectError ? <span className="max-w-52 text-right text-xs text-danger">{selectError.message}</span> : null}
+            {selectError && selectErrorCode === "API_KEY_REQUIRED" ? (
+              <div className="mt-1 w-72">
+                <ErrorState
+                  title="API key required"
+                  what={selectError.message}
+                  whatToDo="Add the key under Profile → Connections — it is stored as a protected, encrypted secret."
+                />
+                <ButtonLink href="/profile" size="sm" className="mt-2 w-full">
+                  Open Profile → Connections
+                </ButtonLink>
+              </div>
+            ) : selectError && selectErrorCode === "DATASET_LIMIT_REACHED" ? (
+              <div className="mt-1 w-72">
+                <ErrorState
+                  title="Download limit reached"
+                  what={selectError.message}
+                  whatToDo="Delete datasets you no longer need, then try again."
+                />
+                <ButtonLink href="/datasets" size="sm" variant="secondary" className="mt-2 w-full">
+                  Manage datasets
+                </ButtonLink>
+              </div>
+            ) : selectError ? (
+              <span className="max-w-52 text-right text-xs text-danger">{selectError.message}</span>
+            ) : null}
             {selectedDatasetId ? <span className="text-xs text-success">Selected — opening dataset…</span> : null}
           </div>
         </div>

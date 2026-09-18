@@ -94,6 +94,7 @@ def list_sources(db: Session = Depends(get_db)):
             "source_type": s.source_type,
             "adapter": s.adapter,
             "status": s.status,
+            "requires_auth": s.requires_auth,
             "last_audited_at": s.last_audited_at,
         }
         for s in sources
