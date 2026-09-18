@@ -1,8 +1,8 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Activity, UserCircle } from "lucide-react";
-import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { Activity } from "lucide-react";
+import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { getDashboardStats } from "@/lib/api-client";
 import { useClerkEnabled } from "@/app/providers";
@@ -44,18 +44,21 @@ export function TopBar() {
 
         {clerkEnabled ? (
           <>
-            <SignedIn>
+            <Show when="signed-in">
               <UserButton />
-            </SignedIn>
-            <SignedOut>
-              <Link
-                href="/profile"
-                className="flex size-7 items-center justify-center rounded-full border border-border bg-elevated text-muted"
-                title="Sign-in not configured"
-              >
-                <UserCircle className="size-4" />
-              </Link>
-            </SignedOut>
+            </Show>
+            <Show when="signed-out">
+              <SignInButton mode="redirect" fallbackRedirectUrl="/dashboard">
+                <button className="rounded-md px-2.5 py-1.5 text-xs font-medium text-muted hover:bg-hover hover:text-text">
+                  Sign in
+                </button>
+              </SignInButton>
+              <SignUpButton mode="redirect" fallbackRedirectUrl="/dashboard">
+                <button className="rounded-md border border-accent/60 bg-accent/15 px-2.5 py-1.5 text-xs font-medium text-accent hover:bg-accent/25">
+                  Sign up
+                </button>
+              </SignUpButton>
+            </Show>
           </>
         ) : (
           <Link

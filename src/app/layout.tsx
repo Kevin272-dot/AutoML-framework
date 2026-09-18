@@ -18,6 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeScript />
       </head>
       <body>
+        {/* ClerkProvider is mounted inside AppProviders (theme-aware, inside <body>). */}
         <AppProviders>
           <div className="flex min-h-screen">
             <Sidebar />
