@@ -70,6 +70,8 @@ async def test_preview_returns_rows():
 @respx.mock
 async def test_preview_404_raises_structured_error():
     respx.get(f"{DSS}/rows").mock(return_value=httpx.Response(404, json={}))
+    respx.get(f"{DSS}/parquet").mock(return_value=httpx.Response(200, json={"parquet_files": []}))
+    respx.get(f"{HF_API}/datasets/user/missing/tree/main").mock(return_value=httpx.Response(200, json=[]))
     from app.discovery.adapters.base import AdapterError
 
     with pytest.raises(AdapterError) as exc_info:
@@ -85,6 +87,7 @@ async def test_download_streams_and_hashes(tmp_path):
         "parquet_files": [{"url": "https://huggingface.co/datasets/user/crop-india/resolve/main/data.parquet",
                            "filename": "data.parquet", "size": len(payload)}]
     }))
+    respx.get(f"{HF_API}/datasets/user/crop-india/tree/main").mock(return_value=httpx.Response(200, json=[]))
     respx.get("https://huggingface.co/datasets/user/crop-india/resolve/main/data.parquet").mock(
         return_value=httpx.Response(200, content=payload)
     )
@@ -102,6 +105,7 @@ async def test_download_enforces_size_limit(tmp_path):
     respx.get(f"{DSS}/parquet").mock(return_value=httpx.Response(200, json={
         "parquet_files": [{"url": "https://example.com/big.parquet", "filename": "big.parquet"}]
     }))
+    respx.get(f"{HF_API}/datasets/user/big/tree/main").mock(return_value=httpx.Response(200, json=[]))
     respx.get("https://example.com/big.parquet").mock(
         return_value=httpx.Response(200, content=b"x" * 10000)
     )

@@ -29,10 +29,11 @@ export default function CandidateDetailPage({ params }: { params: Promise<{ id: 
     queryFn: () => getCandidate(id),
   });
 
-  const { data: preview, isLoading: previewLoading, error: previewError } = useQuery({
+  const { data: preview, isLoading: previewLoading, error: previewError, refetch: refetchPreview } = useQuery({
     queryKey: ["candidate", id, "preview"],
     queryFn: () => getCandidatePreview(id),
     enabled: tab === "Preview" && !!candidate?.preview_available,
+    retry: 1,
   });
 
   if (isLoading) {
@@ -154,7 +155,9 @@ export default function CandidateDetailPage({ params }: { params: Promise<{ id: 
         ) : previewError ? (
           <ErrorState
             what={(previewError as Error).message}
-            whatToDo="This source may not expose a server-side preview for every dataset. Try the dataset's source page."
+            why="The source's preview service may be temporarily unavailable."
+            whatToDo="Retry, or use the dataset's source page. Selecting the dataset downloads real files regardless of preview."
+            onRetry={() => void refetchPreview()}
           />
         ) : preview && preview.rows.length > 0 ? (
           <div className="overflow-x-auto rounded-lg border border-border bg-surface">
