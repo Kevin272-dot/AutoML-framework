@@ -1,20 +1,60 @@
 @import "tailwindcss";
 
-@theme {
-  --color-bg: #0b0d11;
-  --color-surface: #11141a;
-  --color-elevated: #161a21;
-  --color-hover: #1c212b;
-  --color-border: #242a35;
-  --color-border-strong: #323a49;
-  --color-text: #e2e6ee;
-  --color-muted: #8b94a7;
-  --color-faint: #5c6577;
-  --color-accent: #4c8dff;
-  --color-accent-muted: #2b4a7a;
-  --color-success: #3fb68b;
-  --color-warning: #d9a13c;
-  --color-danger: #e05d5d;
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Theme tokens. Light is the default; `.dark` on <html> flips to the dark palette.
+   Semantic vars are referenced by utilities via the `@theme inline` mapping below. */
+:root {
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --elevated: #eef1f5;
+  --hover: #e7ebf1;
+  --border: #e1e5ec;
+  --border-strong: #c8cfda;
+  --text: #171b23;
+  --muted: #5b6474;
+  --faint: #8a93a4;
+  --accent: #2f6fed;
+  --accent-muted: #b9cff7;
+  --success: #17805a;
+  --warning: #9a6709;
+  --danger: #c93c3c;
+  color-scheme: light;
+}
+
+.dark {
+  --bg: #0b0d11;
+  --surface: #11141a;
+  --elevated: #161a21;
+  --hover: #1c212b;
+  --border: #242a35;
+  --border-strong: #323a49;
+  --text: #e2e6ee;
+  --muted: #8b94a7;
+  --faint: #5c6577;
+  --accent: #4c8dff;
+  --accent-muted: #2b4a7a;
+  --success: #3fb68b;
+  --warning: #d9a13c;
+  --danger: #e05d5d;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-elevated: var(--elevated);
+  --color-hover: var(--hover);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-accent: var(--accent);
+  --color-accent-muted: var(--accent-muted);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
 
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: ui-monospace, "JetBrains Mono", "SF Mono", Menlo, monospace;
@@ -43,9 +83,9 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--color-border);
+  background: var(--border);
   border-radius: 5px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-border-strong);
+  background: var(--border-strong);
 }

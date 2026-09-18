@@ -20,7 +20,7 @@ import { Card, CardHeader, MetricCard, ProgressBar, Spinner } from "@/components
 import { ErrorState, NotAvailableYet } from "@/components/ui/States";
 import { formatBytes, formatNumber, formatPct } from "@/lib/utils";
 
-const CHART_COLORS = ["#4c8dff", "#3fb68b", "#d9a13c", "#e05d5d", "#9d7bd8", "#5bc0d4"];
+const CHART_COLORS = ["var(--accent)", "var(--success)", "var(--warning)", "var(--danger)", "#9d7bd8", "#5bc0d4"];
 
 function DownloadProgress({ datasetId }: { datasetId: string }) {
   const { data: jobs } = useQuery({
@@ -103,10 +103,10 @@ function Histogram({ stats }: { stats: ColumnStats }) {
     <div className="h-28">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: 4 }}>
-          <XAxis dataKey="bin" tick={{ fontSize: 9, fill: "#8b94a7" }} interval="preserveStartEnd" />
-          <YAxis tick={{ fontSize: 9, fill: "#8b94a7" }} width={30} />
-          <Tooltip contentStyle={{ background: "#161a21", border: "1px solid #242a35", fontSize: 11 }} />
-          <Bar dataKey="count" fill="#4c8dff" />
+          <XAxis dataKey="bin" tick={{ fontSize: 9, fill: "var(--muted)" }} interval="preserveStartEnd" />
+          <YAxis tick={{ fontSize: 9, fill: "var(--muted)" }} width={30} />
+          <Tooltip contentStyle={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text)", fontSize: 11 }} />
+          <Bar dataKey="count" fill="var(--accent)" />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -123,10 +123,10 @@ function TopValues({ stats }: { stats: ColumnStats }) {
     <div className="h-28">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} layout="vertical" margin={{ top: 4, right: 8, bottom: 0, left: 8 }}>
-          <XAxis type="number" tick={{ fontSize: 9, fill: "#8b94a7" }} />
-          <YAxis type="category" dataKey="value" tick={{ fontSize: 9, fill: "#8b94a7" }} width={70} />
-          <Tooltip contentStyle={{ background: "#161a21", border: "1px solid #242a35", fontSize: 11 }} />
-          <Bar dataKey="count" fill="#3fb68b" radius={[0, 3, 3, 0]} />
+          <XAxis type="number" tick={{ fontSize: 9, fill: "var(--muted)" }} />
+          <YAxis type="category" dataKey="value" tick={{ fontSize: 9, fill: "var(--muted)" }} width={70} />
+          <Tooltip contentStyle={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text)", fontSize: 11 }} />
+          <Bar dataKey="count" fill="var(--success)" radius={[0, 3, 3, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -337,10 +337,10 @@ export default function DatasetWorkspacePage({ params }: { params: Promise<{ id:
                     data={Object.entries(eda.class_balance.counts).map(([k, v]) => ({ name: k, count: v }))}
                     margin={{ top: 4, right: 8, bottom: 0, left: 0 }}
                   >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#242a35" vertical={false} />
-                    <XAxis dataKey="name" tick={{ fontSize: 10, fill: "#8b94a7" }} />
-                    <YAxis tick={{ fontSize: 10, fill: "#8b94a7" }} width={40} />
-                    <Tooltip contentStyle={{ background: "#161a21", border: "1px solid #242a35", fontSize: 11 }} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                    <XAxis dataKey="name" tick={{ fontSize: 10, fill: "var(--muted)" }} />
+                    <YAxis tick={{ fontSize: 10, fill: "var(--muted)" }} width={40} />
+                    <Tooltip contentStyle={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text)", fontSize: 11 }} />
                     <Bar dataKey="count" radius={[3, 3, 0, 0]}>
                       {Object.keys(eda.class_balance.counts).map((_, i) => (
                         <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />

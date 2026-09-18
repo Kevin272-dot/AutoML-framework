@@ -34,7 +34,19 @@ NL query → requirement parsing → resource discovery → resource audit
 
 ## Running
 
-### With Docker (full stack)
+### 1. Configure environment
+
+```bash
+cp .env.example .env.local    # then fill in your Clerk keys
+```
+
+**Clerk** (required for authentication): create an application at
+[dashboard.clerk.com](https://dashboard.clerk.com), copy the API keys into `.env.local`.
+Sign-up lives at `/sign-up`, sign-in at `/sign-in`, and account + appearance preferences
+(bright/dark theme) at `/profile`. Without Clerk keys the app still runs for local
+development, but authentication UI is disabled.
+
+### 2. Infra + backend
 
 ```bash
 docker compose up -d          # Postgres, Redis, MinIO
@@ -47,8 +59,10 @@ alembic upgrade head          # or rely on create_all on startup
 uvicorn app.main:app --port 8000
 celery -A app.workers.celery_app worker -l info
 
-# frontend (repo root)
-npm install
+### 3. Frontend
+
+```bash
+npm install --include=dev
 npm run dev                   # http://localhost:3000
 ```
 

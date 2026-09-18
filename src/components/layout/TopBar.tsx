@@ -1,11 +1,15 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Activity } from "lucide-react";
+import { Activity, UserCircle } from "lucide-react";
+import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import Link from "next/link";
 import { getDashboardStats } from "@/lib/api-client";
+import { useClerkEnabled } from "@/app/providers";
 import { StatusBadge } from "@/components/ui/Badge";
 
 export function TopBar() {
+  const clerkEnabled = useClerkEnabled();
   const { data } = useQuery({
     queryKey: ["dashboard", "stats"],
     queryFn: getDashboardStats,
@@ -37,12 +41,31 @@ export function TopBar() {
             <Activity className="size-3.5" /> No active jobs
           </span>
         )}
-        <div
-          className="flex size-7 items-center justify-center rounded-full bg-elevated text-xs font-semibold text-muted"
-          title="Local User"
-        >
-          LU
-        </div>
+
+        {clerkEnabled ? (
+          <>
+            <SignedIn>
+              <UserButton />
+            </SignedIn>
+            <SignedOut>
+              <Link
+                href="/profile"
+                className="flex size-7 items-center justify-center rounded-full border border-border bg-elevated text-muted"
+                title="Sign-in not configured"
+              >
+                <UserCircle className="size-4" />
+              </Link>
+            </SignedOut>
+          </>
+        ) : (
+          <Link
+            href="/profile"
+            className="flex size-7 items-center justify-center rounded-full bg-elevated text-xs font-semibold text-muted"
+            title="Profile & Preferences"
+          >
+            LU
+          </Link>
+        )}
       </div>
     </header>
   );

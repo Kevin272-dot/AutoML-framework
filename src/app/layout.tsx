@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Providers } from "./providers";
+import { AppProviders } from "./providers";
+import { ThemeScript } from "@/components/theme/ThemeProvider";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { TopBar } from "@/components/layout/TopBar";
 
@@ -12,9 +13,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <ThemeScript />
+      </head>
       <body>
-        <Providers>
+        <AppProviders>
           <div className="flex min-h-screen">
             <Sidebar />
             <div className="flex min-w-0 flex-1 flex-col">
@@ -22,7 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <main className="flex-1 overflow-y-auto p-6">{children}</main>
             </div>
           </div>
-        </Providers>
+        </AppProviders>
       </body>
     </html>
   );

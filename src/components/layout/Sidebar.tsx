@@ -12,6 +12,7 @@ import {
   Database,
   LayoutDashboard,
   Settings,
+  UserCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +23,7 @@ const NAV = [
   { href: "/experiments", label: "Experiments", icon: Beaker },
   { href: "/automl-runs", label: "AutoML Runs", icon: Bot },
   { href: "/models", label: "Models", icon: Boxes },
+  { href: "/profile", label: "Profile & Preferences", icon: UserCircle },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
