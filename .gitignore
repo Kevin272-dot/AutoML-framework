@@ -33,3 +33,16 @@ next-env.d.ts
 # OS files
 .DS_Store
 Thumbs.db
+
+# local tooling
+.commandcode/
+
+# backend (python)
+backend/.venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/*.egg-info/
+backend/automl.db
+backend/data/
+backend/.pytest_cache/
+backend/.ruff_cache/
