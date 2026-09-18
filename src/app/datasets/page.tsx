@@ -1,19 +1,37 @@
 "use client";
 
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
-import { listDatasets } from "@/lib/api-client";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { deleteDataset, listDatasets } from "@/lib/api-client";
 import { Badge } from "@/components/ui/Badge";
 import { ButtonLink } from "@/components/ui/Button";
 import { Card, CardHeader, Spinner } from "@/components/ui/Card";
-import { EmptyState } from "@/components/ui/States";
+import { ConfirmDeleteButton } from "@/components/ui/ConfirmDeleteButton";
+import { EmptyState, ErrorState } from "@/components/ui/States";
 import { formatNumber } from "@/lib/utils";
 
 export default function DatasetsPage() {
+  const queryClient = useQueryClient();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<Error | null>(null);
+
   const { data: datasets, isLoading, isError, error } = useQuery({
     queryKey: ["datasets"],
     queryFn: listDatasets,
   });
+
+  const doDelete = async (id: string) => {
+    setDeleteError(null);
+    try {
+      await deleteDataset(id);
+      setDeletingId(null);
+      await queryClient.invalidateQueries({ queryKey: ["datasets"] });
+      await queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+    } catch (err) {
+      setDeleteError(err as Error);
+    }
+  };
 
   return (
     <div className="mx-auto max-w-5xl space-y-4">
@@ -40,34 +58,38 @@ export default function DatasetsPage() {
           action={{ href: "/discovery", label: "Start dataset discovery" }}
         />
       ) : (
-        <Card>
-          <CardHeader title={`${datasets.length} dataset(s)`} />
-          <div className="divide-y divide-border">
-            {datasets.map((ds) => (
-              <Link
-                key={ds.id}
-                href={`/datasets/${ds.id}`}
-                className="flex items-center justify-between gap-4 px-4 py-3 hover:bg-hover/50"
-              >
-                <div className="min-w-0">
-                  <div className="truncate text-sm font-medium text-text">{ds.name}</div>
-                  <div className="mt-0.5 flex items-center gap-2 text-xs text-faint">
-                    {ds.source ? <Badge tone="neutral">{ds.source}</Badge> : null}
-                    {ds.file_format ? <span>{ds.file_format}</span> : null}
-                    {ds.selected_target ? (
-                      <Badge tone="success">
-                        target: {ds.selected_target}
-                      </Badge>
-                    ) : null}
-                  </div>
+        <>
+          {deleteError ? (
+            <ErrorState
+              what={deleteError.message}
+              whatToDo="Retry the deletion, or check the backend is running."
+            />
+          ) : null}
+          <Card>
+            <CardHeader title={`${datasets.length} dataset(s)`} />
+            <div className="divide-y divide-border">
+              {datasets.map((ds) => (
+                <div
+                  key={ds.id}
+                  className="group flex items-center justify-between gap-4 px-4 py-3 hover:bg-hover/50"
+                >
+                  <Link href={`/datasets/${ds.id}`} className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-medium text-text">{ds.name}</div>
+                    <div className="mt-0.5 flex items-center gap-2 text-xs text-faint">
+                      {ds.source ? <Badge tone="neutral">{ds.source}</Badge> : null}
+                      {ds.file_format ? <span>{ds.file_format}</span> : null}
+                      {ds.selected_target ? <Badge tone="success">target: {ds.selected_target}</Badge> : null}
+                    </div>
+                  </Link>
+                  <span className="num shrink-0 text-xs text-muted">
+                    {formatNumber(ds.row_count)} rows · {ds.column_count ?? "?"} cols
+                  </span>
+                  <ConfirmDeleteButton onConfirm={() => doDelete(ds.id)} />
                 </div>
-                <span className="num shrink-0 text-xs text-muted">
-                  {formatNumber(ds.row_count)} rows · {ds.column_count ?? "?"} cols
-                </span>
-              </Link>
-            ))}
-          </div>
-        </Card>
+              ))}
+            </div>
+          </Card>
+        </>
       )}
     </div>
   );

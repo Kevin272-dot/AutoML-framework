@@ -54,6 +54,29 @@ def store_artifact(local_path: str, key: str) -> dict:
     return {"storage_key": str(dest), "storage_backend": "local", "size": size, "hash": digest}
 
 
+def delete_artifact(storage_key: str, storage_backend: str) -> None:
+    """Remove a stored artifact (best effort — missing files are ignored)."""
+    settings = get_settings()
+    if storage_backend == "s3":
+        bucket, key = storage_key.removeprefix("s3://").split("/", 1)
+        client = boto3.client(
+            "s3",
+            endpoint_url=settings.s3_endpoint_url,
+            aws_access_key_id=settings.s3_access_key,
+            aws_secret_access_key=settings.s3_secret_key,
+        )
+        client.delete_object(Bucket=bucket, Key=key)
+        return
+    path = Path(storage_key)
+    if path.exists():
+        path.unlink()
+        # Clean up the dataset's now-empty artifact directory if possible.
+        try:
+            path.parent.rmdir()
+        except OSError:
+            pass
+
+
 def open_artifact(storage_key: str, storage_backend: str):
     """Return a local file path for reading. Downloads from S3 to a temp file if needed."""
     settings = get_settings()

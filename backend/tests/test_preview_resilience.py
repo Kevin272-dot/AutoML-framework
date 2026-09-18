@@ -3,6 +3,7 @@
 import io
 
 import httpx
+import numpy as np
 import pandas as pd
 import pytest
 import respx
@@ -74,9 +75,33 @@ async def test_rows_error_payload_falls_back_to_parquet():
         "parquet_files": [{"url": "https://example.com/d.parquet", "filename": "d.parquet"}]
     }))
     respx.get("https://example.com/d.parquet").mock(return_value=httpx.Response(200, content=buf.getvalue()))
-
     columns, rows = await HuggingFaceAdapter().get_preview("user/ds")
     assert columns == ["x"] and rows == [{"x": 1}]
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_preview_handles_array_and_nested_cells():
+    """Cells containing numpy arrays / lists (e.g. climate_fever evidence) must not crash."""
+    df = pd.DataFrame({
+        "claim": ["c1"],
+        "evidence": [np.array([{"text": "a"}, {"text": "b"}])],
+        "labels": [np.array([1, 0])],
+    })
+    buf = io.BytesIO()
+    df.to_parquet(buf, index=False)
+
+    respx.get(f"{DSS}/rows").mock(return_value=httpx.Response(500, json={"error": "boom"}))
+    respx.get(f"{DSS}/parquet").mock(return_value=httpx.Response(200, json={
+        "parquet_files": [{"url": "https://example.com/arr.parquet", "filename": "arr.parquet"}]
+    }))
+    respx.get("https://example.com/arr.parquet").mock(return_value=httpx.Response(200, content=buf.getvalue()))
+
+    columns, rows = await HuggingFaceAdapter().get_preview("user/ds")
+    assert columns == ["claim", "evidence", "labels"]
+    assert rows[0]["claim"] == "c1"
+    assert rows[0]["labels"] == [1, 0]
+    assert rows[0]["evidence"] == [{"text": "a"}, {"text": "b"}]
 
 
 @pytest.mark.asyncio

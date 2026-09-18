@@ -1,6 +1,7 @@
 "use client";
 
 import { use, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import {
   Bar,
@@ -12,12 +13,13 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { getDataset, getDatasetFiles, getDatasetJobs, getEda, confirmTarget } from "@/lib/api-client";
+import { getDataset, getDatasetFiles, getDatasetJobs, getEda, confirmTarget, deleteDataset } from "@/lib/api-client";
 import type { ColumnStats } from "@/lib/api-types";
 import { Badge, StatusBadge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card, CardHeader, MetricCard, ProgressBar, Spinner } from "@/components/ui/Card";
 import { ErrorState, NotAvailableYet } from "@/components/ui/States";
+import { ConfirmDeleteButton } from "@/components/ui/ConfirmDeleteButton";
 import { formatBytes, formatNumber, formatPct } from "@/lib/utils";
 
 const CHART_COLORS = ["var(--accent)", "var(--success)", "var(--warning)", "var(--danger)", "#9d7bd8", "#5bc0d4"];
@@ -231,6 +233,9 @@ function TargetConfirmation({ datasetId }: { datasetId: string }) {
 
 export default function DatasetWorkspacePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const router = useRouter();
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<Error | null>(null);
 
   const { data: dataset, isLoading, isError, error } = useQuery({
     queryKey: ["dataset", id],
@@ -261,6 +266,18 @@ export default function DatasetWorkspacePage({ params }: { params: Promise<{ id:
     return <ErrorState what={(error as Error)?.message ?? "Dataset not found."} whatToDo="Open it from the Datasets page." />;
   }
 
+  const doDelete = async () => {
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      await deleteDataset(id);
+      router.push("/datasets");
+    } catch (err) {
+      setDeleteError(err as Error);
+      setDeleting(false);
+    }
+  };
+
   return (
     <div className="mx-auto max-w-5xl space-y-4">
       <div className="rounded-lg border border-border bg-surface p-5">
@@ -276,11 +293,19 @@ export default function DatasetWorkspacePage({ params }: { params: Promise<{ id:
               </span>
             </div>
           </div>
-          {dataset.selected_target ? (
-            <Badge tone="success">
-              target: {dataset.selected_target} ({dataset.selected_task})
-            </Badge>
-          ) : null}
+          <div className="flex flex-col items-end gap-2">
+            {dataset.selected_target ? (
+              <Badge tone="success">
+                target: {dataset.selected_target} ({dataset.selected_task})
+              </Badge>
+            ) : null}
+            <ConfirmDeleteButton
+              size="md"
+              disabled={deleting}
+              onConfirm={() => doDelete()}
+            />
+            {deleteError ? <span className="max-w-52 text-right text-xs text-danger">{deleteError.message}</span> : null}
+          </div>
         </div>
       </div>
 

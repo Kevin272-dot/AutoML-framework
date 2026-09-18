@@ -102,6 +102,13 @@ export function getDataset(id: string) {
   return request<import("./api-types").DatasetOut>(`/api/datasets/${id}`);
 }
 
+export function deleteDataset(id: string) {
+  return request<{ dataset_id: string; status: string; artifacts_removed: number }>(
+    `/api/datasets/${id}`,
+    { method: "DELETE" }
+  );
+}
+
 export function listDatasets() {
   return request<import("./api-types").DatasetOut[]>("/api/datasets");
 }

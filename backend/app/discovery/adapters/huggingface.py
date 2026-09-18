@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any
 
 import httpx
+import numpy as np
 import pandas as pd
 from pandas import Timestamp
 
@@ -160,21 +161,36 @@ class HuggingFaceAdapter(DatasetSourceAdapter):
             raise AdapterError("DOWNLOAD_FAILURE", "Could not download the data file.") from exc
         return size, sha.hexdigest()
 
+    @staticmethod
+    def _clean_value(value: Any) -> Any:
+        """JSON-safe conversion for arbitrary dataframe cell values
+        (scalars, NaN/NaT, numpy scalars, arrays, lists, dicts, timestamps)."""
+        if value is None:
+            return None
+        if isinstance(value, Timestamp):
+            return None if value is pd.NaT else value.isoformat()
+        if isinstance(value, (np.bool_, np.integer, np.floating)):
+            return value.item()
+        if isinstance(value, np.ndarray):
+            return [HuggingFaceAdapter._clean_value(v) for v in value.tolist()]
+        if isinstance(value, (list, tuple)):
+            return [HuggingFaceAdapter._clean_value(v) for v in value]
+        if isinstance(value, dict):
+            return {str(k): HuggingFaceAdapter._clean_value(v) for k, v in value.items()}
+        if isinstance(value, float) and math.isnan(value):
+            return None
+        if hasattr(value, "item"):
+            try:
+                return value.item()
+            except (ValueError, TypeError):
+                return str(value)
+        return value
+
     def _dataframe_to_rows(self, df: pd.DataFrame, limit: int) -> tuple[list[str], list[dict[str, Any]]]:
         columns = [str(c) for c in df.columns]
         rows: list[dict[str, Any]] = []
         for record in df.head(limit).to_dict(orient="records"):
-            clean: dict[str, Any] = {}
-            for key, value in record.items():
-                if value is None or (isinstance(value, float) and math.isnan(value)) or value is pd.NaT:
-                    clean[str(key)] = None
-                elif isinstance(value, Timestamp):
-                    clean[str(key)] = value.isoformat()
-                elif hasattr(value, "item"):
-                    clean[str(key)] = value.item()
-                else:
-                    clean[str(key)] = value
-            rows.append(clean)
+            rows.append({str(key): self._clean_value(value) for key, value in record.items()})
         return columns, rows
 
     async def _preview_from_file(

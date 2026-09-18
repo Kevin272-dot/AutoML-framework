@@ -151,6 +151,36 @@ def get_dataset(dataset_id: str, db: Session = Depends(get_db)):
     return _dataset_out(ds, source)
 
 
+@router.delete("/{dataset_id}")
+def delete_dataset(dataset_id: str, db: Session = Depends(get_db)):
+    """Delete a registered dataset: stored artifacts, files, columns, EDA reports,
+    and jobs. The discovery candidate remains, so the dataset can be re-selected."""
+    ds = db.get(Dataset, dataset_id)
+    if ds is None:
+        raise HTTPException(status_code=404, detail="Dataset not found.")
+
+    from app.models import DatasetColumn, EDAReport, Job
+    from app.storage import delete_artifact
+
+    deleted_artifacts = 0
+    for dfile in db.query(DatasetFile).filter(DatasetFile.dataset_id == ds.id).all():
+        try:
+            delete_artifact(dfile.storage_key, dfile.storage_backend)
+            deleted_artifacts += 1
+        except Exception:
+            # A storage failure must not block the dataset from being deleted;
+            # the record removal still succeeds and orphaned artifacts are cleaned up later.
+            pass
+
+    db.query(DatasetColumn).filter(DatasetColumn.dataset_id == ds.id).delete()
+    db.query(EDAReport).filter(EDAReport.dataset_id == ds.id).delete()
+    db.query(Job).filter(Job.dataset_id == ds.id).delete()
+    db.query(DatasetFile).filter(DatasetFile.dataset_id == ds.id).delete()
+    db.delete(ds)
+    db.commit()
+    return {"dataset_id": dataset_id, "status": "DELETED", "artifacts_removed": deleted_artifacts}
+
+
 @router.get("/{dataset_id}/files")
 def get_dataset_files(dataset_id: str, db: Session = Depends(get_db)):
     ds = db.get(Dataset, dataset_id)
