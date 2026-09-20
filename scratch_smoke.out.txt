@@ -1,0 +1,58 @@
+== config ==
+source: C:\Users\Ibhan Mukherjee\Desktop\RLAGENT\configs\default.yaml
+artifact dir: artifacts
+enabled models: ['logistic_regression', 'random_forest', 'extra_trees', 'xgboost', 'lightgbm', 'mlp']
+fingerprint features: 40
+
+== registry ==
+registered: ['logistic_regression', 'linear_regression', 'random_forest', 'extra_trees', 'xgboost', 'lightgbm', 'mlp', 'svm', 'svr', 'kmeans', 'dbscan', 'agglomerative', 'gaussian_mixture', 'isolation_forest', 'one_class_svm', 'local_outlier_factor', 'pca_transform']
+  logistic_regression    tasks=['classification'] presets=5 avail=True
+  linear_regression      tasks=['regression'] presets=1 avail=True
+  random_forest          tasks=['classification', 'regression'] presets=4 avail=True
+  extra_trees            tasks=['classification', 'regression'] presets=4 avail=True
+  xgboost                tasks=['classification', 'regression'] presets=4 avail=True
+  lightgbm               tasks=['classification', 'regression'] presets=4 avail=True
+  mlp                    tasks=['classification', 'regression'] presets=4 avail=True
+  svm                    tasks=['classification'] presets=3 avail=True
+  svr                    tasks=['regression'] presets=2 avail=True
+  kmeans                 tasks=['clustering'] presets=4 avail=True
+  dbscan                 tasks=['clustering'] presets=3 avail=True
+  agglomerative          tasks=['clustering'] presets=3 avail=True
+  gaussian_mixture       tasks=['clustering'] presets=3 avail=True
+  isolation_forest       tasks=['anomaly_detection'] presets=3 avail=True
+  one_class_svm          tasks=['anomaly_detection'] presets=2 avail=True
+  local_outlier_factor   tasks=['anomaly_detection'] presets=2 avail=True
+  pca_transform          tasks=['dimensionality_reduction'] presets=3 avail=True
+
+== bundled sources ==
+  iris            shape=(150, 5) target=species metric=f1
+  breast_cancer   shape=(569, 31) target=diagnosis metric=f1
+  diabetes        shape=(442, 11) target=disease_progression metric=rmse
+
+== synthetic ==
+  13 recipes
+
+== task classifier ==
+  classification         metric=f1         dir=maximize  target=churn                  conf=0.98
+  regression             metric=rmse       dir=minimize  target=median_house_value     conf=0.98
+  clustering             metric=silhouette dir=maximize  target=None                   conf=0.95
+  classification         metric=f1         dir=maximize  target=is_fraud               conf=0.40
+  regression             metric=rmse       dir=minimize  target=energy_demand          conf=0.98
+  classification         metric=f1         dir=maximize  target=label                  conf=0.98
+
+== profiling + fingerprint ==
+   200 rows x 5 features
+   numeric: ['age', 'income']
+   categorical: ['city']
+   datetime: ['signup_date']
+   missing_ratio: 0.013 dups: 0
+   class dist: n_classes=2 counts={'0': 160, '1': 40} minority_ratio=0.2 imbalance_ratio=4.0 entropy=0.7219280948844771 is_imbalanced=True
+   warnings: ['class distribution is imbalanced (minority class 20.0%); prefer precision/recall/F1 or PR-AUC over accuracy']
+   fingerprint len: 40 all finite: True
+   sample: {'log_rows': 0.329, 'log_cols': 0.21, 'log_rows_per_col': 0.342, 'missing_ratio': 0.013, 'frac_cols_with_missing': 0.2, 'duplicate_ratio': 0.0}
+
+== metric helpers ==
+  f1 dir: maximize | rmse dir: minimize
+  primary cls: f1
+
+SMOKE OK

@@ -1,0 +1,30 @@
+{
+  "name": "churn_strings.csv",
+  "sha256": "",
+  "n_rows": 3000,
+  "n_cols": 10,
+  "target": "churn",
+  "missing_ratio": 0.017833,
+  "duplicate_ratio": 0.0,
+  "numeric_features": 5,
+  "categorical_features": 3,
+  "datetime_features": 1,
+  "high_cardinality_features": 0,
+  "split": {
+    "strategy": "stratified",
+    "stratified": true,
+    "n_train": 1800,
+    "n_val": 600,
+    "n_test": 600,
+    "total": 3000,
+    "seed": 1234,
+    "test_reserved": true,
+    "warnings": []
+  },
+  "warnings": [],
+  "class_distribution": {
+    "n_classes": 2,
+    "minority_ratio": 0.26766666666666666,
+    "is_imbalanced": false
+  }
+}

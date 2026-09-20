@@ -1,0 +1,40 @@
+{
+  "experiment_id": "exp_2d7ab4d8cae8",
+  "model": "lightgbm",
+  "hyperparameters": {
+    "n_estimators": 900,
+    "learning_rate": 0.02,
+    "num_leaves": 48,
+    "min_child_samples": 40,
+    "reg_lambda": 3.0,
+    "subsample": 0.8
+  },
+  "preprocessing": [
+    "clip_outliers",
+    "datetime_features",
+    "encode_categorical",
+    "impute_categorical",
+    "impute_numeric",
+    "log_transform",
+    "missing_indicator",
+    "scale_robust"
+  ],
+  "feature_selection": "none",
+  "preset_index": 3,
+  "n_features_in": 4,
+  "n_features_out": 8,
+  "n_parameters": null,
+  "training_time_s": 5.0557,
+  "peak_memory_mb": 955.37,
+  "validation_score": 0.8666666666666667,
+  "validation_metrics": {
+    "accuracy": 0.8666666666666667,
+    "balanced_accuracy": 0.8666666666666667,
+    "precision": 0.8666666666666667,
+    "recall": 0.8666666666666667,
+    "f1": 0.8666666666666667,
+    "matthews": 0.8,
+    "average_precision": 0.9656915306915307,
+    "log_loss": 0.19478686162464548
+  }
+}

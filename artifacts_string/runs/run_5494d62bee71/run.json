@@ -1,0 +1,1427 @@
+{
+  "run_id": "run_5494d62bee71",
+  "status": "complete",
+  "created_at": "2026-09-19T08:30:09+00:00",
+  "updated_at": "2026-09-19T08:30:48+00:00",
+  "problem_statement": "Classify the iris species from the flower measurements.",
+  "dataset_path": "",
+  "dataset_name": "iris.csv",
+  "dataset_sha256": "",
+  "task": {
+    "learning_type": "supervised",
+    "task_type": "classification",
+    "objective": "species prediction",
+    "target": "species",
+    "metric": "f1",
+    "metric_direction": "maximize",
+    "confidence": 0.4,
+    "source": "user",
+    "notes": [
+      "target provided by user",
+      "default metric for classification: f1",
+      "task specification overridden by the caller"
+    ],
+    "problem_statement": "Classify the iris species from the flower measurements."
+  },
+  "dataset_profile": {
+    "n_rows": 150,
+    "n_cols": 5,
+    "numeric_features": [
+      "sepal length (cm)",
+      "sepal width (cm)",
+      "petal length (cm)",
+      "petal width (cm)"
+    ],
+    "categorical_features": [],
+    "datetime_features": [],
+    "other_features": [],
+    "n_missing_total": 0,
+    "missing_ratio": 0.0,
+    "columns_with_missing": [],
+    "n_duplicate_rows": 1,
+    "duplicate_ratio": 0.006666666666666667,
+    "cardinality": {
+      "sepal length (cm)": 35,
+      "sepal width (cm)": 23,
+      "petal length (cm)": 43,
+      "petal width (cm)": 22,
+      "species": 3
+    },
+    "high_cardinality_features": [],
+    "constant_features": [],
+    "class_distribution": {
+      "n_classes": 3,
+      "counts": {
+        "0": 50,
+        "1": 50,
+        "2": 50
+      },
+      "minority_ratio": 0.3333333333333333,
+      "imbalance_ratio": 1.0,
+      "entropy": 0.9999999999972693,
+      "is_imbalanced": false
+    },
+    "top_correlations": [
+      {
+        "feature_a": "petal length (cm)",
+        "feature_b": "petal width (cm)",
+        "correlation": 0.962865431402796
+      },
+      {
+        "feature_a": "sepal length (cm)",
+        "feature_b": "petal length (cm)",
+        "correlation": 0.8717537758865838
+      },
+      {
+        "feature_a": "sepal length (cm)",
+        "feature_b": "petal width (cm)",
+        "correlation": 0.8179411262715758
+      },
+      {
+        "feature_a": "sepal width (cm)",
+        "feature_b": "petal length (cm)",
+        "correlation": -0.42844010433053864
+      },
+      {
+        "feature_a": "sepal width (cm)",
+        "feature_b": "petal width (cm)",
+        "correlation": -0.3661259325364377
+      },
+      {
+        "feature_a": "sepal length (cm)",
+        "feature_b": "sepal width (cm)",
+        "correlation": -0.11756978413300088
+      }
+    ],
+    "max_abs_correlation": 0.962865431402796,
+    "mean_abs_skew": 0.20234550975011328,
+    "dimensionality_ratio": 0.03333333333333333,
+    "size_bytes": 6132,
+    "memory_mb": 0.005847930908203125,
+    "target": "species",
+    "columns": [
+      {
+        "name": "sepal length (cm)",
+        "kind": "numeric",
+        "dtype": "float64",
+        "n_missing": 0,
+        "missing_ratio": 0.0,
+        "n_unique": 35,
+        "cardinality_ratio": 0.23333333333333334,
+        "is_constant": false,
+        "mean": 5.843333333333334,
+        "std": 0.828066127977863,
+        "minimum": 4.3,
+        "maximum": 7.9,
+        "median": 5.8,
+        "skew": 0.3149109566369728,
+        "n_outliers": 0,
+        "top_values": [],
+        "is_high_cardinality": false
+      },
+      {
+        "name": "sepal width (cm)",
+        "kind": "numeric",
+        "dtype": "float64",
+        "n_missing": 0,
+        "missing_ratio": 0.0,
+        "n_unique": 23,
+        "cardinality_ratio": 0.15333333333333332,
+        "is_constant": false,
+        "mean": 3.0573333333333337,
+        "std": 0.4358662849366982,
+        "minimum": 2.0,
+        "maximum": 4.4,
+        "median": 3.0,
+        "skew": 0.31896566471359966,
+        "n_outliers": 4,
+        "top_values": [],
+        "is_high_cardinality": false
+      },
+      {
+        "name": "petal length (cm)",
+        "kind": "numeric",
+        "dtype": "float64",
+        "n_missing": 0,
+        "missing_ratio": 0.0,
+        "n_unique": 43,
+        "cardinality_ratio": 0.2866666666666667,
+        "is_constant": false,
+        "mean": 3.7580000000000005,
+        "std": 1.7652982332594662,
+        "minimum": 1.0,
+        "maximum": 6.9,
+        "median": 4.35,
+        "skew": -0.27488417975101276,
+        "n_outliers": 0,
+        "top_values": [],
+        "is_high_cardinality": false
+      },
+      {
+        "name": "petal width (cm)",
+        "kind": "numeric",
+        "dtype": "float64",
+        "n_missing": 0,
+        "missing_ratio": 0.0,
+        "n_unique": 22,
+        "cardinality_ratio": 0.14666666666666667,
+        "is_constant": false,
+        "mean": 1.1993333333333336,
+        "std": 0.7622376689603465,
+        "minimum": 0.1,
+        "maximum": 2.5,
+        "median": 1.3,
+        "skew": -0.10296674764898116,
+        "n_outliers": 0,
+        "top_values": [],
+        "is_high_cardinality": false
+      },
+      {
+        "name": "species",
+        "kind": "numeric",
+        "dtype": "int64",
+        "n_missing": 0,
+        "missing_ratio": 0.0,
+        "n_unique": 3,
+        "cardinality_ratio": 0.02,
+        "is_constant": false,
+        "mean": 1.0,
+        "std": 0.8192319205190405,
+        "minimum": 0.0,
+        "maximum": 2.0,
+        "median": 1.0,
+        "skew": 0.0,
+        "n_outliers": 0,
+        "top_values": [],
+        "is_high_cardinality": false
+      }
+    ],
+    "warnings": [
+      "1 duplicate rows detected; consider whether they are legitimate"
+    ],
+    "profiled_at": "2026-09-19T08:30:09+00:00"
+  },
+  "dataset_fingerprint": {
+    "schema_version": "1.0.0",
+    "feature_names": [
+      "log_rows",
+      "log_cols",
+      "log_rows_per_col",
+      "missing_ratio",
+      "frac_cols_with_missing",
+      "duplicate_ratio",
+      "frac_numeric",
+      "frac_categorical",
+      "frac_datetime",
+      "frac_other",
+      "frac_constant",
+      "frac_high_cardinality",
+      "mean_cardinality_ratio",
+      "max_cardinality_ratio",
+      "log_mean_cardinality",
+      "frac_binary_features",
+      "mean_abs_skew",
+      "max_abs_skew",
+      "mean_abs_correlation",
+      "max_abs_correlation",
+      "frac_near_duplicate_features",
+      "log_size_mb",
+      "log_memory_per_row",
+      "class_log_n_classes",
+      "class_minority_ratio",
+      "class_imbalance_ratio",
+      "class_entropy",
+      "class_is_imbalanced",
+      "target_missing_ratio",
+      "target_cardinality_ratio",
+      "log_outlier_ratio",
+      "has_target",
+      "task_is_classification",
+      "task_is_regression",
+      "task_is_clustering",
+      "task_is_anomaly",
+      "task_is_dimred",
+      "samples_per_feature",
+      "frac_low_cardinality_categorical",
+      "numeric_fraction_of_signal"
+    ],
+    "values": [
+      0.31128241911062093,
+      0.21036477161116746,
+      0.317091870480578,
+      0.0,
+      0.0,
+      0.006666666666666667,
+      0.8,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.205,
+      0.2866666666666667,
+      0.30034848504752387,
+      0.0,
+      0.02023455097501133,
+      0.015948283235679983,
+      0.5941160257601554,
+      0.962865431402796,
+      0.0,
+      0.0007009967453466665,
+      0.004706124281305334,
+      0.20065763012322416,
+      0.3333333333333333,
+      0.10032881506161208,
+      0.9999999999972693,
+      0.0,
+      0.0,
+      0.02,
+      0.28152742260770536,
+      1.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.396360879158716,
+      0.0,
+      1.0
+    ],
+    "n_rows": 150,
+    "n_cols": 5
+  },
+  "rl_recommendations": [
+    {
+      "rank": 1,
+      "model": "xgboost",
+      "preprocessing": [
+        "impute_numeric",
+        "impute_categorical",
+        "missing_indicator",
+        "scale_robust",
+        "encode_categorical",
+        "clip_outliers",
+        "log_transform",
+        "datetime_features"
+      ],
+      "feature_selection": "none",
+      "preset_index": 3,
+      "hyperparameters": {
+        "n_estimators": 1200,
+        "learning_rate": 0.02,
+        "max_depth": 9,
+        "subsample": 0.9,
+        "colsample_bytree": 0.9
+      },
+      "reason": "expected f1 ~ 0.985 using the 'deep' preset; medium cost (~76s of training)",
+      "expected_cost": "medium",
+      "expected_performance": 0.985,
+      "experiment": {
+        "experiment_id": "exp_fe49af0dfcdf",
+        "model": "xgboost",
+        "preprocessing": [
+          "impute_numeric",
+          "impute_categorical",
+          "missing_indicator",
+          "scale_robust",
+          "encode_categorical",
+          "clip_outliers",
+          "log_transform",
+          "datetime_features"
+        ],
+        "feature_selection": "none",
+        "preset_index": 3,
+        "hyperparameters": {
+          "n_estimators": 1200,
+          "learning_rate": 0.02,
+          "max_depth": 9,
+          "subsample": 0.9,
+          "colsample_bytree": 0.9
+        },
+        "expected_cost": "high",
+        "source": "baseline",
+        "rationale": "expected f1 ~ 0.985 using the 'deep' preset; medium cost (~76s of training)"
+      }
+    },
+    {
+      "rank": 2,
+      "model": "lightgbm",
+      "preprocessing": [
+        "impute_numeric",
+        "impute_categorical",
+        "missing_indicator",
+        "scale_robust",
+        "encode_categorical",
+        "clip_outliers",
+        "log_transform",
+        "datetime_features"
+      ],
+      "feature_selection": "none",
+      "preset_index": 3,
+      "hyperparameters": {
+        "n_estimators": 900,
+        "learning_rate": 0.02,
+        "num_leaves": 48,
+        "min_child_samples": 40,
+        "reg_lambda": 3.0,
+        "subsample": 0.8
+      },
+      "reason": "expected f1 ~ 0.985 using the 'regularized' preset; medium cost (~76s of training)",
+      "expected_cost": "medium",
+      "expected_performance": 0.985,
+      "experiment": {
+        "experiment_id": "exp_2d7ab4d8cae8",
+        "model": "lightgbm",
+        "preprocessing": [
+          "impute_numeric",
+          "impute_categorical",
+          "missing_indicator",
+          "scale_robust",
+          "encode_categorical",
+          "clip_outliers",
+          "log_transform",
+          "datetime_features"
+        ],
+        "feature_selection": "none",
+        "preset_index": 3,
+        "hyperparameters": {
+          "n_estimators": 900,
+          "learning_rate": 0.02,
+          "num_leaves": 48,
+          "min_child_samples": 40,
+          "reg_lambda": 3.0,
+          "subsample": 0.8
+        },
+        "expected_cost": "high",
+        "source": "baseline",
+        "rationale": "expected f1 ~ 0.985 using the 'regularized' preset; medium cost (~76s of training)"
+      }
+    },
+    {
+      "rank": 3,
+      "model": "xgboost",
+      "preprocessing": [
+        "impute_numeric",
+        "impute_categorical",
+        "missing_indicator",
+        "scale_robust",
+        "encode_categorical",
+        "clip_outliers",
+        "log_transform",
+        "datetime_features"
+      ],
+      "feature_selection": "variance",
+      "preset_index": 3,
+      "hyperparameters": {
+        "n_estimators": 1200,
+        "learning_rate": 0.02,
+        "max_depth": 9,
+        "subsample": 0.9,
+        "colsample_bytree": 0.9
+      },
+      "reason": "expected f1 ~ 0.985 using the 'deep' preset; medium cost (~76s of training); feature selection should help with the near-duplicate features",
+      "expected_cost": "medium",
+      "expected_performance": 0.985,
+      "experiment": {
+        "experiment_id": "exp_bf7fcc45abef",
+        "model": "xgboost",
+        "preprocessing": [
+          "impute_numeric",
+          "impute_categorical",
+          "missing_indicator",
+          "scale_robust",
+          "encode_categorical",
+          "clip_outliers",
+          "log_transform",
+          "datetime_features"
+        ],
+        "feature_selection": "variance",
+        "preset_index": 3,
+        "hyperparameters": {
+          "n_estimators": 1200,
+          "learning_rate": 0.02,
+          "max_depth": 9,
+          "subsample": 0.9,
+          "colsample_bytree": 0.9
+        },
+        "expected_cost": "high",
+        "source": "baseline",
+        "rationale": "expected f1 ~ 0.985 using the 'deep' preset; medium cost (~76s of training); feature selection should help with the near-duplicate features"
+      }
+    }
+  ],
+  "recommendation_set": {
+    "task": "classification",
+    "metric": "f1",
+    "metric_direction": "maximize",
+    "recommended_experiments": [
+      {
+        "rank": 1,
+        "model": "xgboost",
+        "preprocessing": [
+          "impute_numeric",
+          "impute_categorical",
+          "missing_indicator",
+          "scale_robust",
+          "encode_categorical",
+          "clip_outliers",
+          "log_transform",
+          "datetime_features"
+        ],
+        "feature_selection": "none",
+        "preset_index": 3,
+        "hyperparameters": {
+          "n_estimators": 1200,
+          "learning_rate": 0.02,
+          "max_depth": 9,
+          "subsample": 0.9,
+          "colsample_bytree": 0.9
+        },
+        "reason": "expected f1 ~ 0.985 using the 'deep' preset; medium cost (~76s of training)",
+        "expected_cost": "medium",
+        "expected_performance": 0.985,
+        "experiment": {
+          "experiment_id": "exp_fe49af0dfcdf",
+          "model": "xgboost",
+          "preprocessing": [
+            "impute_numeric",
+            "impute_categorical",
+            "missing_indicator",
+            "scale_robust",
+            "encode_categorical",
+            "clip_outliers",
+            "log_transform",
+            "datetime_features"
+          ],
+          "feature_selection": "none",
+          "preset_index": 3,
+          "hyperparameters": {
+            "n_estimators": 1200,
+            "learning_rate": 0.02,
+            "max_depth": 9,
+            "subsample": 0.9,
+            "colsample_bytree": 0.9
+          },
+          "expected_cost": "high",
+          "source": "baseline",
+          "rationale": "expected f1 ~ 0.985 using the 'deep' preset; medium cost (~76s of training)"
+        }
+      },
+      {
+        "rank": 2,
+        "model": "lightgbm",
+        "preprocessing": [
+          "impute_numeric",
+          "impute_categorical",
+          "missing_indicator",
+          "scale_robust",
+          "encode_categorical",
+          "clip_outliers",
+          "log_transform",
+          "datetime_features"
+        ],
+        "feature_selection": "none",
+        "preset_index": 3,
+        "hyperparameters": {
+          "n_estimators": 900,
+          "learning_rate": 0.02,
+          "num_leaves": 48,
+          "min_child_samples": 40,
+          "reg_lambda": 3.0,
+          "subsample": 0.8
+        },
+        "reason": "expected f1 ~ 0.985 using the 'regularized' preset; medium cost (~76s of training)",
+        "expected_cost": "medium",
+        "expected_performance": 0.985,
+        "experiment": {
+          "experiment_id": "exp_2d7ab4d8cae8",
+          "model": "lightgbm",
+          "preprocessing": [
+            "impute_numeric",
+            "impute_categorical",
+            "missing_indicator",
+            "scale_robust",
+            "encode_categorical",
+            "clip_outliers",
+            "log_transform",
+            "datetime_features"
+          ],
+          "feature_selection": "none",
+          "preset_index": 3,
+          "hyperparameters": {
+            "n_estimators": 900,
+            "learning_rate": 0.02,
+            "num_leaves": 48,
+            "min_child_samples": 40,
+            "reg_lambda": 3.0,
+            "subsample": 0.8
+          },
+          "expected_cost": "high",
+          "source": "baseline",
+          "rationale": "expected f1 ~ 0.985 using the 'regularized' preset; medium cost (~76s of training)"
+        }
+      },
+      {
+        "rank": 3,
+        "model": "xgboost",
+        "preprocessing": [
+          "impute_numeric",
+          "impute_categorical",
+          "missing_indicator",
+          "scale_robust",
+          "encode_categorical",
+          "clip_outliers",
+          "log_transform",
+          "datetime_features"
+        ],
+        "feature_selection": "variance",
+        "preset_index": 3,
+        "hyperparameters": {
+          "n_estimators": 1200,
+          "learning_rate": 0.02,
+          "max_depth": 9,
+          "subsample": 0.9,
+          "colsample_bytree": 0.9
+        },
+        "reason": "expected f1 ~ 0.985 using the 'deep' preset; medium cost (~76s of training); feature selection should help with the near-duplicate features",
+        "expected_cost": "medium",
+        "expected_performance": 0.985,
+        "experiment": {
+          "experiment_id": "exp_bf7fcc45abef",
+          "model": "xgboost",
+          "preprocessing": [
+            "impute_numeric",
+            "impute_categorical",
+            "missing_indicator",
+            "scale_robust",
+            "encode_categorical",
+            "clip_outliers",
+            "log_transform",
+            "datetime_features"
+          ],
+          "feature_selection": "variance",
+          "preset_index": 3,
+          "hyperparameters": {
+            "n_estimators": 1200,
+            "learning_rate": 0.02,
+            "max_depth": 9,
+            "subsample": 0.9,
+            "colsample_bytree": 0.9
+          },
+          "expected_cost": "high",
+          "source": "baseline",
+          "rationale": "expected f1 ~ 0.985 using the 'deep' preset; medium cost (~76s of training); feature selection should help with the near-duplicate features"
+        }
+      }
+    ],
+    "estimated_experiments": 3,
+    "estimated_compute": "3 experiment(s) on 150 rows - estimated 229s of training total (xgboost, lightgbm, xgboost)",
+    "estimated_runtime_s": 228.99,
+    "estimated_cost_tier": "medium",
+    "requires_user_approval": true,
+    "planner": "surrogate-greedy",
+    "search_statistics": {
+      "searcher": "rl-ppo-planning",
+      "n_experiments": 3,
+      "n_failed": 0,
+      "n_distinct_models": 2,
+      "best_validation_score": 0.8981620718462824,
+      "best_model": "xgboost",
+      "total_training_time_s": 28.979585300000508,
+      "total_compute_s": 28.979585300000508,
+      "time_to_best_s": null,
+      "stopping_reason": "completed",
+      "history": [
+        {
+          "step": 1,
+          "model": "xgboost",
+          "origin": "surrogate",
+          "expected_score": 0.985,
+          "expected_cost_s": 76.329
+        },
+        {
+          "step": 2,
+          "model": "lightgbm",
+          "origin": "surrogate",
+          "expected_score": 0.985,
+          "expected_cost_s": 76.329
+        },
+        {
+          "step": 3,
+          "model": "xgboost",
+          "origin": "surrogate",
+          "expected_score": 0.985,
+          "expected_cost_s": 76.329
+        }
+      ]
+    },
+    "baseline_expectation": "for reference, 24 uniformly sampled experiments in the same space would be expected to average 0.927 f1 (best single draw 0.985); the recommended set averages 0.985. These are surrogate estimates, not measurements.",
+    "notes": [
+      "no trained policy checkpoint found; using the surrogate planner. Run `automl train-rl` to train one."
+    ],
+    "created_at": "2026-09-19T08:30:09+00:00"
+  },
+  "approved_experiments": [
+    {
+      "experiment_id": "exp_fe49af0dfcdf",
+      "model": "xgboost",
+      "preprocessing": [
+        "impute_numeric",
+        "impute_categorical",
+        "missing_indicator",
+        "scale_robust",
+        "encode_categorical",
+        "clip_outliers",
+        "log_transform",
+        "datetime_features"
+      ],
+      "feature_selection": "none",
+      "preset_index": 3,
+      "hyperparameters": {
+        "n_estimators": 1200,
+        "learning_rate": 0.02,
+        "max_depth": 9,
+        "subsample": 0.9,
+        "colsample_bytree": 0.9
+      },
+      "expected_cost": "high",
+      "source": "baseline",
+      "rationale": "expected f1 ~ 0.985 using the 'deep' preset; medium cost (~76s of training)"
+    },
+    {
+      "experiment_id": "exp_2d7ab4d8cae8",
+      "model": "lightgbm",
+      "preprocessing": [
+        "impute_numeric",
+        "impute_categorical",
+        "missing_indicator",
+        "scale_robust",
+        "encode_categorical",
+        "clip_outliers",
+        "log_transform",
+        "datetime_features"
+      ],
+      "feature_selection": "none",
+      "preset_index": 3,
+      "hyperparameters": {
+        "n_estimators": 900,
+        "learning_rate": 0.02,
+        "num_leaves": 48,
+        "min_child_samples": 40,
+        "reg_lambda": 3.0,
+        "subsample": 0.8
+      },
+      "expected_cost": "high",
+      "source": "baseline",
+      "rationale": "expected f1 ~ 0.985 using the 'regularized' preset; medium cost (~76s of training)"
+    },
+    {
+      "experiment_id": "exp_bf7fcc45abef",
+      "model": "xgboost",
+      "preprocessing": [
+        "impute_numeric",
+        "impute_categorical",
+        "missing_indicator",
+        "scale_robust",
+        "encode_categorical",
+        "clip_outliers",
+        "log_transform",
+        "datetime_features"
+      ],
+      "feature_selection": "variance",
+      "preset_index": 3,
+      "hyperparameters": {
+        "n_estimators": 1200,
+        "learning_rate": 0.02,
+        "max_depth": 9,
+        "subsample": 0.9,
+        "colsample_bytree": 0.9
+      },
+      "expected_cost": "high",
+      "source": "baseline",
+      "rationale": "expected f1 ~ 0.985 using the 'deep' preset; medium cost (~76s of training); feature selection should help with the near-duplicate features"
+    }
+  ],
+  "approved_at": "2026-09-19T08:30:09+00:00",
+  "results": [
+    {
+      "experiment": {
+        "experiment_id": "exp_fe49af0dfcdf",
+        "model": "xgboost",
+        "preprocessing": [
+          "impute_numeric",
+          "impute_categorical",
+          "missing_indicator",
+          "scale_robust",
+          "encode_categorical",
+          "clip_outliers",
+          "log_transform",
+          "datetime_features"
+        ],
+        "feature_selection": "none",
+        "preset_index": 3,
+        "hyperparameters": {
+          "n_estimators": 1200,
+          "learning_rate": 0.02,
+          "max_depth": 9,
+          "subsample": 0.9,
+          "colsample_bytree": 0.9
+        },
+        "expected_cost": "high",
+        "source": "baseline",
+        "rationale": "expected f1 ~ 0.985 using the 'deep' preset; medium cost (~76s of training)"
+      },
+      "status": "success",
+      "error": null,
+      "error_type": null,
+      "primary_metric": "f1",
+      "metric_direction": "maximize",
+      "validation_score": 0.8981620718462824,
+      "test_score": 0.9665831244778613,
+      "validation_metrics": {
+        "accuracy": 0.9,
+        "balanced_accuracy": 0.9,
+        "precision": 0.8993265993265993,
+        "recall": 0.9,
+        "f1": 0.8981620718462824,
+        "matthews": 0.8514202182000767,
+        "average_precision": 0.9078211603211604,
+        "log_loss": 0.4084555506706238
+      },
+      "test_metrics": {
+        "accuracy": 0.9666666666666667,
+        "balanced_accuracy": 0.9666666666666667,
+        "precision": 0.9696969696969697,
+        "recall": 0.9666666666666667,
+        "f1": 0.9665831244778613,
+        "matthews": 0.9515873026942034,
+        "average_precision": 1.0,
+        "log_loss": 0.06821048259735107
+      },
+      "training_time_s": 9.061388699999952,
+      "inference_time_ms": 29.184299999997165,
+      "inference_time_per_1k_ms": 972.8099999999055,
+      "peak_memory_mb": 867.984375,
+      "model_size_bytes": 2721998,
+      "n_parameters": 3,
+      "n_features_used": 8,
+      "artifact_path": "artifacts_string\\runs\\run_5494d62bee71\\models\\exp_fe49af0dfcdf",
+      "warnings": [
+        "feature-name count (12) differs from the transformed width (8); regenerating generic names"
+      ],
+      "started_at": "2026-09-19T08:30:09+00:00",
+      "finished_at": "2026-09-19T08:30:18+00:00"
+    },
+    {
+      "experiment": {
+        "experiment_id": "exp_2d7ab4d8cae8",
+        "model": "lightgbm",
+        "preprocessing": [
+          "impute_numeric",
+          "impute_categorical",
+          "missing_indicator",
+          "scale_robust",
+          "encode_categorical",
+          "clip_outliers",
+          "log_transform",
+          "datetime_features"
+        ],
+        "feature_selection": "none",
+        "preset_index": 3,
+        "hyperparameters": {
+          "n_estimators": 900,
+          "learning_rate": 0.02,
+          "num_leaves": 48,
+          "min_child_samples": 40,
+          "reg_lambda": 3.0,
+          "subsample": 0.8
+        },
+        "expected_cost": "high",
+        "source": "baseline",
+        "rationale": "expected f1 ~ 0.985 using the 'regularized' preset; medium cost (~76s of training)"
+      },
+      "status": "success",
+      "error": null,
+      "error_type": null,
+      "primary_metric": "f1",
+      "metric_direction": "maximize",
+      "validation_score": 0.8666666666666667,
+      "test_score": 0.9665831244778612,
+      "validation_metrics": {
+        "accuracy": 0.8666666666666667,
+        "balanced_accuracy": 0.8666666666666667,
+        "precision": 0.8666666666666667,
+        "recall": 0.8666666666666667,
+        "f1": 0.8666666666666667,
+        "matthews": 0.8,
+        "average_precision": 0.9656915306915307,
+        "log_loss": 0.19478686162464548
+      },
+      "test_metrics": {
+        "accuracy": 0.9666666666666667,
+        "balanced_accuracy": 0.9666666666666667,
+        "precision": 0.9696969696969697,
+        "recall": 0.9666666666666667,
+        "f1": 0.9665831244778612,
+        "matthews": 0.9515873026942034,
+        "average_precision": 1.0,
+        "log_loss": 0.07886696218245365
+      },
+      "training_time_s": 5.055698200000279,
+      "inference_time_ms": 23.73649999981353,
+      "inference_time_per_1k_ms": 791.2166666604511,
+      "peak_memory_mb": 955.37109375,
+      "model_size_bytes": 990812,
+      "n_parameters": null,
+      "n_features_used": 8,
+      "artifact_path": "artifacts_string\\runs\\run_5494d62bee71\\models\\exp_2d7ab4d8cae8",
+      "warnings": [
+        "feature-name count (12) differs from the transformed width (8); regenerating generic names"
+      ],
+      "started_at": "2026-09-19T08:30:18+00:00",
+      "finished_at": "2026-09-19T08:30:24+00:00"
+    },
+    {
+      "experiment": {
+        "experiment_id": "exp_bf7fcc45abef",
+        "model": "xgboost",
+        "preprocessing": [
+          "impute_numeric",
+          "impute_categorical",
+          "missing_indicator",
+          "scale_robust",
+          "encode_categorical",
+          "clip_outliers",
+          "log_transform",
+          "datetime_features"
+        ],
+        "feature_selection": "variance",
+        "preset_index": 3,
+        "hyperparameters": {
+          "n_estimators": 1200,
+          "learning_rate": 0.02,
+          "max_depth": 9,
+          "subsample": 0.9,
+          "colsample_bytree": 0.9
+        },
+        "expected_cost": "high",
+        "source": "baseline",
+        "rationale": "expected f1 ~ 0.985 using the 'deep' preset; medium cost (~76s of training); feature selection should help with the near-duplicate features"
+      },
+      "status": "success",
+      "error": null,
+      "error_type": null,
+      "primary_metric": "f1",
+      "metric_direction": "maximize",
+      "validation_score": 0.8981620718462824,
+      "test_score": 0.9665831244778613,
+      "validation_metrics": {
+        "accuracy": 0.9,
+        "balanced_accuracy": 0.9,
+        "precision": 0.8993265993265993,
+        "recall": 0.9,
+        "f1": 0.8981620718462824,
+        "matthews": 0.8514202182000767,
+        "average_precision": 0.9001822397875029,
+        "log_loss": 0.37446948885917664
+      },
+      "test_metrics": {
+        "accuracy": 0.9666666666666667,
+        "balanced_accuracy": 0.9666666666666667,
+        "precision": 0.9696969696969697,
+        "recall": 0.9666666666666667,
+        "f1": 0.9665831244778613,
+        "matthews": 0.9515873026942034,
+        "average_precision": 0.9939393939393938,
+        "log_loss": 0.07299911230802536
+      },
+      "training_time_s": 14.862498400000277,
+      "inference_time_ms": 21.82519999996657,
+      "inference_time_per_1k_ms": 727.5066666655523,
+      "peak_memory_mb": 892.4921875,
+      "model_size_bytes": 2724572,
+      "n_parameters": 3,
+      "n_features_used": 4,
+      "artifact_path": "artifacts_string\\runs\\run_5494d62bee71\\models\\exp_bf7fcc45abef",
+      "warnings": [],
+      "started_at": "2026-09-19T08:30:24+00:00",
+      "finished_at": "2026-09-19T08:30:39+00:00"
+    }
+  ],
+  "comparison": {
+    "rows": [
+      {
+        "model": "xgboost",
+        "experiment_id": "exp_fe49af0dfcdf",
+        "status": "success",
+        "primary_metric": "f1",
+        "validation_score": 0.8981620718462824,
+        "test_score": 0.9665831244778613,
+        "training_time_s": 9.0614,
+        "inference_time_per_1k_ms": 972.81,
+        "peak_memory_mb": 867.98,
+        "model_size_bytes": 2721998,
+        "error": null
+      },
+      {
+        "model": "lightgbm",
+        "experiment_id": "exp_2d7ab4d8cae8",
+        "status": "success",
+        "primary_metric": "f1",
+        "validation_score": 0.8666666666666667,
+        "test_score": 0.9665831244778612,
+        "training_time_s": 5.0557,
+        "inference_time_per_1k_ms": 791.2167,
+        "peak_memory_mb": 955.37,
+        "model_size_bytes": 990812,
+        "error": null
+      },
+      {
+        "model": "xgboost",
+        "experiment_id": "exp_bf7fcc45abef",
+        "status": "success",
+        "primary_metric": "f1",
+        "validation_score": 0.8981620718462824,
+        "test_score": 0.9665831244778613,
+        "training_time_s": 14.8625,
+        "inference_time_per_1k_ms": 727.5067,
+        "peak_memory_mb": 892.49,
+        "model_size_bytes": 2724572,
+        "error": null
+      }
+    ],
+    "objective": "species prediction",
+    "primary_metric": "f1",
+    "metric_direction": "maximize",
+    "best_validation": "xgboost",
+    "best_test": "xgboost",
+    "fastest": "lightgbm",
+    "smallest": "lightgbm",
+    "most_compute_efficient": "lightgbm",
+    "trade_offs": [
+      "xgboost has the best validation f1 but also the longest training time (9.06s, 1.8x lightgbm)",
+      "lightgbm trains fastest (5.06s) with a validation f1 difference of 0.0315",
+      "2 model(s) carried warnings; see the run report before trusting their scores as directly comparable"
+    ],
+    "table": "MODEL COMPARISON\n\nmodel                          f1   train(s)    mem(MB)   size(KB)        test f1  status\n-----------------------------------------------------------------------------------------\nxgboost                    0.8982       9.06        868     2658.2         0.9666  success\nxgboost                    0.8982      14.86        892     2660.7         0.9666  success\nlightgbm                   0.8667       5.06        955      967.6         0.9666  success\n\ntest column is the held-out split, reported for transparency only; selection used validation"
+  },
+  "best_model": {
+    "model": "xgboost",
+    "experiment_id": "exp_fe49af0dfcdf",
+    "primary_metric": "f1",
+    "metric_direction": "maximize",
+    "validation_score": 0.8981620718462824,
+    "test_score": null,
+    "reason": "best validation f1 per the problem statement's objective; highest validation f1 (0.8982) among the 3 approved pipeline(s) that trained successfully",
+    "selection_basis": "validation only (test split reserved for final evaluation)",
+    "efficiency_alternative": null,
+    "hyperparameters": {
+      "n_estimators": 1200,
+      "learning_rate": 0.02,
+      "max_depth": 9,
+      "subsample": 0.9,
+      "colsample_bytree": 0.9
+    },
+    "preprocessing": [
+      "impute_numeric",
+      "impute_categorical",
+      "missing_indicator",
+      "scale_robust",
+      "encode_categorical",
+      "clip_outliers",
+      "log_transform",
+      "datetime_features"
+    ],
+    "feature_selection": "none"
+  },
+  "pareto_frontier": [
+    {
+      "model": "xgboost",
+      "experiment_id": "exp_fe49af0dfcdf",
+      "score": 0.8981620718462824,
+      "cost_s": 9.061388699999952,
+      "peak_memory_mb": 867.984375,
+      "on_frontier": true
+    },
+    {
+      "model": "lightgbm",
+      "experiment_id": "exp_2d7ab4d8cae8",
+      "score": 0.8666666666666667,
+      "cost_s": 5.055698200000279,
+      "peak_memory_mb": 955.37109375,
+      "on_frontier": true
+    }
+  ],
+  "search_statistics": {
+    "searcher": "rl-ppo-planning",
+    "n_experiments": 3,
+    "n_failed": 0,
+    "n_distinct_models": 2,
+    "best_validation_score": 0.8981620718462824,
+    "best_model": "xgboost",
+    "total_training_time_s": 28.979585300000508,
+    "total_compute_s": 28.979585300000508,
+    "time_to_best_s": null,
+    "stopping_reason": "completed",
+    "history": [
+      {
+        "step": 1,
+        "model": "xgboost",
+        "origin": "surrogate",
+        "expected_score": 0.985,
+        "expected_cost_s": 76.329
+      },
+      {
+        "step": 2,
+        "model": "lightgbm",
+        "origin": "surrogate",
+        "expected_score": 0.985,
+        "expected_cost_s": 76.329
+      },
+      {
+        "step": 3,
+        "model": "xgboost",
+        "origin": "surrogate",
+        "expected_score": 0.985,
+        "expected_cost_s": 76.329
+      }
+    ]
+  },
+  "artifacts": {
+    "model_zip": "artifacts_string\\runs\\run_5494d62bee71\\model_package.zip",
+    "model_zip_sha256": "3c135ebfd7a534ddee8dc8c258ca2a967b4c6916bc855f126db0789d0ee0f933",
+    "model_dir": "artifacts_string\\runs\\run_5494d62bee71\\package\\model_package",
+    "results_zip": "artifacts_string\\runs\\run_5494d62bee71\\results.zip",
+    "results_zip_sha256": "faa99006bf3b743e47787ed3533783b3048257e994ca90bc902f68f92383ca2c",
+    "verified": true,
+    "extras": {}
+  },
+  "config_snapshot": {
+    "runtime": {
+      "artifacts_dir": "artifacts_string",
+      "seed": 1234,
+      "n_jobs": -1,
+      "log_level": "INFO",
+      "log_json": false,
+      "num_threads": 0
+    },
+    "security": {
+      "max_upload_mb": 512.0,
+      "max_rows": 5000000,
+      "max_cols": 5000,
+      "allowed_extensions": [
+        ".csv",
+        ".tsv",
+        ".txt",
+        ".parquet",
+        ".jsonl",
+        ".json"
+      ],
+      "max_column_name_length": 128,
+      "reject_dunder_columns": true,
+      "max_zip_mb": 2048.0
+    },
+    "task": {
+      "default_metric_by_task": {},
+      "llm_extractor": false,
+      "llm_model": "gpt-4o-mini",
+      "min_confidence": 0.35
+    },
+    "dataset": {
+      "train_ratio": 0.6,
+      "val_ratio": 0.2,
+      "test_ratio": 0.2,
+      "min_rows": 50,
+      "stratify": true,
+      "temporal_split": false,
+      "max_cardinality_for_ohe": 50,
+      "high_cardinality_threshold": 0.5,
+      "near_duplicate_correlation": 0.98
+    },
+    "search": {
+      "max_experiments": 4,
+      "min_experiments": 3,
+      "n_recommendations": 3,
+      "time_budget_s": 3600.0,
+      "memory_budget_mb": 8192.0,
+      "target_score": null,
+      "patience": 4,
+      "stop_min_improvement": 0.001,
+      "recommendation_horizon": 6,
+      "recommendation_rollouts": 64,
+      "recommendation_temperature": 1.0,
+      "post_selection_refinement": false,
+      "refinement_trials": 8
+    },
+    "rl": {
+      "enabled": true,
+      "policy_path": "artifacts/policies/ppo_policy.pt",
+      "device": "auto",
+      "seed": null,
+      "hidden_sizes": [
+        256,
+        256
+      ],
+      "lr": 0.0003,
+      "gamma": 0.99,
+      "gae_lambda": 0.95,
+      "clip_ratio": 0.2,
+      "entropy_coef": 0.02,
+      "entropy_coef_final": 0.002,
+      "value_coef": 0.5,
+      "max_grad_norm": 0.5,
+      "update_epochs": 10,
+      "minibatch_size": 256,
+      "rollout_steps": 2048,
+      "total_steps": 200000,
+      "max_episode_steps": 20,
+      "normalize_reward": true,
+      "reward": {
+        "w_perf": 1.0,
+        "w_cost": 0.2,
+        "w_novelty": 0.1,
+        "stagnation_penalty": 0.05,
+        "invalid_penalty": 0.5,
+        "failure_penalty": 0.2,
+        "terminal_bonus": 1.0,
+        "perf_scale": 0.05
+      },
+      "warm_start_recommendation": true
+    },
+    "models": {
+      "enabled": [
+        "logistic_regression",
+        "random_forest",
+        "extra_trees",
+        "xgboost",
+        "lightgbm",
+        "mlp"
+      ],
+      "cost_reference_s": 60.0
+    },
+    "execution": {
+      "cv_folds": 0,
+      "fail_fast": false,
+      "max_parallel": 1,
+      "inference_benchmark_rows": 1000,
+      "memory_sample_interval_s": 0.1,
+      "allow_dimensionality_reduction": true
+    },
+    "packaging": {
+      "include_onnx": false,
+      "include_readme": true,
+      "include_results": true,
+      "inference_requirements": [
+        "numpy>=1.26",
+        "pandas>=2.2",
+        "scipy>=1.11",
+        "scikit-learn>=1.4",
+        "joblib>=1.3"
+      ]
+    },
+    "memory": {
+      "enabled": true,
+      "db_path": "artifacts/memory.db",
+      "similarity_k": 5,
+      "min_similarity": 0.0
+    },
+    "api": {
+      "host": "127.0.0.1",
+      "port": 8000,
+      "cors_origins": [
+        "*"
+      ],
+      "max_concurrent_runs": 2
+    },
+    "source_path": "C:\\Users\\Ibhan Mukherjee\\Desktop\\RLAGENT\\configs\\default.yaml"
+  },
+  "progress": [
+    {
+      "run_id": "run_5494d62bee71",
+      "stage": "profiling",
+      "message": "Understanding the problem statement",
+      "sequence": 1,
+      "progress": 0.1,
+      "detail": {},
+      "timestamp": "2026-09-19T08:30:09+00:00"
+    },
+    {
+      "run_id": "run_5494d62bee71",
+      "stage": "profiling",
+      "message": "Profiling the dataset",
+      "sequence": 2,
+      "progress": 0.1,
+      "detail": {},
+      "timestamp": "2026-09-19T08:30:09+00:00"
+    },
+    {
+      "run_id": "run_5494d62bee71",
+      "stage": "understanding",
+      "message": "classification task, optimising f1",
+      "sequence": 3,
+      "progress": 0.18,
+      "detail": {
+        "task": {
+          "learning_type": "supervised",
+          "task_type": "classification",
+          "objective": "species prediction",
+          "target": "species",
+          "metric": "f1"
+        },
+        "confidence": 0.4
+      },
+      "timestamp": "2026-09-19T08:30:09+00:00"
+    },
+    {
+      "run_id": "run_5494d62bee71",
+      "stage": "planning",
+      "message": "Planning experiments",
+      "sequence": 4,
+      "progress": 0.25,
+      "detail": {},
+      "timestamp": "2026-09-19T08:30:09+00:00"
+    },
+    {
+      "run_id": "run_5494d62bee71",
+      "stage": "awaiting_approval",
+      "message": "3 pipeline(s) recommended; awaiting approval",
+      "sequence": 5,
+      "progress": 0.25,
+      "detail": {
+        "planner": "surrogate-greedy"
+      },
+      "timestamp": "2026-09-19T08:30:09+00:00"
+    },
+    {
+      "run_id": "run_5494d62bee71",
+      "stage": "awaiting_approval",
+      "message": "3 pipeline(s) approved; ready to execute",
+      "sequence": 6,
+      "progress": 0.3,
+      "detail": {
+        "approved": [
+          "xgboost",
+          "lightgbm",
+          "xgboost"
+        ]
+      },
+      "timestamp": "2026-09-19T08:30:09+00:00"
+    },
+    {
+      "run_id": "run_5494d62bee71",
+      "stage": "executing",
+      "message": "Training 3 approved pipeline(s)",
+      "sequence": 7,
+      "progress": 0.35,
+      "detail": {
+        "approved": [
+          "xgboost",
+          "lightgbm",
+          "xgboost"
+        ]
+      },
+      "timestamp": "2026-09-19T08:30:09+00:00"
+    },
+    {
+      "run_id": "run_5494d62bee71",
+      "stage": "executing",
+      "message": "xgboost trained in 9.1s (f1=0.8982)",
+      "sequence": 8,
+      "progress": 0.6,
+      "detail": {
+        "model": "xgboost",
+        "status": "success",
+        "validation_score": 0.8981620718462824
+      },
+      "timestamp": "2026-09-19T08:30:39+00:00"
+    },
+    {
+      "run_id": "run_5494d62bee71",
+      "stage": "executing",
+      "message": "lightgbm trained in 5.1s (f1=0.8667)",
+      "sequence": 9,
+      "progress": 0.6,
+      "detail": {
+        "model": "lightgbm",
+        "status": "success",
+        "validation_score": 0.8666666666666667
+      },
+      "timestamp": "2026-09-19T08:30:39+00:00"
+    },
+    {
+      "run_id": "run_5494d62bee71",
+      "stage": "executing",
+      "message": "xgboost trained in 14.9s (f1=0.8982)",
+      "sequence": 10,
+      "progress": 0.6,
+      "detail": {
+        "model": "xgboost",
+        "status": "success",
+        "validation_score": 0.8981620718462824
+      },
+      "timestamp": "2026-09-19T08:30:39+00:00"
+    },
+    {
+      "run_id": "run_5494d62bee71",
+      "stage": "comparing",
+      "message": "Comparing models",
+      "sequence": 11,
+      "progress": 0.82,
+      "detail": {},
+      "timestamp": "2026-09-19T08:30:39+00:00"
+    },
+    {
+      "run_id": "run_5494d62bee71",
+      "stage": "selecting",
+      "message": "Selecting the final model",
+      "sequence": 12,
+      "progress": 0.86,
+      "detail": {},
+      "timestamp": "2026-09-19T08:30:39+00:00"
+    },
+    {
+      "run_id": "run_5494d62bee71",
+      "stage": "evaluating",
+      "message": "Evaluating on the held-out test split",
+      "sequence": 13,
+      "progress": 0.75,
+      "detail": {},
+      "timestamp": "2026-09-19T08:30:39+00:00"
+    },
+    {
+      "run_id": "run_5494d62bee71",
+      "stage": "packaging",
+      "message": "Packaging the final model",
+      "sequence": 14,
+      "progress": 0.95,
+      "detail": {},
+      "timestamp": "2026-09-19T08:30:39+00:00"
+    },
+    {
+      "run_id": "run_5494d62bee71",
+      "stage": "packaging",
+      "message": "Model package verified and archived",
+      "sequence": 15,
+      "progress": 0.95,
+      "detail": {
+        "zip": "artifacts_string\\runs\\run_5494d62bee71\\model_package.zip",
+        "verified": true,
+        "sha256": "3c135ebfd7a534ddee8dc8c258ca2a967b4c6916bc855f126db0789d0ee0f933"
+      },
+      "timestamp": "2026-09-19T08:30:48+00:00"
+    },
+    {
+      "run_id": "run_5494d62bee71",
+      "stage": "complete",
+      "message": "Run complete",
+      "sequence": 16,
+      "progress": 1.0,
+      "detail": {},
+      "timestamp": "2026-09-19T08:30:48+00:00"
+    }
+  ],
+  "error": null,
+  "messages": [
+    "3 pipeline(s) approved by user at 2026-09-19T08:30:09+00:00"
+  ]
+}

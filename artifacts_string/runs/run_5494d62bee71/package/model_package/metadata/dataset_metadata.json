@@ -1,0 +1,32 @@
+{
+  "name": "iris.csv",
+  "sha256": "",
+  "n_rows": 150,
+  "n_cols": 5,
+  "target": "species",
+  "missing_ratio": 0.0,
+  "duplicate_ratio": 0.006667,
+  "numeric_features": 4,
+  "categorical_features": 0,
+  "datetime_features": 0,
+  "high_cardinality_features": 0,
+  "split": {
+    "strategy": "stratified",
+    "stratified": true,
+    "n_train": 90,
+    "n_val": 30,
+    "n_test": 30,
+    "total": 150,
+    "seed": 1234,
+    "test_reserved": true,
+    "warnings": []
+  },
+  "warnings": [
+    "1 duplicate rows detected; consider whether they are legitimate"
+  ],
+  "class_distribution": {
+    "n_classes": 3,
+    "minority_ratio": 0.3333333333333333,
+    "is_imbalanced": false
+  }
+}

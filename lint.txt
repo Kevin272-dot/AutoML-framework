@@ -1,0 +1,34 @@
+E501 Line too long (103 > 100)
+   --> rl_automl\cli\main.py:282:101
+    |
+280 |             print(f"{name}: {path}  sha256 verified  licence: {spec.license}")
+281 |         if failures:
+282 |             print(f"error: {len(failures)} download(s) failed: {', '.join(failures)}", file=sys.stderr)
+    |                                                                                                     ^^^
+283 |             return EXIT_FAILED
+284 |         return EXIT_OK
+    |
+
+E501 Line too long (102 > 100)
+   --> rl_automl\dataset\loaders.py:653:101
+    |
+651 |     names.extend(recipe.name for recipe in synthetic_recipes())
+652 |     names.extend(
+653 |         name for name in remote.remote_names() if include_network or remote.is_cached(name, cache_dir)
+    |                                                                                                     ^^
+654 |     )
+655 |     if include_network:
+    |
+
+E501 Line too long (104 > 100)
+   --> rl_automl\dataset\remote.py:121:101
+    |
+119 |         metric="f1",
+120 |         license="Public domain (Titanic passenger manifest)",
+121 |         attribution="Compiled from the public Titanic passenger list; mirror datasciencedojo/datasets.",
+    |                                                                                                     ^^^^
+122 |         description=(
+123 |             "891-row passenger manifest: binary survival target with missing values and "
+    |
+
+Found 3 errors.

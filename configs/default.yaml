@@ -1,0 +1,134 @@
+# Default configuration for the adaptive RL AutoML system.
+# Every key can be overridden by an environment variable using the pattern
+# AUTOML_<SECTION>__<FIELD>, e.g. AUTOML_SEARCH__MAX_EXPERIMENTS=20
+#                                      AUTOML_RL__REWARD__W_COST=0.35
+
+runtime:
+  artifacts_dir: artifacts
+  seed: 1234
+  n_jobs: -1
+  log_level: INFO
+  log_json: false
+  num_threads: 0
+
+security:
+  max_upload_mb: 512.0
+  max_rows: 5000000
+  max_cols: 5000
+  allowed_extensions: [".csv", ".tsv", ".txt", ".parquet", ".jsonl", ".json"]
+  max_column_name_length: 128
+  reject_dunder_columns: true
+  max_zip_mb: 2048.0
+  # Archive uploads (.zip, e.g. a Kaggle download) are unpacked, then each tabular member
+  # is put through the same single-file gate. These bound the unpacking effort.
+  max_archive_members: 25
+  max_compression_ratio: 200.0
+
+task:
+  # Empty means "use the built-in default metric for the detected task type".
+  default_metric_by_task: {}
+  llm_extractor: false
+  llm_model: gpt-4o-mini
+  min_confidence: 0.35
+
+dataset:
+  train_ratio: 0.6
+  val_ratio: 0.2
+  test_ratio: 0.2
+  min_rows: 50
+  stratify: true
+  temporal_split: false
+  max_cardinality_for_ohe: 50
+  high_cardinality_threshold: 0.5
+  near_duplicate_correlation: 0.98
+
+search:
+  max_experiments: 12
+  min_experiments: 3
+  n_recommendations: 3
+  time_budget_s: 3600.0
+  memory_budget_mb: 8192.0
+  target_score: null
+  patience: 4
+  stop_min_improvement: 0.001
+  recommendation_horizon: 6
+  recommendation_rollouts: 64
+  recommendation_temperature: 1.0
+  post_selection_refinement: false
+  refinement_trials: 8
+
+rl:
+  enabled: true
+  # relative to runtime.artifacts_dir
+  policy_path: policies/ppo_policy.pt
+  device: auto
+  # null inherits runtime.seed
+  seed: null
+  hidden_sizes: [256, 256]
+  lr: 0.0003
+  gamma: 0.99
+  gae_lambda: 0.95
+  clip_ratio: 0.2
+  entropy_coef: 0.02
+  entropy_coef_final: 0.002
+  value_coef: 0.5
+  max_grad_norm: 0.5
+  update_epochs: 10
+  minibatch_size: 256
+  rollout_steps: 2048
+  # Environment steps per task type for a default run. Measured throughput is ~24 steps/s,
+  # so 25000 is roughly 17 minutes per task type; 200000 is an overnight run (~2h20m each).
+  total_steps: 25000
+  max_episode_steps: 20
+  normalize_reward: true
+  warm_start_recommendation: true
+  reward:
+    w_perf: 1.0
+    w_cost: 0.2
+    w_novelty: 0.1
+    stagnation_penalty: 0.05
+    invalid_penalty: 0.5
+    failure_penalty: 0.2
+    terminal_bonus: 1.0
+    perf_scale: 0.05
+
+models:
+  enabled:
+    - logistic_regression
+    - random_forest
+    - extra_trees
+    - xgboost
+    - lightgbm
+    - mlp
+  cost_reference_s: 60.0
+
+execution:
+  cv_folds: 0
+  fail_fast: false
+  max_parallel: 1
+  inference_benchmark_rows: 1000
+  memory_sample_interval_s: 0.1
+  allow_dimensionality_reduction: true
+
+packaging:
+  include_onnx: false
+  include_readme: true
+  include_results: true
+  inference_requirements:
+    - "numpy>=1.26"
+    - "pandas>=2.2"
+    - "scipy>=1.11"
+    - "scikit-learn>=1.4"
+    - "joblib>=1.3"
+
+memory:
+  enabled: true
+  db_path: memory.db
+  similarity_k: 5
+  min_similarity: 0.0
+
+api:
+  host: 127.0.0.1
+  port: 8000
+  cors_origins: ["*"]
+  max_concurrent_runs: 2

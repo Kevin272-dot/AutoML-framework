@@ -1,0 +1,115 @@
+SIM103 Return the negated condition directly
+   --> rl_automl\environment\action_space.py:256:9
+    |
+254 |           if strategy in SUPERVISED_ONLY_FEATURE_SELECTION and not self.task_type.is_supervised:
+255 |               return False
+256 | /         if (
+257 | |             strategy == FeatureSelectionOption.PCA.value
+258 | |             and self.task_type is TaskType.DIMENSIONALITY_REDUCTION
+259 | |         ):
+260 | |             # PCA is the model for this task; using it again as a stage is redundant.
+261 | |             return False
+262 | |         return True
+    | |___________________^
+263 |
+264 |       # -- decoding ----------------------------------------------------------------
+    |
+help: Inline condition
+
+SIM102 Use a single `if` statement instead of nested `if` statements
+   --> rl_automl\environment\surrogate.py:521:5
+    |
+519 |           else:
+520 |               adjustment -= 0.025
+521 | /     elif family in ("boosting", "bagging", "ensemble"):
+522 | |         if PreprocessingOption.SCALE_STANDARD.value in selected:
+    | |________________________________________________________________^
+523 |               adjustment -= 0.008  # harmless but wasted work for trees
+    |
+help: Combine `if` statements using `and`
+
+RUF034 Useless `if`-`else` condition
+   --> rl_automl\execution\preprocessing.py:350:17
+    |
+348 |         if strategy == FeatureSelectionOption.MUTUAL_INFO.value:
+349 |             score_func = (
+350 |                 mutual_info_classif if task_type is TaskType.CLASSIFICATION else mutual_info_classif
+    |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+351 |             )
+352 |             return SelectKBest(score_func=score_func, k=k)
+    |
+
+SIM105 Use `contextlib.suppress(Exception)` instead of `try`-`except`-`pass`
+   --> rl_automl\execution\resource_monitor.py:96:9
+    |
+ 95 |           # Establish a baseline so the first cpu_percent read is meaningful.
+ 96 | /         try:
+ 97 | |             self._process.cpu_percent(interval=None)
+ 98 | |         except Exception:  # pragma: no cover - platform dependent
+ 99 | |             pass
+    | |________________^
+100 |
+101 |       # -- lifecycle ---------------------------------------------------------------
+    |
+help: Replace `try`-`except`-`pass` with `with contextlib.suppress(Exception): ...`
+
+SIM105 Use `contextlib.suppress(Exception)` instead of `try`-`except`-`pass`
+   --> rl_automl\execution\resource_monitor.py:109:9
+    |
+107 |           # wakes, which would otherwise report a peak of 0 MB for a model that clearly
+108 |           # used memory.
+109 | /         try:
+110 | |             self._collect_once()
+111 | |         except Exception:  # pragma: no cover - best effort
+112 | |             pass
+    | |________________^
+113 |           self._thread = threading.Thread(
+114 |               target=self._sample_loop, name="resource-monitor", daemon=True
+    |
+help: Replace `try`-`except`-`pass` with `with contextlib.suppress(Exception): ...`
+
+E501 Line too long (108 > 100)
+   --> rl_automl\packaging\inference_generator.py:220:101
+    |
+218 |         if extra:
+219 |             warnings.warn(
+220 |                 "ignoring " + str(len(extra)) + " unexpected column(s): " + ", ".join(map(str, extra[:10])),
+    |                                                                                                     ^^^^^^^^
+221 |                 stacklevel=2,
+222 |             )
+    |
+
+E501 Line too long (101 > 100)
+   --> rl_automl\packaging\inference_generator.py:667:101
+    |
+665 |             return "_No metrics were recorded._"
+666 |         rows = "\n".join(
+667 |             f"| {name} | {_format_number(validation.get(name))} | {_format_number(test.get(name))} |"
+    |                                                                                                     ^
+668 |             for name in names
+669 |         )
+    |
+
+E501 Line too long (101 > 100)
+   --> rl_automl\packaging\zip_builder.py:397:101
+    |
+395 |             if actual.size != expected.size:
+396 |                 problems.append(
+397 |                     f"the packaged model returned {actual.size} predictions for {expected.size} rows"
+    |                                                                                                     ^
+398 |                 )
+399 |                 return result
+    |
+
+E501 Line too long (114 > 100)
+   --> rl_automl\task\task_classifier.py:238:101
+    |
+236 |         if stated_direction is not None and stated_direction is not direction:
+237 |             notes.append(
+238 |                 f"statement asks to {'maximize' if stated_direction is MetricDirection.MAXIMIZE else 'minimize'} "
+    |                                                                                                     ^^^^^^^^^^^^^^
+239 |                 f"{metric}; honouring that"
+240 |             )
+    |
+
+Found 9 errors.

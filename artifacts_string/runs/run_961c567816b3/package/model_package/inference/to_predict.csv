@@ -1,0 +1,6 @@
+contract_type,payment_method,internet_service,tenure_months,monthly_charges,total_charges,support_calls,age,signup_date
+one_year,electronic_check,dsl,29.0,43.0,1278.71,1,41.0,2019-12-08
+two_year,card,dsl,10.0,44.2,490.35,1,18.0,2019-05-11
+one_year,bank_transfer,dsl,5.0,84.97,429.76,2,53.0,2021-01-07
+month-to-month,mailed_check,fiber,34.0,130.0,4479.3,2,79.0,2022-04-03
+month-to-month,card,none,10.0,64.66,664.54,0,50.0,2022-03-06

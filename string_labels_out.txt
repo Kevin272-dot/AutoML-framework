@@ -1,0 +1,18 @@
+dataset: churn_demo_small (3000, 10) target: churn
+target values: ['no', 'yes']
+task: classification metric: f1 target: churn
+C:\Users\Ibhan Mukherjee\AppData\Roaming\Python\Python314\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+C:\Users\Ibhan Mukherjee\AppData\Roaming\Python\Python314\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+C:\Users\Ibhan Mukherjee\AppData\Roaming\Python\Python314\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+C:\Users\Ibhan Mukherjee\AppData\Roaming\Python\Python314\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+C:\Users\Ibhan Mukherjee\AppData\Roaming\Python\Python314\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+status: complete
+error: None
+label_mapping present: True
+PRED ['no', 'no', 'yes', 'yes', 'yes']
+STRING-LABEL PACKAGING OK

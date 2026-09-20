@@ -1,0 +1,1473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>RL-AutoML workbench</title>
+<style>
+  /* ---------------------------------------------------------------- tokens */
+  :root {
+    /* Fallback layer for engines without oklch: readable, just less precise. */
+    background: #16130f;
+    color: #f4efe8;
+
+    --bg:          oklch(0.17 0.008 70);
+    --surface:     oklch(0.21 0.009 70);
+    --surface-2:   oklch(0.245 0.010 70);
+    --surface-3:   oklch(0.29 0.012 70);
+    --border:      oklch(0.33 0.012 70);
+    --border-soft: oklch(0.27 0.010 70);
+    --text:        oklch(0.96 0.006 70);
+    --text-muted:  oklch(0.82 0.010 70);
+    --text-dim:    oklch(0.70 0.010 70);
+
+    /* One accent, reserved for the authorize action and focus. */
+    --accent:      oklch(0.80 0.145 78);
+    --accent-hi:   oklch(0.86 0.150 82);
+    --accent-ink:  oklch(0.22 0.030 70);
+
+    --ok:          oklch(0.76 0.140 152);
+    --run:         oklch(0.76 0.110 232);
+    --warn:        oklch(0.82 0.130 92);
+    --err:         oklch(0.68 0.180 27);
+
+    --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, "Cascadia Mono", Consolas, "Liberation Mono", monospace;
+
+    --r-sm: 6px;
+    --r-md: 10px;
+    --r-lg: 14px;
+
+    --shadow-1: 0 1px 2px oklch(0 0 0 / 0.4);
+    --shadow-2: 0 4px 14px oklch(0 0 0 / 0.35), 0 1px 0 oklch(1 0 0 / 0.04) inset;
+    --focus: 2px solid var(--accent);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { height: 100%; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 400 15px/1.5 var(--sans);
+    -webkit-font-smoothing: antialiased;
+    font-variant-numeric: tabular-nums;
+  }
+
+  h1, h2, h3 { margin: 0; font-weight: 600; line-height: 1.25; letter-spacing: -0.01em; }
+  h1 { font-size: 15px; }
+  h2 { font-size: 17px; }
+  h3 { font-size: 13px; }
+
+  p { margin: 0; }
+
+  a { color: var(--accent-hi); text-underline-offset: 2px; }
+
+  :focus-visible {
+    outline: var(--focus);
+    outline-offset: 2px;
+    border-radius: var(--r-sm);
+  }
+
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+
+  .skip {
+    position: absolute; inset-inline-start: 12px; top: -60px; z-index: 20;
+    background: var(--accent); color: var(--accent-ink);
+    padding: 10px 16px; border-radius: var(--r-md); font-weight: 600; text-decoration: none;
+    transition: top 140ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .skip:focus { top: 12px; }
+
+  .mono { font-family: var(--mono); font-size: 12px; }
+
+  /* ---------------------------------------------------------------- shell */
+  .app {
+    display: grid;
+    grid-template-columns: 296px minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas: "brand head" "rail work";
+    min-height: 100vh;
+  }
+
+  .brand {
+    grid-area: brand;
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 20px;
+    border-inline-end: 1px solid var(--border-soft);
+    border-block-end: 1px solid var(--border-soft);
+    background: var(--surface);
+  }
+  .brand .mark {
+    width: 24px; height: 24px; flex: none;
+    border-radius: 7px;
+    background: linear-gradient(150deg, var(--accent), oklch(0.62 0.14 45));
+    box-shadow: var(--shadow-1);
+  }
+  .brand strong { font-size: 14px; font-weight: 600; letter-spacing: -0.01em; }
+  .brand span { font-size: 11px; color: var(--text-dim); }
+
+  .head {
+    grid-area: head;
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    padding: 10px 20px;
+    border-block-end: 1px solid var(--border-soft);
+    background: var(--surface);
+  }
+  .head .spacer { flex: 1 1 auto; }
+
+  .health {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 12px; color: var(--text-muted);
+    padding: 6px 12px; border-radius: 999px;
+    background: var(--surface-2); border: 1px solid var(--border-soft);
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; background: var(--text-dim); }
+  .dot.ok { background: var(--ok); }
+  .dot.err { background: var(--err); }
+  .dot.run { background: var(--run); animation: pulse 1.6s ease-in-out infinite; }
+  .dot.warn { background: var(--warn); }
+
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+  /* ---------------------------------------------------------------- rail */
+  .rail {
+    grid-area: rail;
+    border-inline-end: 1px solid var(--border-soft);
+    background: var(--surface);
+    display: flex; flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .rail-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    padding: 16px 16px 10px;
+  }
+  .rail-head h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-dim); }
+  .rail-list { list-style: none; margin: 0; padding: 0 8px 12px; overflow-y: auto; flex: 1; min-height: 0; }
+  .rail-list li { margin: 0 0 4px; }
+
+  .run-row {
+    width: 100%;
+    display: grid; gap: 3px;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas: "status name" "status meta";
+    align-items: center;
+    padding: 10px 12px;
+    text-align: start;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--r-md);
+    color: var(--text);
+    font: inherit;
+    cursor: pointer;
+    min-height: 44px;
+    transition: background 160ms ease, transform 160ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .run-row:hover { background: var(--surface-2); transform: translateY(-1px); }
+  .run-row[aria-current="true"] {
+    background: var(--surface-3);
+    border-color: color-mix(in oklab, var(--accent) 45%, var(--border));
+  }
+  .run-row .dot { grid-area: status; align-self: center; }
+  .run-row .rname {
+    grid-area: name; font-size: 13px; font-weight: 550;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .run-row .rmeta {
+    grid-area: meta; font-size: 11px; color: var(--text-dim);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+
+  /* ---------------------------------------------------------------- work */
+  .work {
+    grid-area: work;
+    min-width: 0;
+    padding: 24px clamp(16px, 3vw, 36px) 72px;
+    overflow-y: auto;
+  }
+  .stack { display: grid; gap: 24px; max-width: 1180px; }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-1);
+    overflow: hidden;
+  }
+  .panel-head {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    padding: 14px 18px;
+    border-block-end: 1px solid var(--border-soft);
+  }
+  .panel-head .spacer { flex: 1 1 auto; }
+  .panel-head p { font-size: 12px; color: var(--text-dim); }
+  .panel-body { padding: 18px; }
+  .panel-body.tight { padding: 0; }
+
+  .eyebrow {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--text-dim); font-weight: 600;
+  }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    display: inline-flex; align-items: baseline; gap: 6px;
+    padding: 5px 11px; border-radius: 999px;
+    background: var(--surface-2); border: 1px solid var(--border-soft);
+    font-size: 12px; color: var(--text-muted);
+  }
+  .chip b { color: var(--text); font-weight: 600; }
+  .chip.accent { border-color: color-mix(in oklab, var(--accent) 40%, var(--border)); color: var(--text); }
+  .chip.ok { border-color: color-mix(in oklab, var(--ok) 40%, var(--border)); }
+  .chip.warn { border-color: color-mix(in oklab, var(--warn) 45%, var(--border)); }
+  .chip.err { border-color: color-mix(in oklab, var(--err) 45%, var(--border)); }
+
+  /* stepper */
+  .steps { display: flex; flex-wrap: wrap; gap: 4px; list-style: none; margin: 0; padding: 0; }
+  .steps li {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 14px 7px 10px;
+    font-size: 12px; color: var(--text-dim);
+    border-radius: 999px;
+    border: 1px solid transparent;
+  }
+  .steps li .n {
+    width: 20px; height: 20px; flex: none; border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 11px; font-weight: 600;
+    background: var(--surface-3); color: var(--text-muted);
+  }
+  .steps li[data-state="done"] { color: var(--text-muted); }
+  .steps li[data-state="done"] .n { background: color-mix(in oklab, var(--ok) 30%, var(--surface-3)); color: var(--ok); }
+  .steps li[data-state="current"] {
+    color: var(--text);
+    background: var(--surface-2);
+    border-color: color-mix(in oklab, var(--accent) 45%, var(--border));
+  }
+  .steps li[data-state="current"] .n { background: var(--accent); color: var(--accent-ink); }
+  .steps li[data-state="failed"] { color: var(--err); }
+  .steps li[data-state="failed"] .n { background: color-mix(in oklab, var(--err) 30%, var(--surface-3)); color: var(--err); }
+
+  /* ---------------------------------------------------------------- forms */
+  .form-grid { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+  .field { display: grid; gap: 6px; }
+  .field.wide { grid-column: 1 / -1; }
+  .field > label { font-size: 12px; font-weight: 600; color: var(--text-muted); }
+  .field .hint { font-size: 11px; color: var(--text-dim); }
+  input[type="text"], input[type="number"], select, textarea {
+    width: 100%;
+    padding: 10px 12px;
+    min-height: 44px;
+    background: var(--surface-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    font: inherit;
+    font-size: 15px;
+  }
+  textarea { min-height: 76px; resize: vertical; }
+  input::placeholder { color: var(--text-dim); }
+  input:disabled, select:disabled, textarea:disabled {
+    opacity: 0.55; cursor: not-allowed; background: var(--surface);
+  }
+  input[aria-invalid="true"], select[aria-invalid="true"] { border-color: var(--err); }
+
+  .check {
+    display: inline-flex; align-items: center; gap: 10px;
+    min-height: 44px; font-size: 13px; color: var(--text-muted); cursor: pointer;
+  }
+  .check input { width: 18px; height: 18px; accent-color: var(--accent); }
+
+  /* ---------------------------------------------------------------- buttons */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    min-height: 44px; padding: 0 18px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
+    font: inherit; font-weight: 600; font-size: 13px;
+    cursor: pointer;
+    transition: background 160ms ease, transform 120ms cubic-bezier(0.22, 1, 0.36, 1), opacity 160ms;
+  }
+  .btn:hover:not(:disabled) { background: var(--surface-3); }
+  .btn:active:not(:disabled) { transform: translateY(1px); }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  .btn-primary {
+    background: var(--accent); color: var(--accent-ink); border-color: transparent;
+  }
+  .btn-primary:hover:not(:disabled) { background: var(--accent-hi); }
+  .btn-quiet { background: transparent; border-color: transparent; color: var(--text-muted); }
+  .btn-quiet:hover:not(:disabled) { background: var(--surface-2); color: var(--text); }
+  .btn-danger { color: var(--err); border-color: color-mix(in oklab, var(--err) 40%, var(--border)); background: transparent; }
+  .btn-danger:hover:not(:disabled) { background: color-mix(in oklab, var(--err) 12%, transparent); }
+  .btn small { font-weight: 500; color: inherit; opacity: 0.8; }
+
+  .actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+  /* ---------------------------------------------------------------- tables */
+  .scroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; min-width: 620px; }
+  caption { text-align: start; padding: 0 0 10px; font-size: 12px; color: var(--text-dim); }
+  th, td { padding: 11px 14px; text-align: start; border-block-end: 1px solid var(--border-soft); }
+  thead th {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--text-dim); font-weight: 600; white-space: nowrap;
+    background: var(--surface);
+    position: sticky; top: 0; z-index: 1;
+  }
+  tbody tr:hover { background: var(--surface-2); }
+  tbody tr[data-best="true"] { background: color-mix(in oklab, var(--accent) 8%, transparent); }
+  tbody tr[data-best="true"] td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
+  td.num, th.num { text-align: end; white-space: nowrap; }
+  td.mid { text-align: center; }
+  .muted { color: var(--text-dim); }
+  .degraded { color: var(--err); font-size: 12px; }
+
+  .sel-cell { width: 52px; }
+  .sel-cell input { width: 18px; height: 18px; accent-color: var(--accent); }
+  .model-name { font-weight: 600; }
+  .reason {
+    font-size: 12px; color: var(--text-muted); max-width: 46ch;
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  }
+
+  /* ---------------------------------------------------------------- progress */
+  .meter {
+    height: 8px; border-radius: 999px; background: var(--surface-3); overflow: hidden;
+  }
+  .meter > i {
+    display: block; height: 100%; width: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent-hi));
+    transform-origin: left center; transform: scaleX(0);
+    transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .meter-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-block-end: 8px; }
+  .meter-row .stage { font-weight: 600; font-size: 13px; }
+  .meter-row .pct { font-family: var(--mono); font-size: 12px; color: var(--text-muted); }
+
+  .log {
+    margin: 0; padding: 12px 14px;
+    max-height: 260px; overflow-y: auto;
+    background: var(--bg);
+    border-top: 1px solid var(--border-soft);
+    font-family: var(--mono); font-size: 12px; line-height: 1.65;
+    color: var(--text-muted);
+    list-style: none;
+  }
+  .log li { display: grid; grid-template-columns: 62px 1fr; gap: 10px; }
+  .log .t { color: var(--text-dim); }
+  .log .s-complete { color: var(--ok); }
+  .log .s-failed { color: var(--err); }
+  .log .s-awaiting_approval { color: var(--accent); }
+
+  /* ---------------------------------------------------------------- states */
+  .note {
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 12px 14px; border-radius: var(--r-md);
+    font-size: 13px; line-height: 1.55;
+    background: var(--surface-2); border: 1px solid var(--border-soft);
+    color: var(--text-muted);
+  }
+  .note strong { color: var(--text); }
+  .note.err { border-color: color-mix(in oklab, var(--err) 45%, var(--border)); color: var(--text); }
+  .note.err strong { color: var(--err); }
+  .note.warn { border-color: color-mix(in oklab, var(--warn) 40%, var(--border)); }
+
+  .empty {
+    padding: 44px 24px; text-align: center; color: var(--text-dim);
+    display: grid; gap: 8px; justify-items: center;
+  }
+  .empty h3 { font-size: 15px; color: var(--text-muted); }
+  .empty p { font-size: 13px; max-width: 46ch; }
+
+  .skeleton { display: grid; gap: 10px; padding: 18px; }
+  .skeleton i {
+    display: block; height: 12px; border-radius: 6px;
+    background: linear-gradient(90deg, var(--surface-2), var(--surface-3), var(--surface-2));
+    background-size: 200% 100%;
+    animation: sweep 1.4s linear infinite;
+  }
+  .skeleton i:nth-child(1) { width: 42%; }
+  .skeleton i:nth-child(2) { width: 88%; }
+  .skeleton i:nth-child(3) { width: 74%; }
+  .skeleton i:nth-child(4) { width: 56%; }
+  @keyframes sweep { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+  .gate {
+    border: 1px solid color-mix(in oklab, var(--accent) 40%, var(--border));
+    background: linear-gradient(180deg, color-mix(in oklab, var(--accent) 7%, var(--surface)), var(--surface));
+  }
+  .gate .panel-head { border-block-end-color: color-mix(in oklab, var(--accent) 28%, var(--border-soft)); }
+
+  .artifacts { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  .artifact {
+    display: grid; gap: 8px;
+    padding: 14px; border-radius: var(--r-md);
+    background: var(--surface-2); border: 1px solid var(--border-soft);
+  }
+  .artifact .aname { font-weight: 600; font-size: 13px; }
+  .artifact .ameta { font-family: var(--mono); font-size: 11px; color: var(--text-dim); word-break: break-all; }
+  .artifact .abody { min-height: 44px; display: flex; align-items: center; }
+
+  .toast {
+    position: fixed; inset-block-end: 20px; inset-inline-end: 20px; z-index: 30;
+    max-width: min(420px, calc(100vw - 40px));
+    padding: 12px 16px; border-radius: var(--r-md);
+    background: var(--surface-3); border: 1px solid var(--border);
+    box-shadow: var(--shadow-2);
+    font-size: 13px;
+  }
+  .toast.err { border-color: color-mix(in oklab, var(--err) 55%, var(--border)); }
+  .toast[hidden] { display: none; }
+
+  .visually-hidden-live { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+  /* ---------------------------------------------------------------- entrance */
+  .enter { animation: rise 260ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px) scale(0.995); } to { opacity: 1; transform: none; } }
+
+  /* ---------------------------------------------------------------- responsive */
+  @media (max-width: 1023px) {
+    .app {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas: "brand" "head" "rail" "work";
+    }
+    .brand { border-inline-end: 0; }
+    .rail { border-inline-end: 0; border-block-end: 1px solid var(--border-soft); max-height: 260px; }
+    .rail-list { display: flex; gap: 8px; padding: 0 12px 12px; overflow-x: auto; overflow-y: hidden; }
+    .rail-list li { flex: 0 0 232px; }
+    .work { padding-top: 18px; }
+  }
+
+  @media (max-width: 639px) {
+    body { font-size: 14px; }
+    input[type="text"], input[type="number"], select, textarea { font-size: 16px; }
+    .panel-body { padding: 14px; }
+    .head { gap: 10px; }
+    .health .hlabel { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#work">Skip to the workbench</a>
+
+<div class="app">
+  <div class="brand">
+    <div class="mark" aria-hidden="true"></div>
+    <div>
+      <strong>RL-AutoML</strong><br>
+      <span>plan, approve, then train</span>
+    </div>
+  </div>
+
+  <header class="head">
+    <span class="health" id="health">
+      <span class="dot" id="health-dot" aria-hidden="true"></span>
+      <span id="health-text">Checking service</span>
+    </span>
+    <span class="spacer"></span>
+    <a class="chip" href="/docs" target="_blank" rel="noreferrer">API reference</a>
+    <button type="button" class="btn btn-quiet" id="refresh-all">Refresh</button>
+  </header>
+
+  <nav class="rail" aria-label="Runs">
+    <div class="rail-head">
+      <h2 id="rail-title">Runs</h2>
+      <button type="button" class="btn btn-quiet" id="new-run">New run</button>
+    </div>
+    <ul class="rail-list" id="rail-list" aria-labelledby="rail-title"></ul>
+  </nav>
+
+  <main class="work" id="work">
+    <div class="stack">
+
+      <!-- configure -->
+      <section class="panel" id="setup-panel" aria-labelledby="setup-title">
+        <div class="panel-head">
+          <div>
+            <h2 id="setup-title">New run</h2>
+            <p>Planning profiles the dataset and proposes experiments. It trains nothing until you authorize it.</p>
+          </div>
+        </div>
+        <div class="panel-body">
+          <form id="run-form" novalidate>
+            <div class="form-grid">
+              <div class="field wide">
+                <label for="f-problem">Problem statement</label>
+                <textarea id="f-problem" name="problem_statement" rows="2" placeholder="Predict which customers will churn" required>Predict which customers will churn</textarea>
+                <span class="hint">Plain language. Used to infer the task, metric, and target when you leave them blank.</span>
+              </div>
+
+              <div class="field">
+                <label for="f-source">Dataset</label>
+                <select id="f-source" name="source"></select>
+                <span class="hint" id="source-hint">Bundled and synthetic sources, no network needed.</span>
+              </div>
+
+              <div class="field">
+                <label for="f-upload">Or upload a file</label>
+                <input type="file" id="f-upload" accept=".csv,.tsv,.txt,.json,.jsonl,.parquet,.zip" style="padding:8px 10px">
+                <span class="hint">A single table, or a .zip archive such as a Kaggle download.</span>
+              </div>
+
+              <div class="field wide" id="archive-block" hidden>
+                <label for="f-member">Table to train on</label>
+                <select id="f-member"></select>
+                <span class="hint" id="archive-hint"></span>
+              </div>
+
+              <div class="field">
+                <label for="f-target">Target column</label>
+                <input type="text" id="f-target" name="target" placeholder="leave blank to infer">
+                <span class="hint" id="target-hint"></span>
+              </div>
+
+              <div class="field">
+                <label for="f-task">Task type</label>
+                <select id="f-task" name="task_type">
+                  <option value="">Infer from the data</option>
+                  <option value="classification">Classification</option>
+                  <option value="regression">Regression</option>
+                  <option value="clustering">Clustering</option>
+                  <option value="anomaly_detection">Anomaly detection</option>
+                  <option value="dimensionality_reduction">Dimensionality reduction</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="f-metric">Metric</label>
+                <input type="text" id="f-metric" name="metric" placeholder="leave blank to infer">
+              </div>
+
+              <div class="field">
+                <label for="f-policy">Planner</label>
+                <select id="f-policy" name="use_policy">
+                  <option value="true">Trained PPO policy</option>
+                  <option value="false">Surrogate model only</option>
+                </select>
+                <span class="hint">Recommendation scores are estimates, not measured performance.</span>
+              </div>
+            </div>
+
+            <div class="note warn" id="contract-note" style="margin-block-start:16px" hidden></div>
+
+            <div class="actions" style="margin-block-start:18px">
+              <button type="submit" class="btn btn-primary" id="plan-btn">Start planning</button>
+              <span class="hint" id="plan-status" role="status"></span>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- active run -->
+      <section class="panel" id="run-panel" aria-labelledby="run-title" hidden>
+        <div class="panel-head">
+          <div>
+            <h2 id="run-title">Run</h2>
+            <p class="mono" id="run-id-text"></p>
+          </div>
+          <span class="spacer"></span>
+          <span class="chip" id="run-status-chip"><span class="dot" id="run-dot" aria-hidden="true"></span><span id="run-status-text">created</span></span>
+          <button type="button" class="btn btn-danger" id="cancel-btn">Cancel run</button>
+        </div>
+        <div class="panel-body">
+          <ol class="steps" id="steps" aria-label="Lifecycle">
+            <li data-step="plan"><span class="n">1</span>Plan</li>
+            <li data-step="approve"><span class="n">2</span>Authorize</li>
+            <li data-step="execute"><span class="n">3</span>Train</li>
+            <li data-step="package"><span class="n">4</span>Package</li>
+            <li data-step="done"><span class="n">5</span>Done</li>
+          </ol>
+          <div id="run-chips" style="margin-block-start:14px" class="chips"></div>
+        </div>
+      </section>
+
+      <!-- progress -->
+      <section class="panel" id="progress-panel" aria-labelledby="progress-title" hidden>
+        <div class="panel-head">
+          <h2 id="progress-title">Progress</h2>
+          <span class="spacer"></span>
+          <span class="mono muted" id="progress-count"></span>
+        </div>
+        <div class="panel-body">
+          <div class="meter-row">
+            <span class="stage" id="progress-stage">Starting</span>
+            <span class="pct" id="progress-pct">0%</span>
+          </div>
+          <div class="meter" id="progress-meter" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-labelledby="progress-stage">
+            <i id="progress-fill"></i>
+          </div>
+        </div>
+        <ul class="log" id="log" role="log" aria-live="polite" aria-label="Run events"></ul>
+      </section>
+
+      <!-- gate -->
+      <section class="panel gate" id="gate-panel" aria-labelledby="gate-title" hidden>
+        <div class="panel-head">
+          <div>
+            <span class="eyebrow">Approval gate</span>
+            <h2 id="gate-title">Recommended experiments</h2>
+            <p id="gate-sub"></p>
+          </div>
+          <span class="spacer"></span>
+          <span class="chip" id="gate-planner"></span>
+        </div>
+        <div class="panel-body tight">
+          <div class="scroll">
+            <table id="rec-table">
+              <caption id="rec-caption">Select the pipelines you authorize. Nothing is trained until you do.</caption>
+              <thead>
+                <tr>
+                  <th class="sel-cell" scope="col">Use</th>
+                  <th class="num" scope="col">Rank</th>
+                  <th scope="col">Model</th>
+                  <th scope="col">Cost</th>
+                  <th class="num" scope="col">Expected score</th>
+                  <th scope="col">Why</th>
+                </tr>
+              </thead>
+              <tbody id="rec-body"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="actions">
+            <div class="field" style="min-width:190px">
+              <label for="f-approver">Approved by</label>
+              <input type="text" id="f-approver" value="operator" autocomplete="name">
+            </div>
+            <button type="button" class="btn btn-primary" id="approve-btn" disabled>Authorize pipelines</button>
+            <button type="button" class="btn" id="select-all-btn">Select all</button>
+            <span class="hint" id="gate-status" role="status"></span>
+          </div>
+          <div class="note" id="gate-note" style="margin-block-start:14px" hidden></div>
+        </div>
+      </section>
+
+      <!-- results -->
+      <section class="panel" id="results-panel" aria-labelledby="results-title" hidden>
+        <div class="panel-head">
+          <h2 id="results-title">Results</h2>
+          <span class="spacer"></span>
+          <span id="results-best" class="chip accent"></span>
+        </div>
+        <div class="panel-body tight">
+          <div class="scroll">
+            <table id="results-table">
+              <caption id="results-caption"></caption>
+              <thead>
+                <tr>
+                  <th scope="col">Model</th>
+                  <th class="num" scope="col" id="th-val">Validation</th>
+                  <th class="num" scope="col" id="th-test">Test</th>
+                  <th class="num" scope="col">Train (s)</th>
+                  <th class="num" scope="col">Peak mem (MB)</th>
+                  <th class="num" scope="col">Size (KB)</th>
+                  <th scope="col">Status</th>
+                </tr>
+              </thead>
+              <tbody id="results-body"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div id="results-notes" class="stack" style="gap:10px"></div>
+        </div>
+      </section>
+
+      <!-- artifacts -->
+      <section class="panel" id="artifacts-panel" aria-labelledby="artifacts-title" hidden>
+        <div class="panel-head">
+          <h2 id="artifacts-title">Artifacts</h2>
+          <span class="spacer"></span>
+          <span class="chip" id="artifacts-verified"></span>
+        </div>
+        <div class="panel-body">
+          <div class="artifacts" id="artifacts-list"></div>
+        </div>
+      </section>
+
+      <!-- error -->
+      <section class="panel" id="error-panel" aria-labelledby="error-title" hidden>
+        <div class="panel-head"><h2 id="error-title">Run failed</h2></div>
+        <div class="panel-body"><div class="note err" id="error-body"></div></div>
+      </section>
+
+      <!-- empty state -->
+      <section class="panel" id="empty-panel" aria-labelledby="empty-title">
+        <div class="empty">
+          <h3 id="empty-title">No run selected yet</h3>
+          <p>Start a run above to see the plan. You will get recommendations first, and training begins only after you authorize specific pipelines.</p>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast" role="status" hidden></div>
+<div class="visually-hidden-live" id="live" aria-live="polite"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  var TERMINAL = ["complete", "failed", "cancelled"];
+  var STAGES = [
+    "created", "profiling", "understanding", "planning", "awaiting_approval",
+    "executing", "evaluating", "comparing", "selecting", "packaging",
+    "complete", "failed", "cancelled", "message"
+  ];
+  var STAGE_LABEL = {
+    created: "Queued", profiling: "Profiling dataset", understanding: "Reading the problem",
+    planning: "Planning experiments", awaiting_approval: "Waiting for your authorization",
+    executing: "Training pipelines", evaluating: "Evaluating on validation",
+    comparing: "Comparing candidates", selecting: "Selecting the best model",
+    packaging: "Packaging artifacts", complete: "Complete", failed: "Failed",
+    cancelled: "Cancelled", message: "Working"
+  };
+
+  var el = function (id) { return document.getElementById(id); };
+  var state = {
+    runs: [], activeRunId: null, run: null, recs: null,
+    selection: new Set(), source: null, catalog: null, uploadedDatasetId: null,
+    poll: null, es: null, seen: 0
+  };
+
+  // ------------------------------------------------------------------ utils
+  function esc(value) {
+    return String(value == null ? "" : value).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function num(v, digits) {
+    if (v === null || v === undefined || Number.isNaN(v)) return "<span class=\"muted\">-</span>";
+    return Number(v).toFixed(digits === undefined ? 4 : digits);
+  }
+  function kb(bytes) {
+    if (!bytes) return "-";
+    return (bytes / 1024).toFixed(1);
+  }
+  function clock(iso) {
+    if (!iso) return "";
+    var d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return "";
+    return d.toTimeString().slice(0, 8);
+  }
+  function stamp(iso) {
+    if (!iso) return "";
+    var d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return iso;
+    return d.toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+  }
+
+  function toast(message, isError) {
+    var node = el("toast");
+    node.textContent = message;
+    node.className = "toast" + (isError ? " err" : "");
+    node.hidden = false;
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function () { node.hidden = true; }, isError ? 9000 : 4500);
+  }
+
+  function announce(message) { el("live").textContent = message; }
+
+  function detailOf(payload, fallback) {
+    if (!payload) return fallback;
+    var d = payload.detail;
+    if (typeof d === "string") return d;
+    if (d && typeof d === "object") return d.message || d.error || JSON.stringify(d);
+    return fallback;
+  }
+
+  function api(path, options) {
+    var opts = options || {};
+    if (opts.body !== undefined && !(opts.body instanceof FormData)) {
+      opts.headers = Object.assign({ "Content-Type": "application/json" }, opts.headers || {});
+      opts.body = JSON.stringify(opts.body);
+    }
+    return fetch(path, opts).then(function (res) {
+      var isJson = (res.headers.get("content-type") || "").indexOf("json") !== -1;
+      return (isJson ? res.json().catch(function () { return null; }) : res.text())
+        .then(function (body) {
+          if (!res.ok) {
+            var err = new Error(detailOf(body, "Request failed with status " + res.status));
+            err.status = res.status;
+            err.body = body;
+            throw err;
+          }
+          return body;
+        });
+    });
+  }
+
+  // ------------------------------------------------------------------ chrome
+  function statusClass(status) {
+    if (status === "complete") return "ok";
+    if (status === "failed") return "err";
+    if (status === "cancelled") return "warn";
+    if (status === "awaiting_approval") return "warn";
+    return "run";
+  }
+
+  function stepIndex(status) {
+    if (status === "complete") return 5;
+    if (status === "packaging") return 4;
+    if (status === "executing" || status === "evaluating" || status === "comparing" || status === "selecting") return 3;
+    if (status === "awaiting_approval") return 2;
+    return 1;
+  }
+
+  function renderSteps(status) {
+    var current = stepIndex(status);
+    var isFailed = status === "failed" || status === "cancelled";
+    Array.prototype.forEach.call(el("steps").children, function (li, i) {
+      var s = "todo";
+      if (isFailed && i + 1 === current) s = "failed";
+      else if (i + 1 < current) s = "done";
+      else if (i + 1 === current) s = "current";
+      li.dataset.state = s;
+      if (s === "current") li.setAttribute("aria-current", "step");
+      else li.removeAttribute("aria-current");
+    });
+  }
+
+  function renderHealth() {
+    return api("/health").then(function (h) {
+      el("health-dot").className = "dot ok";
+      el("health-text").textContent = "Service ok";
+      el("health").title = h.runs + " run(s), " + h.datasets + " dataset(s) on the server";
+    }).catch(function () {
+      el("health-dot").className = "dot err";
+      el("health-text").textContent = "Service unreachable";
+    });
+  }
+
+  function renderRail() {
+    var list = el("rail-list");
+    if (!state.runs.length) {
+      list.innerHTML = "<li><div class=\"empty\" style=\"padding:20px 12px\"><p>No runs yet. Start one to see a plan.</p></div></li>";
+      return;
+    }
+    list.innerHTML = state.runs.map(function (r, i) {
+      var active = r.run_id === state.activeRunId;
+      var meta = r.best_model ? (r.best_model + " | " + (r.validation_score == null ? "no score" : Number(r.validation_score).toFixed(3)))
+                              : (r.task_type || "planning") + " | " + r.status.replace(/_/g, " ");
+      return "<li class=\"enter\" style=\"animation-delay:" + Math.min(i * 20, 200) + "ms\">" +
+        "<button type=\"button\" class=\"run-row\" data-run=\"" + esc(r.run_id) + "\" aria-current=\"" + (active ? "true" : "false") + "\">" +
+          "<span class=\"dot " + statusClass(r.status) + "\" aria-hidden=\"true\"></span>" +
+          "<span class=\"rname\">" + esc(r.dataset_name || r.run_id) + "</span>" +
+          "<span class=\"rmeta\">" + esc(meta) + " | " + esc(stamp(r.created_at)) + "</span>" +
+          "<span class=\"sr-only\">Status: " + esc(r.status.replace(/_/g, " ")) + "</span>" +
+        "</button></li>";
+    }).join("");
+  }
+
+  function loadRuns() {
+    return api("/runs").then(function (runs) {
+      state.runs = (runs || []).slice().sort(function (a, b) {
+        return String(b.created_at).localeCompare(String(a.created_at));
+      });
+      renderRail();
+    });
+  }
+
+  function loadCatalog() {
+    return api("/models").then(function (catalog) {
+      state.catalog = catalog;
+    }).catch(function () {
+      state.catalog = null;
+    });
+  }
+
+  function taskRunnable(taskType) {
+    if (!state.catalog || !taskType) return true;
+    return (state.catalog.runnable_tasks || []).indexOf(taskType) !== -1;
+  }
+
+  function loadSources() {
+    return api("/datasets/sources").then(function (sources) {
+      state.source = sources || [];
+      el("f-source").innerHTML = state.source.map(function (s) {
+        var suffix = taskRunnable(s.task_type) ? "" : " - no enabled model";
+        return "<option value=\"" + esc(s.name) + "\">" + esc(s.name) +
+          (s.task_type ? " (" + esc(s.task_type.replace(/_/g, " ")) + ")" : "") + esc(suffix) + "</option>";
+      }).join("");
+      var preferred = state.source.find(function (s) { return s.name === "churn_demo"; });
+      if (preferred) el("f-source").value = preferred.name;
+      applySourceDefaults();
+    }).catch(function () {
+      el("f-source").innerHTML = "<option value=\"iris\">iris</option>";
+      applySourceDefaults();
+    });
+  }
+
+  // A dataset source declares its own task contract. Following it stops a supervised
+  // reading of the problem statement from being applied to an unsupervised dataset,
+  // which is exactly the mismatch that fails later for want of a target column.
+  function applySourceDefaults() {
+    var src = (state.source || []).find(function (s) { return s.name === el("f-source").value; });
+    var taskSelect = el("f-task");
+    var target = el("f-target");
+    var metric = el("f-metric");
+    var note = el("contract-note");
+
+    if (!src) {
+      target.disabled = false;
+      target.value = "";
+      target.placeholder = "leave blank to infer";
+      el("target-hint").textContent = "Required for supervised tasks. Leave blank to infer.";
+      el("source-hint").textContent = "Bundled and synthetic sources, no network needed.";
+      note.hidden = true;
+      el("plan-btn").disabled = false;
+      return;
+    }
+
+    taskSelect.value = src.task_type || "";
+    var supervised = src.task_type === "classification" || src.task_type === "regression";
+
+    if (supervised && src.target) {
+      target.disabled = false;
+      target.value = src.target;
+      target.placeholder = "leave blank to infer";
+      el("target-hint").textContent = "Declared by " + src.name + ". Change it to override.";
+    } else {
+      target.value = "";
+      target.disabled = true;
+      target.placeholder = "not applicable";
+      el("target-hint").textContent = "This dataset has no target column: it is an unsupervised task.";
+    }
+    metric.value = src.metric || "";
+
+    var runnable = taskRunnable(src.task_type);
+    if (runnable) {
+      el("source-hint").textContent = src.description
+        ? src.description
+        : src.task_type + (src.requires_network ? " | needs network access" : "");
+      note.hidden = true;
+    } else {
+      el("source-hint").textContent = src.task_type.replace(/_/g, " ") + " | no enabled model in this configuration";
+      note.innerHTML = "<div><strong>This dataset cannot run here yet.</strong><br>" +
+        esc(src.name) + " is a " + esc(src.task_type.replace(/_/g, " ")) + " task, but the enabled models only cover " +
+        esc((state.catalog.runnable_tasks || []).join(", ")) +
+        ". Add a " + esc(src.task_type) + " model to <span class=\"mono\">models.enabled</span> in " +
+        "<span class=\"mono\">configs/default.yaml</span> and restart the service.</div>";
+      note.hidden = false;
+    }
+    el("plan-btn").disabled = !runnable;
+  }
+
+  // ------------------------------------------------------------------ panels
+  function show(id, visible) { el(id).hidden = !visible; }
+
+  function resetPanels() {
+    ["run-panel", "progress-panel", "gate-panel", "results-panel", "artifacts-panel", "error-panel"]
+      .forEach(function (id) { show(id, false); });
+  }
+
+  function renderRunChips(run) {
+    var chips = [];
+    if (run.task) {
+      chips.push("<span class=\"chip\">Task <b>" + esc(String(run.task.task_type).replace(/_/g, " ")) + "</b></span>");
+      if (run.task.metric) chips.push("<span class=\"chip\">Metric <b>" + esc(run.task.metric) + "</b></span>");
+      if (run.task.target) chips.push("<span class=\"chip\">Target <b>" + esc(run.task.target) + "</b></span>");
+      if (run.task.confidence != null) chips.push("<span class=\"chip\">Confidence <b>" + num(run.task.confidence, 2) + "</b></span>");
+    }
+    var p = run.dataset_profile;
+    if (p) {
+      chips.push("<span class=\"chip\">Rows <b>" + esc(p.n_rows) + "</b></span>");
+      chips.push("<span class=\"chip\">Columns <b>" + esc(p.n_cols) + "</b></span>");
+      if (p.missing_ratio) chips.push("<span class=\"chip\">Missing <b>" + (p.missing_ratio * 100).toFixed(1) + "%</b></span>");
+      var cd = p.class_distribution;
+      if (cd && cd.minority_ratio != null) {
+        chips.push("<span class=\"chip" + (cd.is_imbalanced ? " warn" : "") + "\">Minority class <b>" +
+          (cd.minority_ratio * 100).toFixed(1) + "%</b></span>");
+      }
+    }
+    if (run.dataset_name) chips.unshift("<span class=\"chip\">Dataset <b>" + esc(run.dataset_name) + "</b></span>");
+    el("run-chips").innerHTML = chips.join("");
+  }
+
+  function renderRun(run) {
+    state.run = run;
+    show("empty-panel", false);
+    show("run-panel", true);
+    el("run-id-text").textContent = run.run_id;
+    el("run-status-text").textContent = String(run.status).replace(/_/g, " ");
+    el("run-dot").className = "dot " + statusClass(run.status);
+    var terminal = TERMINAL.indexOf(run.status) !== -1;
+    el("cancel-btn").disabled = terminal;
+    renderSteps(run.status);
+    renderRunChips(run);
+    renderError(run);
+    renderResults(run);
+    renderArtifacts(run);
+  }
+
+  function renderError(run) {
+    var failed = run.status === "failed" || run.status === "cancelled";
+    show("error-panel", failed);
+    if (!failed) return;
+    el("error-panel").querySelector("h2").textContent = run.status === "cancelled" ? "Run cancelled" : "Run failed";
+    el("error-body").innerHTML = "<div><strong>" + esc(run.status === "cancelled" ? "Cancelled" : "Something stopped this run") +
+      "</strong><br>" + esc(run.error || "No detail was recorded. Check the progress log above, then retry with a different selection.") + "</div>";
+  }
+
+  function renderResults(run) {
+    var results = run.results || [];
+    if (!results.length) { show("results-panel", false); return; }
+    show("results-panel", true);
+
+    var metric = (run.task && run.task.metric) || "score";
+    var best = run.best_model ? run.best_model.model : null;
+    el("th-val").textContent = "Validation " + metric;
+    el("th-test").textContent = "Test " + metric;
+    el("results-best").innerHTML = best
+      ? "Best: <b>" + esc(best) + "</b>" + (run.best_model.validation_score == null ? "" : " " + num(run.best_model.validation_score, 4))
+      : "";
+    el("results-caption").textContent = "Selection used validation only. The test column is the held-out split, reported once for transparency.";
+
+    el("results-body").innerHTML = results.map(function (r) {
+      var model = (r.experiment && r.experiment.model) || "unknown";
+      var isBest = model === best;
+      var warned = (r.warnings || []).length;
+      return "<tr data-best=\"" + (isBest ? "true" : "false") + "\">" +
+        "<td><span class=\"model-name\">" + esc(model) + "</span>" +
+          (isBest ? "<span class=\"chip accent\" style=\"margin-inline-start:8px\">selected</span>" : "") +
+          (warned ? "<div class=\"degraded\">" + warned + " warning(s)</div>" : "") + "</td>" +
+        "<td class=\"num\">" + num(r.validation_score, 4) + "</td>" +
+        "<td class=\"num\">" + num(r.test_score, 4) + "</td>" +
+        "<td class=\"num\">" + num(r.training_time_s, 2) + "</td>" +
+        "<td class=\"num\">" + num(r.peak_memory_mb, 0) + "</td>" +
+        "<td class=\"num\">" + esc(kb(r.model_size_bytes)) + "</td>" +
+        "<td>" + esc(String(r.status)) + (r.error ? "<div class=\"degraded\">" + esc(r.error) + "</div>" : "") + "</td>" +
+      "</tr>";
+    }).join("");
+
+    var notes = [];
+    if (run.best_model && run.best_model.reason) {
+      notes.push("<div class=\"note\"><div><strong>Why this model</strong><br>" + esc(run.best_model.reason) + "</div></div>");
+    }
+    var stats = run.search_statistics;
+    if (stats) {
+      notes.push("<div class=\"note\"><div><strong>Search</strong><br>" +
+        esc(stats.n_experiments) + " experiment(s), " + esc(stats.n_failed || 0) + " failed. " +
+        "Total training " + num(stats.total_training_time_s, 1) + "s. Stopping reason: " + esc(stats.stopping_reason || "n/a") + ".</div></div>");
+    }
+    el("results-notes").innerHTML = notes.join("");
+  }
+
+  function renderArtifacts(run) {
+    var a = run.artifacts || {};
+    var has = a.model_zip || a.results_zip;
+    show("artifacts-panel", !!has);
+    if (!has) return;
+
+    el("artifacts-verified").innerHTML = a.verified
+      ? "<span class=\"dot ok\" aria-hidden=\"true\"></span>Verified"
+      : "Not verified";
+    el("artifacts-verified").className = "chip " + (a.verified ? "ok" : "");
+
+    var cards = [];
+    if (a.model_zip) {
+      cards.push("<div class=\"artifact\">" +
+        "<span class=\"aname\">Deployable model package</span>" +
+        "<span class=\"ameta\">sha256 " + esc((a.model_zip_sha256 || "").slice(0, 16)) + "...</span>" +
+        "<span class=\"abody\"><a class=\"btn btn-primary\" href=\"/runs/" + esc(run.run_id) + "/artifacts/model.zip\" download>Download model.zip</a></span>" +
+      "</div>");
+    }
+    if (a.results_zip) {
+      cards.push("<div class=\"artifact\">" +
+        "<span class=\"aname\">Results bundle</span>" +
+        "<span class=\"ameta\">sha256 " + esc((a.results_zip_sha256 || "").slice(0, 16)) + "...</span>" +
+        "<span class=\"abody\"><a class=\"btn\" href=\"/runs/" + esc(run.run_id) + "/artifacts/results.zip\" download>Download results.zip</a></span>" +
+      "</div>");
+    }
+    el("artifacts-list").innerHTML = cards.join("");
+  }
+
+  // ------------------------------------------------------------------ progress
+  function setProgress(p, stage) {
+    var pct = Math.max(0, Math.min(1, p || 0));
+    el("progress-fill").style.transform = "scaleX(" + pct + ")";
+    el("progress-meter").setAttribute("aria-valuenow", String(Math.round(pct * 100)));
+    el("progress-pct").textContent = Math.round(pct * 100) + "%";
+    if (stage) el("progress-stage").textContent = STAGE_LABEL[stage] || stage;
+  }
+
+  function appendLog(event) {
+    if (!event || (event.sequence || 0) <= state.seen) return;
+    state.seen = event.sequence || state.seen;
+    var li = document.createElement("li");
+    li.innerHTML = "<span class=\"t\">" + esc(clock(event.timestamp)) + "</span>" +
+      "<span class=\"s-" + esc(event.stage) + "\">" + esc(event.message || event.stage) + "</span>";
+    var log = el("log");
+    log.appendChild(li);
+    while (log.children.length > 300) log.removeChild(log.firstChild);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  function openStream(runId) {
+    closeStream();
+    el("log").innerHTML = "";
+    var es = new EventSource("/runs/" + runId + "/events");
+    state.es = es;
+    STAGES.forEach(function (stage) {
+      es.addEventListener(stage, function (evt) {
+        var payload;
+        try { payload = JSON.parse(evt.data); } catch (e) { return; }
+        appendLog(payload);
+        if (typeof payload.progress === "number") setProgress(payload.progress, payload.stage);
+        if (payload.stage) announce(STAGE_LABEL[payload.stage] || payload.stage);
+        if (TERMINAL.indexOf(payload.stage) !== -1) {
+          closeStream();
+          refreshRun();
+          loadRuns();
+        }
+      });
+    });
+  }
+
+  function closeStream() {
+    if (state.es) { state.es.close(); state.es = null; }
+  }
+
+  function startPolling() {
+    stopPolling();
+    state.poll = setInterval(refreshRun, 2000);
+  }
+  function stopPolling() {
+    if (state.poll) { clearInterval(state.poll); state.poll = null; }
+  }
+
+  // ------------------------------------------------------------------ run view
+  function selectRun(runId) {
+    state.activeRunId = runId;
+    state.recs = null;
+    state.selection = new Set();
+    state.seen = 0;
+    state.justApproved = false;
+    renderRail();
+    refreshRun();
+  }
+
+  function refreshRun() {
+    if (!state.activeRunId) return Promise.resolve();
+    return api("/runs/" + state.activeRunId).then(function (run) {
+      var previous = state.run ? state.run.status : null;
+      renderRun(run);
+      var status = run.status;
+
+      if (TERMINAL.indexOf(status) !== -1) {
+        stopPolling();
+        show("progress-panel", true);
+        setProgress(1, status);
+        closeStream();
+        loadRuns();
+        return;
+      }
+      if (status === "awaiting_approval") {
+        stopPolling();
+        show("progress-panel", true);
+        setProgress(1, status);
+        // Approval was just submitted; execution takes a moment to start. Keep polling
+        // instead of re-rendering the gate the user has already passed.
+        if (state.justApproved) { startPolling(); return; }
+        return loadRecommendations();
+      }
+      state.justApproved = false;
+      show("gate-panel", false);
+      show("progress-panel", true);
+      if (previous !== status) announce(STAGE_LABEL[status] || status);
+      if (!state.es) openStream(state.activeRunId);
+      startPolling();
+    }).catch(function (err) {
+      stopPolling();
+      closeStream();
+      if (err.status === 404) {
+        toast("That run no longer exists on the server.", true);
+        loadRuns();
+      } else {
+        toast(err.message, true);
+      }
+    });
+  }
+
+  function loadRecommendations() {
+    return api("/runs/" + state.activeRunId + "/recommendations").then(function (data) {
+      state.recs = data;
+      renderGate(data);
+    });
+  }
+
+  function renderGate(data) {
+    if (!data) return;
+    show("gate-panel", true);
+    el("gate-planner").innerHTML = "Planner <b>" + esc(data.planner || "unknown") + "</b>";
+    el("gate-sub").textContent = data.requires_user_approval
+      ? "Nothing trains until you authorize. Pick one or more pipelines."
+      : "This plan does not require approval, but you can still pick a subset.";
+
+    var recs = data.recommendations || [];
+    el("rec-caption").textContent = recs.length
+      ? "Select the pipelines you authorize. Nothing is trained until you do."
+      : "No experiments were proposed.";
+
+    el("rec-body").innerHTML = recs.map(function (r) {
+      var checked = state.selection.has(r.rank);
+      return "<tr>" +
+        "<td class=\"sel-cell\"><input type=\"checkbox\" data-rank=\"" + esc(r.rank) + "\" " +
+          (checked ? "checked" : "") + " aria-label=\"Authorize rank " + esc(r.rank) + ", " + esc(r.model) + "\"></td>" +
+        "<td class=\"num\">" + esc(r.rank) + "</td>" +
+        "<td><span class=\"model-name\">" + esc(r.model) + "</span>" +
+          "<div class=\"muted mono\">" + esc(r.feature_selection || "none") + "</div></td>" +
+        "<td>" + esc(r.expected_cost) + "</td>" +
+        "<td class=\"num\">" + num(r.expected_performance, 4) + "</td>" +
+        "<td><span class=\"reason\">" + esc(r.reason || "") + "</span></td>" +
+      "</tr>";
+    }).join("");
+
+    var notes = [];
+    if (data.baseline_expectation) {
+      notes.push("<div class=\"note warn\"><div><strong>Estimates, not measurements.</strong><br>" + esc(data.baseline_expectation) + "</div></div>");
+    }
+    if (data.estimated_runtime_s != null) {
+      notes.push("<div class=\"note\"><div>Approved pipelines will take roughly <strong>" +
+        esc(Math.round(data.estimated_runtime_s)) + "s</strong> of training" +
+        (data.estimated_compute ? " (" + esc(data.estimated_compute) + ")" : "") + ".</div></div>");
+    }
+    (data.notes || []).forEach(function (n) { notes.push("<div class=\"note\"><div>" + esc(n) + "</div></div>"); });
+    el("gate-note").innerHTML = notes.join("");
+    el("gate-note").hidden = !notes.length;
+
+    syncGate();
+  }
+
+  function syncGate() {
+    var n = state.selection.size;
+    var btn = el("approve-btn");
+    btn.textContent = n ? "Authorize " + n + " pipeline" + (n === 1 ? "" : "s") : "Authorize pipelines";
+    btn.disabled = n === 0;
+    el("gate-status").textContent = n === 0
+      ? "Select at least one pipeline to continue."
+      : n + " of " + ((state.recs && state.recs.recommendations) || []).length + " selected.";
+  }
+
+  el("rec-body").addEventListener("change", function (evt) {
+    var cb = evt.target;
+    if (!cb || cb.type !== "checkbox") return;
+    var rank = Number(cb.dataset.rank);
+    if (cb.checked) state.selection.add(rank); else state.selection.delete(rank);
+    syncGate();
+  });
+
+  el("select-all-btn").addEventListener("click", function () {
+    if (!state.recs) return;
+    var recs = state.recs.recommendations || [];
+    var all = state.selection.size === recs.length;
+    state.selection = new Set(all ? [] : recs.map(function (r) { return r.rank; }));
+    renderGate(state.recs);
+  });
+
+  el("approve-btn").addEventListener("click", function () {
+    if (!state.activeRunId || !state.selection.size) return;
+    var btn = el("approve-btn");
+    btn.disabled = true;
+    el("gate-status").textContent = "Starting training";
+    api("/runs/" + state.activeRunId + "/approve", {
+      method: "POST",
+      body: {
+        selection: Array.from(state.selection).sort(function (a, b) { return a - b; }),
+        approved_by: el("f-approver").value || "operator"
+      }
+    }).then(function () {
+      toast("Authorized. Training started on the selected pipelines.");
+      show("gate-panel", false);
+      state.justApproved = true;
+      closeStream();
+      refreshRun();
+      loadRuns();
+    }).catch(function (err) {
+      btn.disabled = false;
+      el("gate-status").textContent = "";
+      toast(err.message, true);
+    });
+  });
+
+  el("cancel-btn").addEventListener("click", function () {
+    if (!state.activeRunId) return;
+    api("/runs/" + state.activeRunId + "/cancel", { method: "POST", body: { reason: "cancelled from the dashboard" } })
+      .then(function () { toast("Cancel requested."); refreshRun(); })
+      .catch(function (err) { toast(err.message, true); });
+  });
+
+  // ------------------------------------------------------------------ create
+  el("run-form").addEventListener("submit", function (evt) {
+    evt.preventDefault();
+    var problem = el("f-problem").value.trim();
+    if (problem.length < 3) {
+      el("f-problem").setAttribute("aria-invalid", "true");
+      el("plan-status").textContent = "Describe the problem in a few words first.";
+      el("f-problem").focus();
+      return;
+    }
+    el("f-problem").removeAttribute("aria-invalid");
+
+    var payload = { problem_statement: problem, use_policy: el("f-policy").value === "true" };
+    if (state.uploadedDatasetId) {
+      payload.dataset_id = state.uploadedDatasetId;
+    } else {
+      payload.source = el("f-source").value;
+    }
+    ["target", "metric", "task_type"].forEach(function (key) {
+      var v = el("f-" + (key === "task_type" ? "task" : key)).value.trim();
+      if (v) payload[key] = v;
+    });
+
+    var btn = el("plan-btn");
+    btn.disabled = true;
+    el("plan-status").textContent = "Planning. Profiling the dataset and proposing experiments.";
+
+    api("/runs", { method: "POST", body: payload }).then(function (run) {
+      el("plan-status").textContent = "";
+      btn.disabled = false;
+      toast("Run created. Nothing will train until you authorize it.");
+      return loadRuns().then(function () { selectRun(run.run_id); });
+    }).catch(function (err) {
+      btn.disabled = false;
+      el("plan-status").textContent = "";
+      toast(err.message, true);
+    });
+  });
+
+  el("f-source").addEventListener("change", applySourceDefaults);
+
+  // An uploaded table has no declared contract, so hand the task back to inference.
+  function resetUploadedContract() {
+    el("f-task").value = "";
+    el("f-target").disabled = false;
+    el("f-target").value = "";
+    el("f-target").placeholder = "leave blank to infer";
+    el("target-hint").textContent = "Required for supervised tasks. Leave blank to infer.";
+  }
+
+  function clearUpload() {
+    state.uploadedDatasetId = null;
+    el("archive-block").hidden = true;
+    el("f-member").innerHTML = "";
+  }
+
+  function renderArchiveMembers(result) {
+    var select = el("f-member");
+    select.innerHTML = result.datasets.map(function (d) {
+      return "<option value=\"" + esc(d.dataset_id) + "\">" + esc(d.name) +
+        " (" + esc(d.n_rows) + " rows x " + esc(d.n_cols) + " columns)</option>";
+    }).join("");
+    // A Kaggle archive always carries the training table under a recognisable name.
+    var preferred = result.datasets.find(function (d) { return /^train/i.test(d.name); });
+    select.value = (preferred || result.datasets[0]).dataset_id;
+    state.uploadedDatasetId = select.value;
+    el("archive-block").hidden = false;
+
+    var skipped = result.rejected.length
+      ? " Skipped " + result.rejected.length + ": " +
+        result.rejected.map(function (r) { return r.name + " (" + r.reason + ")"; }).join("; ")
+      : "";
+    el("archive-hint").textContent = result.datasets.length + " table(s) unpacked from " +
+      result.archive_name + ". Pick the one holding the training rows." + skipped;
+  }
+
+  el("f-member").addEventListener("change", function () {
+    state.uploadedDatasetId = el("f-member").value;
+  });
+
+  el("f-upload").addEventListener("change", function (evt) {
+    var file = evt.target.files && evt.target.files[0];
+    if (!file) { clearUpload(); return; }
+    var form = new FormData();
+    form.append("file", file);
+    var isArchive = /\.zip$/i.test(file.name);
+    clearUpload();
+    el("plan-status").textContent = isArchive
+      ? "Unpacking and validating " + file.name
+      : "Uploading and validating " + file.name;
+
+    var request = isArchive
+      ? api("/datasets/archive", { method: "POST", body: form }).then(function (result) {
+          renderArchiveMembers(result);
+          resetUploadedContract();
+          var chosen = el("f-member");
+          el("source-hint").textContent = "Using " + chosen.options[chosen.selectedIndex].text + " from " + result.archive_name + ".";
+          el("plan-status").textContent = result.datasets.length + " table(s) ready from " + result.archive_name + ".";
+          if (result.rejected.length) toast("Skipped " + result.rejected.length + " file(s) in the archive: " + result.rejected[0].reason, false);
+          renderHealth();
+        })
+      : api("/datasets", { method: "POST", body: form }).then(function (ds) {
+          state.uploadedDatasetId = ds.dataset_id;
+          resetUploadedContract();
+          el("source-hint").textContent = "Using the uploaded file " + ds.name + ".";
+          el("plan-status").textContent = ds.name + " ready: " + ds.n_rows + " rows x " + ds.n_cols + " columns.";
+          if (ds.warnings && ds.warnings.length) toast(ds.warnings[0], false);
+          renderHealth();
+        });
+
+    request.catch(function (err) {
+      clearUpload();
+      evt.target.value = "";
+      el("plan-status").textContent = "";
+      toast("Upload rejected: " + err.message, true);
+    });
+  });
+
+  el("new-run").addEventListener("click", function () {
+    show("setup-panel", true);
+    el("f-problem").focus();
+    el("setup-panel").scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
+  el("refresh-all").addEventListener("click", function () {
+    renderHealth();
+    loadCatalog().then(loadSources);
+    loadRuns().then(function () { if (state.activeRunId) refreshRun(); });
+  });
+
+  el("rail-list").addEventListener("click", function (evt) {
+    var row = evt.target.closest("[data-run]");
+    if (!row) return;
+    closeStream();
+    stopPolling();
+    resetPanels();
+    selectRun(row.dataset.run);
+  });
+
+  // ------------------------------------------------------------------ boot
+  renderHealth();
+  loadCatalog().then(loadSources);
+  loadRuns().then(function () {
+    if (state.runs.length) {
+      var newest = state.runs[0];
+      selectRun(newest.run_id);
+    }
+  });
+  setInterval(renderHealth, 20000);
+})();
+</script>
+</body>
+</html>

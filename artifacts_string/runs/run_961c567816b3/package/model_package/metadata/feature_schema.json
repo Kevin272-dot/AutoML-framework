@@ -1,0 +1,124 @@
+{
+  "schema_version": "1.0.0",
+  "task_type": "classification",
+  "metric": "f1",
+  "target": "churn",
+  "n_features_expected": 9,
+  "excluded_columns": [
+    "name='churn' kind=<ColumnKind.CATEGORICAL: 'categorical'> dtype='str' n_missing=0 missing_ratio=0.0 n_unique=2 cardinality_ratio=0.0006666666666666666 is_constant=False mean=None std=None minimum=None maximum=None median=None skew=None n_outliers=0 top_values=[{'value': 'no', 'count': 2197, 'ratio': 0.7323333333333333}, {'value': 'yes', 'count': 803, 'ratio': 0.26766666666666666}] is_high_cardinality=False"
+  ],
+  "output": {
+    "type": "label",
+    "column": "prediction",
+    "classes": [
+      "no",
+      "yes"
+    ],
+    "probabilities": "predict_proba() returns one column per class"
+  },
+  "features": [
+    {
+      "name": "contract_type",
+      "kind": "categorical",
+      "dtype": "category",
+      "required": true,
+      "nullable": false,
+      "n_unique": 3,
+      "example_values": [
+        "month-to-month",
+        "one_year",
+        "two_year"
+      ],
+      "notes": "any value not seen during training is routed to the encoder's infrequent category"
+    },
+    {
+      "name": "payment_method",
+      "kind": "categorical",
+      "dtype": "category",
+      "required": true,
+      "nullable": false,
+      "n_unique": 4,
+      "example_values": [
+        "bank_transfer",
+        "card",
+        "mailed_check",
+        "electronic_check"
+      ],
+      "notes": "any value not seen during training is routed to the encoder's infrequent category"
+    },
+    {
+      "name": "internet_service",
+      "kind": "categorical",
+      "dtype": "category",
+      "required": true,
+      "nullable": false,
+      "n_unique": 3,
+      "example_values": [
+        "fiber",
+        "dsl",
+        "none"
+      ],
+      "notes": "any value not seen during training is routed to the encoder's infrequent category"
+    },
+    {
+      "name": "tenure_months",
+      "kind": "numeric",
+      "dtype": "float64",
+      "required": true,
+      "nullable": false,
+      "n_unique": 72,
+      "example_values": [],
+      "notes": ""
+    },
+    {
+      "name": "monthly_charges",
+      "kind": "numeric",
+      "dtype": "float64",
+      "required": true,
+      "nullable": true,
+      "n_unique": 2354,
+      "example_values": [],
+      "notes": ""
+    },
+    {
+      "name": "total_charges",
+      "kind": "numeric",
+      "dtype": "float64",
+      "required": true,
+      "nullable": true,
+      "n_unique": 2659,
+      "example_values": [],
+      "notes": ""
+    },
+    {
+      "name": "support_calls",
+      "kind": "numeric",
+      "dtype": "int64",
+      "required": true,
+      "nullable": false,
+      "n_unique": 8,
+      "example_values": [],
+      "notes": ""
+    },
+    {
+      "name": "age",
+      "kind": "numeric",
+      "dtype": "float64",
+      "required": true,
+      "nullable": true,
+      "n_unique": 72,
+      "example_values": [],
+      "notes": ""
+    },
+    {
+      "name": "signup_date",
+      "kind": "datetime",
+      "dtype": "datetime64[us]",
+      "required": true,
+      "nullable": false,
+      "n_unique": 1651,
+      "example_values": [],
+      "notes": ""
+    }
+  ]
+}

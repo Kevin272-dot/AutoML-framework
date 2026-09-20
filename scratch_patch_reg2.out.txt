@@ -1,0 +1,1 @@
+the class-weighted block is already after its dependencies

@@ -1,0 +1,88 @@
+{
+  "model": "XGBoost",
+  "model_key": "xgboost",
+  "task": "classification",
+  "learning_type": "supervised",
+  "framework": "xgboost",
+  "objective": "churn prediction",
+  "primary_metric": "f1",
+  "metric_direction": "maximize",
+  "validation_score": 0.456973293768546,
+  "test_score": 0.47126436781609193,
+  "validation_metrics": {
+    "accuracy": 0.695,
+    "balanced_accuracy": 0.6263741705457067,
+    "precision": 0.4375,
+    "recall": 0.4782608695652174,
+    "f1": 0.456973293768546,
+    "matthews": 0.24597685800019337,
+    "roc_auc": 0.7320137523168126,
+    "average_precision": 0.4968961047150561,
+    "pr_auc": 0.4968961047150561,
+    "log_loss": 0.6119568943977356
+  },
+  "test_metrics": {
+    "accuracy": 0.6933333333333334,
+    "balanced_accuracy": 0.635068407872211,
+    "precision": 0.4385026737967914,
+    "recall": 0.5093167701863354,
+    "f1": 0.47126436781609193,
+    "matthews": 0.25842417906349185,
+    "roc_auc": 0.7152761074718093,
+    "average_precision": 0.47151070997359557,
+    "pr_auc": 0.47151070997359557,
+    "log_loss": 0.6307039260864258
+  },
+  "features": 18,
+  "raw_features": 9,
+  "preprocessing": [
+    "clip_outliers",
+    "datetime_features",
+    "encode_categorical",
+    "impute_categorical",
+    "impute_numeric",
+    "log_transform",
+    "missing_indicator",
+    "scale_robust"
+  ],
+  "feature_selection": "mutual_info",
+  "hyperparameters": {
+    "n_estimators": 500,
+    "learning_rate": 0.05,
+    "max_depth": 6,
+    "subsample": 0.9,
+    "colsample_bytree": 0.8,
+    "scale_pos_weight": 4.0
+  },
+  "preset": {
+    "index": 4,
+    "name": "class_balanced"
+  },
+  "training_timestamp": "2026-09-19T08:31:49+00:00",
+  "run_id": "run_961c567816b3",
+  "dataset": {
+    "name": "churn_strings.csv",
+    "sha256": ""
+  },
+  "resource_usage": {
+    "training_time_s": 5.5065,
+    "peak_memory_mb": 883.59
+  },
+  "n_parameters": 1,
+  "artifacts": {
+    "model": "model/model.joblib",
+    "preprocessor": "preprocessing/preprocessor.joblib"
+  },
+  "library_versions": {
+    "numpy": "2.4.6",
+    "pandas": "3.0.3",
+    "scikit-learn": "1.9.0",
+    "joblib": "1.5.3",
+    "xgboost": "3.3.0"
+  },
+  "excluded_raw_columns": [],
+  "label_mapping": {
+    "0": "no",
+    "1": "yes"
+  }
+}

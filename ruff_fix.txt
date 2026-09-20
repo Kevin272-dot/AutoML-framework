@@ -1,0 +1,890 @@
+F841 Local variable `device` is assigned to but never used
+   --> rl_automl\agent\actor.py:113:9
+    |
+111 |         logits = self.forward(state)
+112 |         batch_size = state.shape[0]
+113 |         device = state.device
+    |         ^^^^^^
+114 |
+115 |         model_dist = Categorical(
+    |
+help: Remove assignment to unused variable `device`
+
+F841 Local variable `preprocessing_dist` is assigned to but never used
+   --> rl_automl\agent\actor.py:122:9
+    |
+120 |         preprocessing_mask = masks.preprocessing_for(model)
+121 |         preprocessing_logits = masked_logits(logits[1], preprocessing_mask)
+122 |         preprocessing_dist = Categorical(logits=preprocessing_logits)
+    |         ^^^^^^^^^^^^^^^^^^
+123 |         # The multi-binary head samples each toggle independently; a Bernoulli per toggle
+124 |         # is the right factorisation and keeps the masks per-toggle.
+    |
+help: Remove assignment to unused variable `preprocessing_dist`
+
+E501 Line too long (102 > 100)
+   --> rl_automl\agent\rollout_buffer.py:201:101
+    |
+199 |         self.states[index] = state
+200 |         self.model[index] = int(action[0])
+201 |         self.preprocessing[index] = np.asarray(action[1 : 1 + self.n_preprocessing], dtype=np.float32)
+    |                                                                                                     ^^
+202 |         self.preset[index] = int(action[1 + self.n_preprocessing])
+203 |         self.feature_selection[index] = int(action[2 + self.n_preprocessing])
+    |
+
+E501 Line too long (102 > 100)
+   --> rl_automl\agent\rollout_buffer.py:313:101
+    |
+311 |             states=states,
+312 |             actions=actions,
+313 |             log_probs=torch.as_tensor(self.log_probs[index], dtype=torch.float32, device=self.device),
+    |                                                                                                     ^^
+314 |             values=torch.as_tensor(self.values[index], dtype=torch.float32, device=self.device),
+315 |             advantages=torch.as_tensor(
+    |
+
+SIM105 Use `contextlib.suppress(Exception)` instead of `try`-`except`-`pass`
+  --> rl_automl\core\seeding.py:37:13
+   |
+35 |               torch.backends.cudnn.benchmark = False
+36 |               # Best effort: some ops have no deterministic kernel and will warn.
+37 | /             try:
+38 | |                 torch.use_deterministic_algorithms(True, warn_only=True)
+39 | |             except Exception:  # pragma: no cover - torch version dependent
+40 | |                 pass
+   | |____________________^
+41 |       except ImportError:  # pragma: no cover - torch not installed
+42 |           pass
+   |
+help: Replace `try`-`except`-`pass` with `with contextlib.suppress(Exception): ...`
+
+E501 Line too long (101 > 100)
+  --> rl_automl\core\vocabulary.py:41:101
+   |
+40 | PREPROCESSING_OPTIONS: tuple[str, ...] = tuple(option.value for option in PreprocessingOption)
+41 | FEATURE_SELECTION_OPTIONS: tuple[str, ...] = tuple(option.value for option in FeatureSelectionOption)
+   |                                                                                                     ^
+42 |
+43 | #: Options that address missing values. A model that cannot tolerate NaN should be
+   |
+
+E501 Line too long (101 > 100)
+   --> rl_automl\dataset\loaders.py:545:101
+    |
+544 | OPENML_IDS: dict[str, dict[str, Any]] = {
+545 |     "openml_titanic": {"data_id": 40945, "task_type": TaskType.CLASSIFICATION, "target": "survived"},
+    |                                                                                                     ^
+546 |     "openml_credit_g": {"data_id": 31, "task_type": TaskType.CLASSIFICATION, "target": "class"},
+547 |     "openml_diabetes_130": {"data_id": 37, "task_type": TaskType.CLASSIFICATION, "target": "class"},
+    |
+
+E501 Line too long (112 > 100)
+   --> rl_automl\dataset\loaders.py:607:101
+    |
+607 | def get_source(name: str, *, allow_network: bool = False, cache_dir: str | Path | None = None) -> DatasetSource:
+    |                                                                                                     ^^^^^^^^^^^^
+608 |     """Resolve a source by name across all tiers."""
+609 |     if name in BUNDLED_SOURCES:
+    |
+
+E501 Line too long (101 > 100)
+  --> rl_automl\dataset\profiler.py:59:101
+   |
+57 |         warnings_found: list[str] = []
+58 |
+59 |         feature_frame = frame.drop(columns=[target]) if target and target in frame.columns else frame
+   |                                                                                                     ^
+60 |
+61 |         kinds: dict[str, ColumnKind] = {}
+   |
+
+F841 Local variable `mean_cardinality_ratio` is assigned to but never used
+   --> rl_automl\dataset\profiler.py:117:9
+    |
+115 |         mean_abs_skew = float(np.mean(skews)) if skews else 0.0
+116 |
+117 |         mean_cardinality_ratio = (
+    |         ^^^^^^^^^^^^^^^^^^^^^^
+118 |             float(np.mean([cardinality[c] / n_rows for c in feature_frame.columns])) if n_cols else 0.0
+119 |         )
+    |
+help: Remove assignment to unused variable `mean_cardinality_ratio`
+
+E501 Line too long (103 > 100)
+   --> rl_automl\dataset\profiler.py:118:101
+    |
+117 |         mean_cardinality_ratio = (
+118 |             float(np.mean([cardinality[c] / n_rows for c in feature_frame.columns])) if n_cols else 0.0
+    |                                                                                                     ^^^
+119 |         )
+    |
+
+E501 Line too long (107 > 100)
+   --> rl_automl\dataset\validation.py:169:101
+    |
+167 |     # -- reading -----------------------------------------------------------------
+168 |
+169 |     def read(self, path: str | Path, filename: str | None = None) -> tuple[pd.DataFrame, ValidationReport]:
+    |                                                                                                     ^^^^^^^
+170 |         """Validate, read and sanitise a dataset. Returns the frame and the audit report."""
+171 |         resolved = Path(path)
+    |
+
+E501 Line too long (104 > 100)
+   --> rl_automl\dataset\validation.py:206:101
+    |
+204 |         logger.info(
+205 |             "dataset validated",
+206 |             extra={"context": {"name": display_name, **{"rows": report.n_rows, "cols": report.n_cols}}},
+    |                                                                                                     ^^^^
+207 |         )
+208 |         return frame, report
+    |
+
+SIM103 Return the negated condition directly
+   --> rl_automl\environment\action_space.py:258:9
+    |
+256 |           if strategy in SUPERVISED_ONLY_FEATURE_SELECTION and not self.task_type.is_supervised:
+257 |               return False
+258 | /         if (
+259 | |             strategy == FeatureSelectionOption.PCA.value
+260 | |             and self.task_type is TaskType.DIMENSIONALITY_REDUCTION
+261 | |         ):
+262 | |             # PCA is the model for this task; using it again as a stage is redundant.
+263 | |             return False
+264 | |         return True
+    | |___________________^
+265 |
+266 |       # -- decoding ----------------------------------------------------------------
+    |
+help: Inline condition
+
+E501 Line too long (101 > 100)
+   --> rl_automl\environment\action_space.py:335:101
+    |
+333 |             if len(present) > 1:
+334 |                 winner = next(option for option in group if option in present)
+335 |                 selected = [option for option in selected if option not in group or option == winner]
+    |                                                                                                     ^
+336 |
+337 |         # Preserve the canonical order so that signatures and de-duplication are stable.
+    |
+
+E501 Line too long (101 > 100)
+   --> rl_automl\environment\base.py:125:101
+    |
+123 |     @property
+124 |     def best_score(self) -> float | None:
+125 |         scores = [entry.oriented_score for entry in self.history if entry.oriented_score is not None]
+    |                                                                                                     ^
+126 |         return max(scores) if scores else None
+    |
+
+E501 Line too long (103 > 100)
+   --> rl_automl\environment\state_encoder.py:210:101
+    |
+209 |         best_relative = (
+210 |             _tanh((progress.best_score or 0.0) / reference) if progress.best_score is not None else 0.0
+    |                                                                                                     ^^^
+211 |         )
+212 |         best_improvement = (
+    |
+
+SIM102 Use a single `if` statement instead of nested `if` statements
+   --> rl_automl\environment\surrogate.py:523:5
+    |
+521 |           else:
+522 |               adjustment -= 0.025
+523 | /     elif family in ("boosting", "bagging", "ensemble"):
+524 | |         if PreprocessingOption.SCALE_STANDARD.value in selected:
+    | |________________________________________________________________^
+525 |               adjustment -= 0.008  # harmless but wasted work for trees
+    |
+help: Combine `if` statements using `and`
+
+E501 Line too long (111 > 100)
+  --> rl_automl\execution\comparison.py:54:101
+   |
+52 |         rows = [self._row(result) for result in results]
+53 |
+54 |         successful = [result for result in results if result.succeeded and result.validation_score is not None]
+   |                                                                                                     ^^^^^^^^^^^
+55 |         summary = ComparisonSummary(
+56 |             rows=rows,
+   |
+
+E501 Line too long (103 > 100)
+   --> rl_automl\execution\comparison.py:108:101
+    |
+106 |         has_test = any(result.test_score is not None for result in results)
+107 |         metric_header = self.metric
+108 |         header = f"{'model':<22} {metric_header:>10} {'train(s)':>10} {'mem(MB)':>10} {'size(KB)':>10}"
+    |                                                                                                     ^^^
+109 |         if has_test:
+110 |             header += f" {'test ' + metric_header:>14}"
+    |
+
+E501 Line too long (104 > 100)
+   --> rl_automl\execution\comparison.py:172:101
+    |
+170 |                 result for result in successful if result.experiment.model == summary.fastest
+171 |             )
+172 |             delta = _score_delta(best.validation_score, fastest_result.validation_score, self.direction)
+    |                                                                                                     ^^^^
+173 |             notes.append(
+174 |                 f"{summary.fastest} trains fastest ({fastest_result.training_time_s:.2f}s) with a "
+    |
+
+E501 Line too long (111 > 100)
+   --> rl_automl\execution\comparison.py:196:101
+    |
+194 |         pareto = compute_pareto(results, self.direction).frontier
+195 |
+196 |         successful = [result for result in results if result.succeeded and result.validation_score is not None]
+    |                                                                                                     ^^^^^^^^^^^
+197 |         if not successful:
+198 |             logger.warning("no experiment succeeded; no model can be selected")
+    |
+
+E501 Line too long (102 > 100)
+  --> rl_automl\execution\evaluator.py:53:101
+   |
+51 |         self.task = task
+52 |         self.task_type = task.task_type
+53 |         self.primary_metric = normalise_metric_name(task.metric or primary_metric_for(self.task_type))
+   |                                                                                                     ^^
+54 |         self.direction = task.metric_direction or direction_for(self.primary_metric)
+55 |         self.class_labels = class_labels
+   |
+
+E501 Line too long (105 > 100)
+   --> rl_automl\execution\evaluator.py:260:101
+    |
+258 |             record(
+259 |                 "mape",
+260 |                 lambda: float(np.mean(np.abs((y_true[non_zero] - y_pred[non_zero]) / y_true[non_zero]))),
+    |                                                                                                     ^^^^^
+261 |             )
+262 |         else:
+    |
+
+E501 Line too long (110 > 100)
+   --> rl_automl\execution\executor.py:220:101
+    |
+218 |         result = ExperimentResult(
+219 |             experiment=experiment,
+220 |             primary_metric=normalise_metric_name(self.task.metric or primary_metric_for(self.task.task_type)),
+    |                                                                                                     ^^^^^^^^^^
+221 |             metric_direction=self.task.metric_direction or direction_for(self.task.metric),
+222 |             started_at=started_at,
+    |
+
+E501 Line too long (101 > 100)
+   --> rl_automl\execution\executor.py:239:101
+    |
+237 |             )
+238 |
+239 |         if not spec.fit_requires_target and experiment.feature_selection in ("kbest", "mutual_info"):
+    |                                                                                                     ^
+240 |             result.warnings.append(
+241 |                 f"feature selection '{experiment.feature_selection}' needs a target and was "
+    |
+
+E501 Line too long (111 > 100)
+   --> rl_automl\execution\executor.py:505:101
+    |
+503 |         if truth is None and self.task.target and self.splits.target_for(which) is not None:
+504 |             truth = self.splits.target_for(which)
+505 |         return self._evaluator.evaluate(X=trained.preprocessor.transform(X), labels=truth, model=trained.model)
+    |                                                                                                     ^^^^^^^^^^^
+506 |
+507 |     def _evaluate_dimred(self, trained: TrainedModel, which: str) -> EvaluationResult:
+    |
+
+E501 Line too long (105 > 100)
+   --> rl_automl\execution\preprocessing.py:217:101
+    |
+215 |         )
+216 |
+217 |         selection = self._resolve_feature_selection(feature_selection, task_type, output_names, warnings)
+    |                                                                                                     ^^^^^
+218 |         steps: list[tuple[str, Any]] = [("columns", column_transformer)]
+219 |         if selection is not None:
+    |
+
+RUF034 Useless `if`-`else` condition
+   --> rl_automl\execution\preprocessing.py:352:17
+    |
+350 |         if strategy == FeatureSelectionOption.MUTUAL_INFO.value:
+351 |             score_func = (
+352 |                 mutual_info_classif if task_type is TaskType.CLASSIFICATION else mutual_info_classif
+    |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+353 |             )
+354 |             return SelectKBest(score_func=score_func, k=k)
+    |
+
+SIM105 Use `contextlib.suppress(Exception)` instead of `try`-`except`-`pass`
+   --> rl_automl\execution\resource_monitor.py:96:9
+    |
+ 95 |           # Establish a baseline so the first cpu_percent read is meaningful.
+ 96 | /         try:
+ 97 | |             self._process.cpu_percent(interval=None)
+ 98 | |         except Exception:  # pragma: no cover - platform dependent
+ 99 | |             pass
+    | |________________^
+100 |
+101 |       # -- lifecycle ---------------------------------------------------------------
+    |
+help: Replace `try`-`except`-`pass` with `with contextlib.suppress(Exception): ...`
+
+SIM105 Use `contextlib.suppress(Exception)` instead of `try`-`except`-`pass`
+   --> rl_automl\execution\resource_monitor.py:109:9
+    |
+107 |           # wakes, which would otherwise report a peak of 0 MB for a model that clearly
+108 |           # used memory.
+109 | /         try:
+110 | |             self._collect_once()
+111 | |         except Exception:  # pragma: no cover - best effort
+112 | |             pass
+    | |________________^
+113 |           self._thread = threading.Thread(target=self._sample_loop, name="resource-monitor", daemon=True)
+114 |           self._thread.start()
+    |
+help: Replace `try`-`except`-`pass` with `with contextlib.suppress(Exception): ...`
+
+E501 Line too long (103 > 100)
+   --> rl_automl\execution\resource_monitor.py:113:101
+    |
+111 |         except Exception:  # pragma: no cover - best effort
+112 |             pass
+113 |         self._thread = threading.Thread(target=self._sample_loop, name="resource-monitor", daemon=True)
+    |                                                                                                     ^^^
+114 |         self._thread.start()
+115 |         return self
+    |
+
+RUF046 Value being cast to `int` is already an integer
+   --> rl_automl\execution\splits.py:181:14
+    |
+179 |         )
+180 |
+181 |     n_test = int(round(len(all_idx) * config.test_ratio))
+    |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+182 |     n_val = int(round(len(all_idx) * config.val_ratio))
+183 |     n_train = len(all_idx) - n_val - n_test
+    |
+help: Remove unnecessary `int` call
+
+RUF046 Value being cast to `int` is already an integer
+   --> rl_automl\execution\splits.py:182:13
+    |
+181 |     n_test = int(round(len(all_idx) * config.test_ratio))
+182 |     n_val = int(round(len(all_idx) * config.val_ratio))
+    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+183 |     n_train = len(all_idx) - n_val - n_test
+    |
+help: Remove unnecessary `int` call
+
+RUF046 Value being cast to `int` is already an integer
+   --> rl_automl\execution\splits.py:257:31
+    |
+255 |         share = len(shuffled) / total
+256 |
+257 |         n_test_class = max(1, int(round(n_test * share)))
+    |                               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+258 |         n_val_class = max(1, int(round(n_val * share)))
+259 |         if n_test_class + n_val_class >= len(shuffled):
+    |
+help: Remove unnecessary `int` call
+
+RUF046 Value being cast to `int` is already an integer
+   --> rl_automl\execution\splits.py:258:30
+    |
+257 |         n_test_class = max(1, int(round(n_test * share)))
+258 |         n_val_class = max(1, int(round(n_val * share)))
+    |                              ^^^^^^^^^^^^^^^^^^^^^^^^^
+259 |         if n_test_class + n_val_class >= len(shuffled):
+260 |             n_test_class = max(1, min(n_test_class, len(shuffled) - 2))
+    |
+help: Remove unnecessary `int` call
+
+RUF046 Value being cast to `int` is already an integer
+   --> rl_automl\execution\splits.py:290:14
+    |
+288 |     ordered = ordered[~pd.isna(parsed.to_numpy()[order])]
+289 |
+290 |     n_test = int(round(len(ordered) * config.test_ratio))
+    |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+291 |     n_val = int(round(len(ordered) * config.val_ratio))
+292 |     n_train = len(ordered) - n_val - n_test
+    |
+help: Remove unnecessary `int` call
+
+RUF046 Value being cast to `int` is already an integer
+   --> rl_automl\execution\splits.py:291:13
+    |
+290 |     n_test = int(round(len(ordered) * config.test_ratio))
+291 |     n_val = int(round(len(ordered) * config.val_ratio))
+    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+292 |     n_train = len(ordered) - n_val - n_test
+293 |     if min(n_train, n_val, n_test) < 1:
+    |
+help: Remove unnecessary `int` call
+
+RUF046 Value being cast to `int` is already an integer
+   --> rl_automl\execution\splits.py:333:21
+    |
+331 |     second reserved set has no meaning without labels to score against.
+332 |     """
+333 |     n_eval = max(1, int(round(len(all_idx) * (config.val_ratio + config.test_ratio))))
+    |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+334 |     n_fit = len(all_idx) - n_eval
+335 |     if n_fit < 1:
+    |
+help: Remove unnecessary `int` call
+
+B007 Loop control variable `epoch` not used within loop body
+   --> rl_automl\execution\torch_models.py:161:13
+    |
+159 |         self.loss_curve_: list[float] = []
+160 |
+161 |         for epoch in range(int(self.max_epochs)):
+    |             ^^^^^
+162 |             self.module_.train()
+163 |             permutation = torch.randperm(len(train_idx), generator=generator).to(device)
+    |
+help: Rename unused `epoch` to `_epoch`
+
+RUF046 Value being cast to `int` is already an integer
+   --> rl_automl\execution\torch_models.py:342:24
+    |
+340 |     rng = np.random.default_rng(seed)
+341 |     permutation = rng.permutation(n_rows)
+342 |     n_val = max(1, min(int(round(n_rows * validation_fraction)), n_rows - 1))
+    |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+343 |     return np.sort(permutation[n_val:]), np.sort(permutation[:n_val])
+    |
+help: Remove unnecessary `int` call
+
+E501 Line too long (108 > 100)
+   --> rl_automl\packaging\inference_generator.py:220:101
+    |
+218 |         if extra:
+219 |             warnings.warn(
+220 |                 "ignoring " + str(len(extra)) + " unexpected column(s): " + ", ".join(map(str, extra[:10])),
+    |                                                                                                     ^^^^^^^^
+221 |                 stacklevel=2,
+222 |             )
+    |
+
+E501 Line too long (101 > 100)
+   --> rl_automl\packaging\inference_generator.py:670:101
+    |
+668 |             return "_No metrics were recorded._"
+669 |         rows = "\n".join(
+670 |             f"| {name} | {_format_number(validation.get(name))} | {_format_number(test.get(name))} |"
+    |                                                                                                     ^
+671 |             for name in names
+672 |         )
+    |
+
+E501 Line too long (101 > 100)
+   --> rl_automl\packaging\zip_builder.py:302:101
+    |
+300 |         except zipfile.BadZipFile as exc:
+301 |             return ArchiveVerification(
+302 |                 ok=False, problems=[f"not a readable ZIP archive: {exc}"], sha256=verification.sha256
+    |                                                                                                     ^
+303 |             )
+    |
+
+E501 Line too long (101 > 100)
+   --> rl_automl\packaging\zip_builder.py:388:101
+    |
+386 |             if actual.size != expected.size:
+387 |                 problems.append(
+388 |                     f"the packaged model returned {actual.size} predictions for {expected.size} rows"
+    |                                                                                                     ^
+389 |                 )
+390 |                 return result
+    |
+
+SIM105 Use `contextlib.suppress(TypeError, ValueError)` instead of `try`-`except`-`pass`
+   --> rl_automl\packaging\zip_builder.py:391:13
+    |
+389 |                   )
+390 |                   return result
+391 | /             try:
+392 | |                 actual = actual.astype(expected.dtype)
+393 | |             except (TypeError, ValueError):
+394 | |                 pass
+    | |____________________^
+395 |
+396 |               difference = _prediction_difference(actual, expected, task_type)
+    |
+help: Replace `try`-`except`-`pass` with `with contextlib.suppress(TypeError, ValueError): ...`
+
+E501 Line too long (101 > 100)
+   --> rl_automl\packaging\zip_builder.py:419:101
+    |
+419 | def _prediction_difference(actual: np.ndarray, expected: np.ndarray, task_type: str) -> float | None:
+    |                                                                                                     ^
+420 |     """Zero for identical classes/values; max absolute difference for continuous output.
+    |
+
+RUF046 Value being cast to `int` is already an integer
+   --> rl_automl\search\hyperparameters.py:237:16
+    |
+235 |     value = float(np.clip(value, low, high))
+236 |     if kind == "int":
+237 |         return int(round(value))
+    |                ^^^^^^^^^^^^^^^^^
+238 |     return round(value, 6)
+    |
+help: Remove unnecessary `int` call
+
+E501 Line too long (104 > 100)
+   --> rl_automl\search\model_registry.py:292:101
+    |
+290 |     Preset("fast", {"n_estimators": 200, "max_depth": None, "min_samples_leaf": 1}, CostTier.LOW,
+291 |            "Shallow ensemble, quick baseline"),
+292 |     Preset("balanced", {"n_estimators": 500, "max_depth": None, "min_samples_leaf": 1}, CostTier.MEDIUM,
+    |                                                                                                     ^^^^
+293 |            "Default workhorse configuration"),
+294 |     Preset("regularized", {"n_estimators": 400, "max_depth": 12, "min_samples_leaf": 4}, CostTier.MEDIUM,
+    |
+
+E501 Line too long (105 > 100)
+   --> rl_automl\search\model_registry.py:294:101
+    |
+292 |     Preset("balanced", {"n_estimators": 500, "max_depth": None, "min_samples_leaf": 1}, CostTier.MEDIUM,
+293 |            "Default workhorse configuration"),
+294 |     Preset("regularized", {"n_estimators": 400, "max_depth": 12, "min_samples_leaf": 4}, CostTier.MEDIUM,
+    |                                                                                                     ^^^^^
+295 |            "Depth-limited to reduce variance"),
+296 |     Preset("deep", {"n_estimators": 900, "max_depth": 24, "min_samples_leaf": 1}, CostTier.HIGH,
+    |
+
+E501 Line too long (101 > 100)
+   --> rl_automl\search\model_registry.py:350:101
+    |
+348 |     Preset("ward5", {"n_clusters": 5, "linkage": "ward"}, CostTier.MEDIUM, "Ward linkage"),
+349 |     Preset("avg5", {"n_clusters": 5, "linkage": "average"}, CostTier.HIGH, "Average linkage"),
+350 |     Preset("complete8", {"n_clusters": 8, "linkage": "complete"}, CostTier.HIGH, "Complete linkage"),
+    |                                                                                                     ^
+351 | )
+    |
+
+E501 Line too long (102 > 100)
+   --> rl_automl\search\model_registry.py:354:101
+    |
+353 | _GMM_PRESETS = (
+354 |     Preset("g3", {"n_components": 3, "covariance_type": "full"}, CostTier.MEDIUM, "Three components"),
+    |                                                                                                     ^^
+355 |     Preset("g5", {"n_components": 5, "covariance_type": "full"}, CostTier.MEDIUM, "Five components"),
+356 |     Preset("g8diag", {"n_components": 8, "covariance_type": "diag"}, CostTier.MEDIUM,
+    |
+
+E501 Line too long (101 > 100)
+   --> rl_automl\search\model_registry.py:355:101
+    |
+353 | _GMM_PRESETS = (
+354 |     Preset("g3", {"n_components": 3, "covariance_type": "full"}, CostTier.MEDIUM, "Three components"),
+355 |     Preset("g5", {"n_components": 5, "covariance_type": "full"}, CostTier.MEDIUM, "Five components"),
+    |                                                                                                     ^
+356 |     Preset("g8diag", {"n_components": 8, "covariance_type": "diag"}, CostTier.MEDIUM,
+357 |            "Eight diagonal components"),
+    |
+
+E501 Line too long (102 > 100)
+   --> rl_automl\search\model_registry.py:361:101
+    |
+360 | _IFOREST_PRESETS = (
+361 |     Preset("default", {"n_estimators": 200, "contamination": "auto"}, CostTier.LOW, "Default forest"),
+    |                                                                                                     ^^
+362 |     Preset("deep", {"n_estimators": 500, "max_samples": 512, "contamination": "auto"}, CostTier.MEDIUM,
+363 |            "Larger forest"),
+    |
+
+E501 Line too long (103 > 100)
+   --> rl_automl\search\model_registry.py:362:101
+    |
+360 | _IFOREST_PRESETS = (
+361 |     Preset("default", {"n_estimators": 200, "contamination": "auto"}, CostTier.LOW, "Default forest"),
+362 |     Preset("deep", {"n_estimators": 500, "max_samples": 512, "contamination": "auto"}, CostTier.MEDIUM,
+    |                                                                                                     ^^^
+363 |            "Larger forest"),
+364 |     Preset("sensitive", {"n_estimators": 300, "contamination": 0.1}, CostTier.MEDIUM,
+    |
+
+E501 Line too long (101 > 100)
+   --> rl_automl\search\model_registry.py:470:101
+    |
+468 |     Preset("ward5", {"n_clusters": 5, "linkage": "ward"}, CostTier.MEDIUM, "Ward linkage"),
+469 |     Preset("avg5", {"n_clusters": 5, "linkage": "average"}, CostTier.HIGH, "Average linkage"),
+470 |     Preset("complete8", {"n_clusters": 8, "linkage": "complete"}, CostTier.HIGH, "Complete linkage"),
+    |                                                                                                     ^
+471 | )
+    |
+
+E501 Line too long (102 > 100)
+   --> rl_automl\search\model_registry.py:474:101
+    |
+473 | _GMM_PRESETS = (
+474 |     Preset("g3", {"n_components": 3, "covariance_type": "full"}, CostTier.MEDIUM, "Three components"),
+    |                                                                                                     ^^
+475 |     Preset("g5", {"n_components": 5, "covariance_type": "full"}, CostTier.MEDIUM, "Five components"),
+476 |     Preset("g8diag", {"n_components": 8, "covariance_type": "diag"}, CostTier.MEDIUM,
+    |
+
+E501 Line too long (101 > 100)
+   --> rl_automl\search\model_registry.py:475:101
+    |
+473 | _GMM_PRESETS = (
+474 |     Preset("g3", {"n_components": 3, "covariance_type": "full"}, CostTier.MEDIUM, "Three components"),
+475 |     Preset("g5", {"n_components": 5, "covariance_type": "full"}, CostTier.MEDIUM, "Five components"),
+    |                                                                                                     ^
+476 |     Preset("g8diag", {"n_components": 8, "covariance_type": "diag"}, CostTier.MEDIUM,
+477 |            "Eight diagonal components"),
+    |
+
+E501 Line too long (102 > 100)
+   --> rl_automl\search\model_registry.py:481:101
+    |
+480 | _IFOREST_PRESETS = (
+481 |     Preset("default", {"n_estimators": 200, "contamination": "auto"}, CostTier.LOW, "Default forest"),
+    |                                                                                                     ^^
+482 |     Preset("deep", {"n_estimators": 500, "max_samples": 512, "contamination": "auto"}, CostTier.MEDIUM,
+483 |            "Larger forest"),
+    |
+
+E501 Line too long (103 > 100)
+   --> rl_automl\search\model_registry.py:482:101
+    |
+480 | _IFOREST_PRESETS = (
+481 |     Preset("default", {"n_estimators": 200, "contamination": "auto"}, CostTier.LOW, "Default forest"),
+482 |     Preset("deep", {"n_estimators": 500, "max_samples": 512, "contamination": "auto"}, CostTier.MEDIUM,
+    |                                                                                                     ^^^
+483 |            "Larger forest"),
+484 |     Preset("sensitive", {"n_estimators": 300, "contamination": 0.1}, CostTier.MEDIUM,
+    |
+
+E501 Line too long (113 > 100)
+   --> rl_automl\search\recommendation.py:263:101
+    |
+261 |     ) -> list[PlannedExperiment]:
+262 |         """Optional randomized refinement around the strongest candidates."""
+263 |         refiner = HyperparameterRefiner(self.search_config, seed=self.search_config.__dict__.get("seed", 0) or 0)
+    |                                                                                                     ^^^^^^^^^^^^^
+264 |         best = max(base_candidates, key=lambda item: item.expected_performance)
+265 |         proposals = refiner.refine(best.experiment, trials=self.config.refinement_trials)
+    |
+
+E501 Line too long (114 > 100)
+   --> rl_automl\task\task_classifier.py:238:101
+    |
+236 |         if stated_direction is not None and stated_direction is not direction:
+237 |             notes.append(
+238 |                 f"statement asks to {'maximize' if stated_direction is MetricDirection.MAXIMIZE else 'minimize'} "
+    |                                                                                                     ^^^^^^^^^^^^^^
+239 |                 f"{metric}; honouring that"
+240 |             )
+    |
+
+E402 Module level import not at top of file
+  --> rl_automl\tests\test_api.py:11:1
+   |
+ 9 | fastapi = pytest.importorskip("fastapi")
+10 | pytest.importorskip("httpx")
+11 | from fastapi.testclient import TestClient
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+12 |
+13 | from rl_automl.api.app import create_app
+   |
+
+E402 Module level import not at top of file
+  --> rl_automl\tests\test_api.py:13:1
+   |
+11 | from fastapi.testclient import TestClient
+12 |
+13 | from rl_automl.api.app import create_app
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+14 | from rl_automl.api.routes.runs import _render_event
+15 | from rl_automl.api.run_manager import RunManager
+   |
+
+E402 Module level import not at top of file
+  --> rl_automl\tests\test_api.py:14:1
+   |
+13 | from rl_automl.api.app import create_app
+14 | from rl_automl.api.routes.runs import _render_event
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+15 | from rl_automl.api.run_manager import RunManager
+16 | from rl_automl.core.types import RunObject, RunStatus
+   |
+
+E402 Module level import not at top of file
+  --> rl_automl\tests\test_api.py:15:1
+   |
+13 | from rl_automl.api.app import create_app
+14 | from rl_automl.api.routes.runs import _render_event
+15 | from rl_automl.api.run_manager import RunManager
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+16 | from rl_automl.core.types import RunObject, RunStatus
+   |
+
+E402 Module level import not at top of file
+  --> rl_automl\tests\test_api.py:16:1
+   |
+14 | from rl_automl.api.routes.runs import _render_event
+15 | from rl_automl.api.run_manager import RunManager
+16 | from rl_automl.core.types import RunObject, RunStatus
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+
+E501 Line too long (101 > 100)
+  --> rl_automl\tests\test_execution.py:16:101
+   |
+16 | def test_splits_are_deterministic_disjoint_and_stratified(binary_frame, classification_task, config):
+   |                                                                                                     ^
+17 |     one = make_splits(binary_frame, classification_task, config.dataset, seed=13)
+18 |     two = make_splits(binary_frame, classification_task, config.dataset, seed=13)
+   |
+
+E501 Line too long (134 > 100)
+  --> rl_automl\tests\test_execution.py:20:101
+   |
+18 |     two = make_splits(binary_frame, classification_task, config.dataset, seed=13)
+19 |     assert np.array_equal(one.train_idx, two.train_idx)
+20 |     assert not (set(one.train_idx) & set(one.val_idx) | set(one.train_idx) & set(one.test_idx) | set(one.val_idx) & set(one.test_idx))
+   |                                                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+21 |     assert len(set(one.train_idx) | set(one.val_idx) | set(one.test_idx)) == len(binary_frame)
+22 |     assert one.stratified and one.test_reserved
+   |
+
+E501 Line too long (109 > 100)
+  --> rl_automl\tests\test_execution.py:36:101
+   |
+34 |     pipeline, metadata = PreprocessorBuilder(config.dataset).build(
+35 |         get_spec("logistic_regression"),
+36 |         ["impute_numeric", "encode_categorical", "scale_standard", "datetime_features", "missing_indicator"],
+   |                                                                                                     ^^^^^^^^^
+37 |         task_type=TaskType.CLASSIFICATION,
+38 |         column_kinds=kinds,
+   |
+
+E501 Line too long (105 > 100)
+  --> rl_automl\tests\test_execution.py:59:101
+   |
+57 |     )
+58 |     assert result.metrics["f1"] == pytest.approx(metrics.f1_score(truth, pred, pos_label="yes"))
+59 |     assert result.metrics["roc_auc"] == pytest.approx(metrics.roc_auc_score(truth == "yes", proba[:, 1]))
+   |                                                                                                     ^^^^^
+   |
+
+E501 Line too long (111 > 100)
+  --> rl_automl\tests\test_execution.py:62:101
+   |
+62 | def test_executor_isolates_failures_enforces_budget_and_guards_test(binary_frame, classification_task, config):
+   |                                                                                                     ^^^^^^^^^^^
+63 |     executor = PipelineExecutor(
+64 |         classification_task, config, run_id="executor", limits=ExecutionLimits(max_experiments=1, time_budget_s=30)
+   |
+
+E501 Line too long (115 > 100)
+  --> rl_automl\tests\test_execution.py:64:101
+   |
+62 | def test_executor_isolates_failures_enforces_budget_and_guards_test(binary_frame, classification_task, config):
+63 |     executor = PipelineExecutor(
+64 |         classification_task, config, run_id="executor", limits=ExecutionLimits(max_experiments=1, time_budget_s=30)
+   |                                                                                                     ^^^^^^^^^^^^^^^
+65 |     )
+66 |     executor.prepare(binary_frame.drop(columns="when"))
+   |
+
+E501 Line too long (106 > 100)
+  --> rl_automl\tests\test_execution.py:89:101
+   |
+89 | def test_executor_unknown_model_failure_is_returned_not_raised(binary_frame, classification_task, config):
+   |                                                                                                     ^^^^^^
+90 |     executor = PipelineExecutor(classification_task, config, run_id="failure")
+91 |     executor.prepare(binary_frame.drop(columns="when"))
+   |
+
+E501 Line too long (125 > 100)
+  --> rl_automl\tests\test_import_boundaries.py:27:101
+   |
+25 | )
+26 | def test_agent_and_simulator_do_not_import_execution(path):
+27 |     forbidden = [name for name in _imports(path) if name == "rl_automl.execution" or name.startswith("rl_automl.execution.")]
+   |                                                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^
+28 |     assert not forbidden, f"{path.relative_to(ROOT)} imports execution: {forbidden}"
+   |
+
+E501 Line too long (117 > 100)
+  --> rl_automl\tests\test_packaging.py:38:101
+   |
+38 | def test_packaging_label_mapping_only_when_encoding_is_required(tmp_path, config, binary_frame, classification_task):
+   |                                                                                                     ^^^^^^^^^^^^^^^^^
+39 |     package, executor, _ = _build_package(
+40 |         tmp_path / "strings", config, binary_frame.drop(columns="when"), classification_task, "strings"
+   |
+
+E501 Line too long (103 > 100)
+  --> rl_automl\tests\test_packaging.py:40:101
+   |
+38 | def test_packaging_label_mapping_only_when_encoding_is_required(tmp_path, config, binary_frame, classification_task):
+39 |     package, executor, _ = _build_package(
+40 |         tmp_path / "strings", config, binary_frame.drop(columns="when"), classification_task, "strings"
+   |                                                                                                     ^^^
+41 |     )
+42 |     metadata = json.loads((package.directory / "metadata/model_metadata.json").read_text())
+   |
+
+E501 Line too long (109 > 100)
+  --> rl_automl\tests\test_task_profile_fingerprint.py:20:101
+   |
+18 |     ("statement", "columns", "expected", "metric", "target"),
+19 |     [
+20 |         ("Predict whether a customer will churn.", ["age", "churn"], TaskType.CLASSIFICATION, "f1", "churn"),
+   |                                                                                                     ^^^^^^^^^
+21 |         ("Minimize RMSE when predicting house_price.", ["area", "house_price"], TaskType.REGRESSION, "rmse", "house_price"),
+22 |         ("Segment customers into groups.", ["spend", "visits"], TaskType.CLUSTERING, "silhouette", None),
+   |
+
+E501 Line too long (124 > 100)
+  --> rl_automl\tests\test_task_profile_fingerprint.py:21:101
+   |
+19 |     [
+20 |         ("Predict whether a customer will churn.", ["age", "churn"], TaskType.CLASSIFICATION, "f1", "churn"),
+21 |         ("Minimize RMSE when predicting house_price.", ["area", "house_price"], TaskType.REGRESSION, "rmse", "house_price"),
+   |                                                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^
+22 |         ("Segment customers into groups.", ["spend", "visits"], TaskType.CLUSTERING, "silhouette", None),
+23 |         (
+   |
+
+E501 Line too long (105 > 100)
+  --> rl_automl\tests\test_task_profile_fingerprint.py:22:101
+   |
+20 |         ("Predict whether a customer will churn.", ["age", "churn"], TaskType.CLASSIFICATION, "f1", "churn"),
+21 |         ("Minimize RMSE when predicting house_price.", ["area", "house_price"], TaskType.REGRESSION, "rmse", "house_price"),
+22 |         ("Segment customers into groups.", ["spend", "visits"], TaskType.CLUSTERING, "silhouette", None),
+   |                                                                                                     ^^^^^
+23 |         (
+24 |             "Detect anomalous transactions.",
+   |
+
+E501 Line too long (125 > 100)
+  --> rl_automl\tests\test_task_profile_fingerprint.py:32:101
+   |
+30 |             None,
+31 |         ),
+32 |         ("Use PCA for dimensionality reduction.", ["a", "b"], TaskType.DIMENSIONALITY_REDUCTION, "explained_variance", None),
+   |                                                                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^
+33 |     ],
+34 | )
+   |
+
+Found 160 errors (79 fixed, 81 remaining).
+No fixes available (14 hidden fixes can be enabled with the `--unsafe-fixes` option).

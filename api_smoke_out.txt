@@ -1,0 +1,73 @@
+== health ==
+{'status': 'ok', 'runs': 0, 'datasets': 0}
+
+== register bundled dataset ==
+201 {'dataset_id': 'data_5db362022eb1', 'name': 'churn_demo_small', 'path': 'C:\\Users\\IBHANM~1\\AppData\\Local\\Temp\\automl_api_6b4agc04\\artifacts\\datasets\\data_5db362022eb1\\data.csv', 'n_rows': 3000, 'n_cols': 10, 'sha256': '1da8a7ec8125772b9a1857863b53e145d458e75bcc649653f4c98258ecba9762', 'columns': ['contract_type', 'payment_method', 'internet_service', 'tenure_months', 'monthly_charges', 'total_charges', 'support_calls', 'age', 'signup_date', 'churn'], 'warnings': ["materialised from 'churn_demo_small'"], 'created_at': '2026-09-19T12:51:00+00:00'}
+preview row keys: ['age', 'churn', 'contract_type', 'internet_service', 'monthly_charges']
+
+== upload rejection (bad extension) ==
+status: 400 -> security_error
+
+== create run ==
+202 run_4fdbb5bf07fc created
+status: awaiting_approval | task: classification
+
+== recommendations ==
+planner: surrogate-greedy | metric: f1 | requires approval: True
+   #1 xgboost            cost=high fs=variance
+   #2 lightgbm           cost=high fs=variance
+   #3 random_forest      cost=high fs=variance
+
+== approve ranks 1 and 2 ==
+202 ['xgboost', 'lightgbm']
+
+== approve again is refused ==
+status: 409 -> {"detail": {"code": "run_state_error", "message": "run 'run_4fdbb5bf07fc' has already been approved and submitted for execution", "details": {"run_id": "run_4fdbb5bf07fc"}}}
+
+== bad selection stays retryable ==
+status: 409 -> {"detail": {"code": "run_state_error", "message": "run 'run_4fdbb5bf07fc' has already been approved and submitted for execution", "details": {"run_id": "run_4fd
+C:\Users\Ibhan Mukherjee\AppData\Roaming\Python\Python314\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+C:\Users\Ibhan Mukherjee\AppData\Roaming\Python\Python314\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+C:\Users\Ibhan Mukherjee\AppData\Roaming\Python\Python314\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+C:\Users\Ibhan Mukherjee\AppData\Roaming\Python\Python314\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+C:\Users\Ibhan Mukherjee\AppData\Roaming\Python\Python314\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+C:\Users\Ibhan Mukherjee\AppData\Roaming\Python\Python314\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+C:\Users\Ibhan Mukherjee\AppData\Roaming\Python\Python314\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+status: complete | best: lightgbm | error: None
+
+== artifacts ==
+{
+  "run_id": "run_4fdbb5bf07fc",
+  "verified": true,
+  "artifacts": [
+    {
+      "kind": "model",
+      "url": "/runs/run_4fdbb5bf07fc/artifacts/model.zip",
+      "sha256": "87ee845a4af18862ffd2912044609a75747262e22c6daeef893d6b2741d28293",
+      "size_bytes": 823066
+    },
+    {
+      "kind": "results",
+      "url": "/runs/run_4fdbb5bf07fc/artifacts/results.zip",
+      "sha256": "4a2546dc0e904f
+model.zip bytes: 823066 content-type: application/zip
+members: 14 | runtime present: True
+results members: ['results/comparison.csv', 'results/comparison.txt', 'results/experiment_history.json', 'results/results.json', 'results/search_statistics.json']
+
+== events (SSE replay) ==
+stages: ['profiling', 'profiling', 'understanding', 'planning', 'awaiting_approval', 'awaiting_approval', 'executing', 'executing', 'executing', 'comparing', 'selecting', 'evaluating', 'packaging', 'packaging', 'complete', 'complete']
+
+== list runs ==
+[('run_4fdbb5bf07fc', 'complete')]
+
+== 404 on unknown run ==
+404
+
+API SMOKE OK

@@ -1,0 +1,1637 @@
+{
+  "run_id": "run_961c567816b3",
+  "status": "complete",
+  "created_at": "2026-09-19T08:31:24+00:00",
+  "updated_at": "2026-09-19T08:31:55+00:00",
+  "problem_statement": "Predict whether a customer will churn.",
+  "dataset_path": "",
+  "dataset_name": "churn_strings.csv",
+  "dataset_sha256": "",
+  "task": {
+    "learning_type": "supervised",
+    "task_type": "classification",
+    "objective": "churn prediction",
+    "target": "churn",
+    "metric": "f1",
+    "metric_direction": "maximize",
+    "confidence": 0.98,
+    "source": "user",
+    "notes": [
+      "signals: churn, predict whether, whether a customer",
+      "target provided by user",
+      "default metric for classification: f1",
+      "task specification overridden by the caller"
+    ],
+    "problem_statement": "Predict whether a customer will churn."
+  },
+  "dataset_profile": {
+    "n_rows": 3000,
+    "n_cols": 10,
+    "numeric_features": [
+      "tenure_months",
+      "monthly_charges",
+      "total_charges",
+      "support_calls",
+      "age"
+    ],
+    "categorical_features": [
+      "contract_type",
+      "payment_method",
+      "internet_service"
+    ],
+    "datetime_features": [
+      "signup_date"
+    ],
+    "other_features": [],
+    "n_missing_total": 535,
+    "missing_ratio": 0.017833333333333333,
+    "columns_with_missing": [
+      "monthly_charges",
+      "total_charges",
+      "age"
+    ],
+    "n_duplicate_rows": 0,
+    "duplicate_ratio": 0.0,
+    "cardinality": {
+      "contract_type": 3,
+      "payment_method": 4,
+      "internet_service": 3,
+      "tenure_months": 72,
+      "monthly_charges": 2354,
+      "total_charges": 2659,
+      "support_calls": 8,
+      "age": 72,
+      "signup_date": 1651,
+      "churn": 2
+    },
+    "high_cardinality_features": [],
+    "constant_features": [],
+    "class_distribution": {
+      "n_classes": 2,
+      "counts": {
+        "no": 2197,
+        "yes": 803
+      },
+      "minority_ratio": 0.26766666666666666,
+      "imbalance_ratio": 2.7359900373599,
+      "entropy": 0.8380964877755773,
+      "is_imbalanced": false
+    },
+    "top_correlations": [
+      {
+        "feature_a": "tenure_months",
+        "feature_b": "total_charges",
+        "correlation": 0.8122741624066948
+      },
+      {
+        "feature_a": "monthly_charges",
+        "feature_b": "total_charges",
+        "correlation": 0.45990419439622604
+      },
+      {
+        "feature_a": "tenure_months",
+        "feature_b": "monthly_charges",
+        "correlation": -0.0243337130157577
+      },
+      {
+        "feature_a": "monthly_charges",
+        "feature_b": "age",
+        "correlation": -0.0178109405860811
+      },
+      {
+        "feature_a": "total_charges",
+        "feature_b": "support_calls",
+        "correlation": -0.01244787044123826
+      },
+      {
+        "feature_a": "monthly_charges",
+        "feature_b": "support_calls",
+        "correlation": 0.010929150181698913
+      },
+      {
+        "feature_a": "total_charges",
+        "feature_b": "age",
+        "correlation": -0.009903403861762125
+      },
+      {
+        "feature_a": "tenure_months",
+        "feature_b": "age",
+        "correlation": 0.007451954498444573
+      },
+      {
+        "feature_a": "support_calls",
+        "feature_b": "age",
+        "correlation": 0.007184466027647088
+      },
+      {
+        "feature_a": "tenure_months",
+        "feature_b": "support_calls",
+        "correlation": 0.0029036081834940618
+      }
+    ],
+    "max_abs_correlation": 0.8122741624066948,
+    "mean_abs_skew": 0.6718917644097713,
+    "dimensionality_ratio": 0.0033333333333333335,
+    "size_bytes": 184480,
+    "memory_mb": 0.175933837890625,
+    "target": "churn",
+    "columns": [
+      {
+        "name": "contract_type",
+        "kind": "categorical",
+        "dtype": "category",
+        "n_missing": 0,
+        "missing_ratio": 0.0,
+        "n_unique": 3,
+        "cardinality_ratio": 0.001,
+        "is_constant": false,
+        "mean": null,
+        "std": null,
+        "minimum": null,
+        "maximum": null,
+        "median": null,
+        "skew": null,
+        "n_outliers": 0,
+        "top_values": [
+          {
+            "value": "month-to-month",
+            "count": 1644,
+            "ratio": 0.548
+          },
+          {
+            "value": "one_year",
+            "count": 739,
+            "ratio": 0.24633333333333332
+          },
+          {
+            "value": "two_year",
+            "count": 617,
+            "ratio": 0.20566666666666666
+          }
+        ],
+        "is_high_cardinality": false
+      },
+      {
+        "name": "payment_method",
+        "kind": "categorical",
+        "dtype": "category",
+        "n_missing": 0,
+        "missing_ratio": 0.0,
+        "n_unique": 4,
+        "cardinality_ratio": 0.0013333333333333333,
+        "is_constant": false,
+        "mean": null,
+        "std": null,
+        "minimum": null,
+        "maximum": null,
+        "median": null,
+        "skew": null,
+        "n_outliers": 0,
+        "top_values": [
+          {
+            "value": "bank_transfer",
+            "count": 784,
+            "ratio": 0.2613333333333333
+          },
+          {
+            "value": "card",
+            "count": 777,
+            "ratio": 0.259
+          },
+          {
+            "value": "mailed_check",
+            "count": 724,
+            "ratio": 0.24133333333333334
+          },
+          {
+            "value": "electronic_check",
+            "count": 715,
+            "ratio": 0.23833333333333334
+          }
+        ],
+        "is_high_cardinality": false
+      },
+      {
+        "name": "internet_service",
+        "kind": "categorical",
+        "dtype": "category",
+        "n_missing": 0,
+        "missing_ratio": 0.0,
+        "n_unique": 3,
+        "cardinality_ratio": 0.001,
+        "is_constant": false,
+        "mean": null,
+        "std": null,
+        "minimum": null,
+        "maximum": null,
+        "median": null,
+        "skew": null,
+        "n_outliers": 0,
+        "top_values": [
+          {
+            "value": "fiber",
+            "count": 1330,
+            "ratio": 0.44333333333333336
+          },
+          {
+            "value": "dsl",
+            "count": 1199,
+            "ratio": 0.39966666666666667
+          },
+          {
+            "value": "none",
+            "count": 471,
+            "ratio": 0.157
+          }
+        ],
+        "is_high_cardinality": false
+      },
+      {
+        "name": "tenure_months",
+        "kind": "numeric",
+        "dtype": "float64",
+        "n_missing": 0,
+        "missing_ratio": 0.0,
+        "n_unique": 72,
+        "cardinality_ratio": 0.024,
+        "is_constant": false,
+        "mean": 27.844333333333335,
+        "std": 17.889590465907865,
+        "minimum": 1.0,
+        "maximum": 72.0,
+        "median": 24.0,
+        "skew": 0.8068903133733294,
+        "n_outliers": 0,
+        "top_values": [],
+        "is_high_cardinality": false
+      },
+      {
+        "name": "monthly_charges",
+        "kind": "numeric",
+        "dtype": "float64",
+        "n_missing": 128,
+        "missing_ratio": 0.042666666666666665,
+        "n_unique": 2354,
+        "cardinality_ratio": 0.7846666666666666,
+        "is_constant": false,
+        "mean": 70.42317200557103,
+        "std": 26.541055800073114,
+        "minimum": 18.0,
+        "maximum": 130.0,
+        "median": 69.47,
+        "skew": 0.09552147213838237,
+        "n_outliers": 0,
+        "top_values": [],
+        "is_high_cardinality": false
+      },
+      {
+        "name": "total_charges",
+        "kind": "numeric",
+        "dtype": "float64",
+        "n_missing": 332,
+        "missing_ratio": 0.11066666666666666,
+        "n_unique": 2659,
+        "cardinality_ratio": 0.8863333333333333,
+        "is_constant": false,
+        "mean": 1954.206671664168,
+        "std": 1530.7928769392859,
+        "minimum": 21.93,
+        "maximum": 9559.05,
+        "median": 1539.5549999999998,
+        "skew": 1.4094096519885124,
+        "n_outliers": 104,
+        "top_values": [],
+        "is_high_cardinality": false
+      },
+      {
+        "name": "support_calls",
+        "kind": "numeric",
+        "dtype": "int64",
+        "n_missing": 0,
+        "missing_ratio": 0.0,
+        "n_unique": 8,
+        "cardinality_ratio": 0.0026666666666666666,
+        "is_constant": false,
+        "mean": 1.303,
+        "std": 1.1394254824881622,
+        "minimum": 0.0,
+        "maximum": 7.0,
+        "median": 1.0,
+        "skew": 0.861690795516734,
+        "n_outliers": 5,
+        "top_values": [],
+        "is_high_cardinality": false
+      },
+      {
+        "name": "age",
+        "kind": "numeric",
+        "dtype": "float64",
+        "n_missing": 75,
+        "missing_ratio": 0.025,
+        "n_unique": 72,
+        "cardinality_ratio": 0.024,
+        "is_constant": false,
+        "mean": 44.34290598290598,
+        "std": 14.30648338791096,
+        "minimum": 18.0,
+        "maximum": 90.0,
+        "median": 44.0,
+        "skew": 0.18594658903189853,
+        "n_outliers": 10,
+        "top_values": [],
+        "is_high_cardinality": false
+      },
+      {
+        "name": "signup_date",
+        "kind": "datetime",
+        "dtype": "datetime64[us]",
+        "n_missing": 0,
+        "missing_ratio": 0.0,
+        "n_unique": 1651,
+        "cardinality_ratio": 0.5503333333333333,
+        "is_constant": false,
+        "mean": null,
+        "std": null,
+        "minimum": 1546300800.0,
+        "maximum": 1735344000.0,
+        "median": null,
+        "skew": null,
+        "n_outliers": 0,
+        "top_values": [],
+        "is_high_cardinality": false
+      },
+      {
+        "name": "churn",
+        "kind": "categorical",
+        "dtype": "str",
+        "n_missing": 0,
+        "missing_ratio": 0.0,
+        "n_unique": 2,
+        "cardinality_ratio": 0.0006666666666666666,
+        "is_constant": false,
+        "mean": null,
+        "std": null,
+        "minimum": null,
+        "maximum": null,
+        "median": null,
+        "skew": null,
+        "n_outliers": 0,
+        "top_values": [
+          {
+            "value": "no",
+            "count": 2197,
+            "ratio": 0.7323333333333333
+          },
+          {
+            "value": "yes",
+            "count": 803,
+            "ratio": 0.26766666666666666
+          }
+        ],
+        "is_high_cardinality": false
+      }
+    ],
+    "warnings": [],
+    "profiled_at": "2026-09-19T08:31:25+00:00"
+  },
+  "dataset_fingerprint": {
+    "schema_version": "1.0.0",
+    "feature_names": [
+      "log_rows",
+      "log_cols",
+      "log_rows_per_col",
+      "missing_ratio",
+      "frac_cols_with_missing",
+      "duplicate_ratio",
+      "frac_numeric",
+      "frac_categorical",
+      "frac_datetime",
+      "frac_other",
+      "frac_constant",
+      "frac_high_cardinality",
+      "mean_cardinality_ratio",
+      "max_cardinality_ratio",
+      "log_mean_cardinality",
+      "frac_binary_features",
+      "mean_abs_skew",
+      "max_abs_skew",
+      "mean_abs_correlation",
+      "max_abs_correlation",
+      "frac_near_duplicate_features",
+      "log_size_mb",
+      "log_memory_per_row",
+      "class_log_n_classes",
+      "class_minority_ratio",
+      "class_imbalance_ratio",
+      "class_entropy",
+      "class_is_imbalanced",
+      "target_missing_ratio",
+      "target_cardinality_ratio",
+      "log_outlier_ratio",
+      "has_target",
+      "task_is_classification",
+      "task_is_regression",
+      "task_is_clustering",
+      "task_is_anomaly",
+      "task_is_dimred",
+      "samples_per_feature",
+      "frac_low_cardinality_categorical",
+      "numeric_fraction_of_signal"
+    ],
+    "values": [
+      0.49675228197873944,
+      0.28152924545561486,
+      0.5048354971678022,
+      0.017833333333333333,
+      0.3,
+      0.0,
+      0.5,
+      0.3,
+      0.1,
+      0.0,
+      0.0,
+      0.0,
+      0.2528148148148148,
+      0.8863333333333333,
+      0.576098701502431,
+      0.0,
+      0.06718917644097713,
+      0.07047048259942562,
+      0.13651434635990448,
+      0.8122741624066948,
+      0.0,
+      0.019483335820603583,
+      0.007011056754092542,
+      0.15901740961444308,
+      0.26766666666666666,
+      0.1907742995379731,
+      0.8380964877755773,
+      0.0,
+      0.0,
+      0.0006666666666666666,
+      0.18255743887078324,
+      1.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.6310380685089608,
+      0.3333333333333333,
+      0.5555555555555556
+    ],
+    "n_rows": 3000,
+    "n_cols": 10
+  },
+  "rl_recommendations": [
+    {
+      "rank": 1,
+      "model": "xgboost",
+      "preprocessing": [
+        "impute_numeric",
+        "impute_categorical",
+        "missing_indicator",
+        "scale_robust",
+        "encode_categorical",
+        "clip_outliers",
+        "log_transform",
+        "datetime_features"
+      ],
+      "feature_selection": "variance",
+      "preset_index": 4,
+      "hyperparameters": {
+        "n_estimators": 500,
+        "learning_rate": 0.05,
+        "max_depth": 6,
+        "subsample": 0.9,
+        "colsample_bytree": 0.8,
+        "scale_pos_weight": 4.0
+      },
+      "reason": "expected f1 ~ 0.976 using the 'class_balanced' preset; high cost (~118s of training); tolerates the 1.8% missing values",
+      "expected_cost": "high",
+      "expected_performance": 0.975693,
+      "experiment": {
+        "experiment_id": "exp_a938a356619d",
+        "model": "xgboost",
+        "preprocessing": [
+          "impute_numeric",
+          "impute_categorical",
+          "missing_indicator",
+          "scale_robust",
+          "encode_categorical",
+          "clip_outliers",
+          "log_transform",
+          "datetime_features"
+        ],
+        "feature_selection": "variance",
+        "preset_index": 4,
+        "hyperparameters": {
+          "n_estimators": 500,
+          "learning_rate": 0.05,
+          "max_depth": 6,
+          "subsample": 0.9,
+          "colsample_bytree": 0.8,
+          "scale_pos_weight": 4.0
+        },
+        "expected_cost": "medium",
+        "source": "baseline",
+        "rationale": "expected f1 ~ 0.976 using the 'class_balanced' preset; high cost (~118s of training); tolerates the 1.8% missing values"
+      }
+    },
+    {
+      "rank": 2,
+      "model": "lightgbm",
+      "preprocessing": [
+        "impute_numeric",
+        "impute_categorical",
+        "missing_indicator",
+        "scale_robust",
+        "encode_categorical",
+        "clip_outliers",
+        "log_transform",
+        "datetime_features"
+      ],
+      "feature_selection": "variance",
+      "preset_index": 4,
+      "hyperparameters": {
+        "n_estimators": 600,
+        "learning_rate": 0.04,
+        "num_leaves": 31,
+        "subsample": 0.9,
+        "colsample_bytree": 0.8,
+        "class_weight": "balanced"
+      },
+      "reason": "expected f1 ~ 0.976 using the 'class_balanced' preset; high cost (~118s of training); tolerates the 1.8% missing values",
+      "expected_cost": "high",
+      "expected_performance": 0.975693,
+      "experiment": {
+        "experiment_id": "exp_b62c26363ba4",
+        "model": "lightgbm",
+        "preprocessing": [
+          "impute_numeric",
+          "impute_categorical",
+          "missing_indicator",
+          "scale_robust",
+          "encode_categorical",
+          "clip_outliers",
+          "log_transform",
+          "datetime_features"
+        ],
+        "feature_selection": "variance",
+        "preset_index": 4,
+        "hyperparameters": {
+          "n_estimators": 600,
+          "learning_rate": 0.04,
+          "num_leaves": 31,
+          "subsample": 0.9,
+          "colsample_bytree": 0.8,
+          "class_weight": "balanced"
+        },
+        "expected_cost": "medium",
+        "source": "baseline",
+        "rationale": "expected f1 ~ 0.976 using the 'class_balanced' preset; high cost (~118s of training); tolerates the 1.8% missing values"
+      }
+    },
+    {
+      "rank": 3,
+      "model": "xgboost",
+      "preprocessing": [
+        "impute_numeric",
+        "impute_categorical",
+        "missing_indicator",
+        "scale_robust",
+        "encode_categorical",
+        "clip_outliers",
+        "log_transform",
+        "datetime_features"
+      ],
+      "feature_selection": "mutual_info",
+      "preset_index": 4,
+      "hyperparameters": {
+        "n_estimators": 500,
+        "learning_rate": 0.05,
+        "max_depth": 6,
+        "subsample": 0.9,
+        "colsample_bytree": 0.8,
+        "scale_pos_weight": 4.0
+      },
+      "reason": "expected f1 ~ 0.976 using the 'class_balanced' preset; high cost (~118s of training); tolerates the 1.8% missing values",
+      "expected_cost": "high",
+      "expected_performance": 0.975693,
+      "experiment": {
+        "experiment_id": "exp_07e344f1a761",
+        "model": "xgboost",
+        "preprocessing": [
+          "impute_numeric",
+          "impute_categorical",
+          "missing_indicator",
+          "scale_robust",
+          "encode_categorical",
+          "clip_outliers",
+          "log_transform",
+          "datetime_features"
+        ],
+        "feature_selection": "mutual_info",
+        "preset_index": 4,
+        "hyperparameters": {
+          "n_estimators": 500,
+          "learning_rate": 0.05,
+          "max_depth": 6,
+          "subsample": 0.9,
+          "colsample_bytree": 0.8,
+          "scale_pos_weight": 4.0
+        },
+        "expected_cost": "medium",
+        "source": "baseline",
+        "rationale": "expected f1 ~ 0.976 using the 'class_balanced' preset; high cost (~118s of training); tolerates the 1.8% missing values"
+      }
+    }
+  ],
+  "recommendation_set": {
+    "task": "classification",
+    "metric": "f1",
+    "metric_direction": "maximize",
+    "recommended_experiments": [
+      {
+        "rank": 1,
+        "model": "xgboost",
+        "preprocessing": [
+          "impute_numeric",
+          "impute_categorical",
+          "missing_indicator",
+          "scale_robust",
+          "encode_categorical",
+          "clip_outliers",
+          "log_transform",
+          "datetime_features"
+        ],
+        "feature_selection": "variance",
+        "preset_index": 4,
+        "hyperparameters": {
+          "n_estimators": 500,
+          "learning_rate": 0.05,
+          "max_depth": 6,
+          "subsample": 0.9,
+          "colsample_bytree": 0.8,
+          "scale_pos_weight": 4.0
+        },
+        "reason": "expected f1 ~ 0.976 using the 'class_balanced' preset; high cost (~118s of training); tolerates the 1.8% missing values",
+        "expected_cost": "high",
+        "expected_performance": 0.975693,
+        "experiment": {
+          "experiment_id": "exp_a938a356619d",
+          "model": "xgboost",
+          "preprocessing": [
+            "impute_numeric",
+            "impute_categorical",
+            "missing_indicator",
+            "scale_robust",
+            "encode_categorical",
+            "clip_outliers",
+            "log_transform",
+            "datetime_features"
+          ],
+          "feature_selection": "variance",
+          "preset_index": 4,
+          "hyperparameters": {
+            "n_estimators": 500,
+            "learning_rate": 0.05,
+            "max_depth": 6,
+            "subsample": 0.9,
+            "colsample_bytree": 0.8,
+            "scale_pos_weight": 4.0
+          },
+          "expected_cost": "medium",
+          "source": "baseline",
+          "rationale": "expected f1 ~ 0.976 using the 'class_balanced' preset; high cost (~118s of training); tolerates the 1.8% missing values"
+        }
+      },
+      {
+        "rank": 2,
+        "model": "lightgbm",
+        "preprocessing": [
+          "impute_numeric",
+          "impute_categorical",
+          "missing_indicator",
+          "scale_robust",
+          "encode_categorical",
+          "clip_outliers",
+          "log_transform",
+          "datetime_features"
+        ],
+        "feature_selection": "variance",
+        "preset_index": 4,
+        "hyperparameters": {
+          "n_estimators": 600,
+          "learning_rate": 0.04,
+          "num_leaves": 31,
+          "subsample": 0.9,
+          "colsample_bytree": 0.8,
+          "class_weight": "balanced"
+        },
+        "reason": "expected f1 ~ 0.976 using the 'class_balanced' preset; high cost (~118s of training); tolerates the 1.8% missing values",
+        "expected_cost": "high",
+        "expected_performance": 0.975693,
+        "experiment": {
+          "experiment_id": "exp_b62c26363ba4",
+          "model": "lightgbm",
+          "preprocessing": [
+            "impute_numeric",
+            "impute_categorical",
+            "missing_indicator",
+            "scale_robust",
+            "encode_categorical",
+            "clip_outliers",
+            "log_transform",
+            "datetime_features"
+          ],
+          "feature_selection": "variance",
+          "preset_index": 4,
+          "hyperparameters": {
+            "n_estimators": 600,
+            "learning_rate": 0.04,
+            "num_leaves": 31,
+            "subsample": 0.9,
+            "colsample_bytree": 0.8,
+            "class_weight": "balanced"
+          },
+          "expected_cost": "medium",
+          "source": "baseline",
+          "rationale": "expected f1 ~ 0.976 using the 'class_balanced' preset; high cost (~118s of training); tolerates the 1.8% missing values"
+        }
+      },
+      {
+        "rank": 3,
+        "model": "xgboost",
+        "preprocessing": [
+          "impute_numeric",
+          "impute_categorical",
+          "missing_indicator",
+          "scale_robust",
+          "encode_categorical",
+          "clip_outliers",
+          "log_transform",
+          "datetime_features"
+        ],
+        "feature_selection": "mutual_info",
+        "preset_index": 4,
+        "hyperparameters": {
+          "n_estimators": 500,
+          "learning_rate": 0.05,
+          "max_depth": 6,
+          "subsample": 0.9,
+          "colsample_bytree": 0.8,
+          "scale_pos_weight": 4.0
+        },
+        "reason": "expected f1 ~ 0.976 using the 'class_balanced' preset; high cost (~118s of training); tolerates the 1.8% missing values",
+        "expected_cost": "high",
+        "expected_performance": 0.975693,
+        "experiment": {
+          "experiment_id": "exp_07e344f1a761",
+          "model": "xgboost",
+          "preprocessing": [
+            "impute_numeric",
+            "impute_categorical",
+            "missing_indicator",
+            "scale_robust",
+            "encode_categorical",
+            "clip_outliers",
+            "log_transform",
+            "datetime_features"
+          ],
+          "feature_selection": "mutual_info",
+          "preset_index": 4,
+          "hyperparameters": {
+            "n_estimators": 500,
+            "learning_rate": 0.05,
+            "max_depth": 6,
+            "subsample": 0.9,
+            "colsample_bytree": 0.8,
+            "scale_pos_weight": 4.0
+          },
+          "expected_cost": "medium",
+          "source": "baseline",
+          "rationale": "expected f1 ~ 0.976 using the 'class_balanced' preset; high cost (~118s of training); tolerates the 1.8% missing values"
+        }
+      }
+    ],
+    "estimated_experiments": 3,
+    "estimated_compute": "3 experiment(s) on 3,000 rows - estimated 355s of training total (xgboost, lightgbm, xgboost)",
+    "estimated_runtime_s": 355.28,
+    "estimated_cost_tier": "high",
+    "requires_user_approval": true,
+    "planner": "surrogate-greedy",
+    "search_statistics": {
+      "searcher": "rl-ppo-planning",
+      "n_experiments": 3,
+      "n_failed": 0,
+      "n_distinct_models": 2,
+      "best_validation_score": 0.456973293768546,
+      "best_model": "xgboost",
+      "total_training_time_s": 22.542108200000257,
+      "total_compute_s": 22.542108200000257,
+      "time_to_best_s": null,
+      "stopping_reason": "completed",
+      "history": [
+        {
+          "step": 1,
+          "model": "xgboost",
+          "origin": "surrogate",
+          "expected_score": 0.97569,
+          "expected_cost_s": 118.425
+        },
+        {
+          "step": 2,
+          "model": "lightgbm",
+          "origin": "surrogate",
+          "expected_score": 0.97569,
+          "expected_cost_s": 118.425
+        },
+        {
+          "step": 3,
+          "model": "xgboost",
+          "origin": "surrogate",
+          "expected_score": 0.97569,
+          "expected_cost_s": 118.425
+        }
+      ]
+    },
+    "baseline_expectation": "for reference, 24 uniformly sampled experiments in the same space would be expected to average 0.924 f1 (best single draw 0.976); the recommended set averages 0.976. These are surrogate estimates, not measurements.",
+    "notes": [
+      "no trained policy checkpoint found; using the surrogate planner. Run `automl train-rl` to train one."
+    ],
+    "created_at": "2026-09-19T08:31:25+00:00"
+  },
+  "approved_experiments": [
+    {
+      "experiment_id": "exp_a938a356619d",
+      "model": "xgboost",
+      "preprocessing": [
+        "impute_numeric",
+        "impute_categorical",
+        "missing_indicator",
+        "scale_robust",
+        "encode_categorical",
+        "clip_outliers",
+        "log_transform",
+        "datetime_features"
+      ],
+      "feature_selection": "variance",
+      "preset_index": 4,
+      "hyperparameters": {
+        "n_estimators": 500,
+        "learning_rate": 0.05,
+        "max_depth": 6,
+        "subsample": 0.9,
+        "colsample_bytree": 0.8,
+        "scale_pos_weight": 4.0
+      },
+      "expected_cost": "medium",
+      "source": "baseline",
+      "rationale": "expected f1 ~ 0.976 using the 'class_balanced' preset; high cost (~118s of training); tolerates the 1.8% missing values"
+    },
+    {
+      "experiment_id": "exp_b62c26363ba4",
+      "model": "lightgbm",
+      "preprocessing": [
+        "impute_numeric",
+        "impute_categorical",
+        "missing_indicator",
+        "scale_robust",
+        "encode_categorical",
+        "clip_outliers",
+        "log_transform",
+        "datetime_features"
+      ],
+      "feature_selection": "variance",
+      "preset_index": 4,
+      "hyperparameters": {
+        "n_estimators": 600,
+        "learning_rate": 0.04,
+        "num_leaves": 31,
+        "subsample": 0.9,
+        "colsample_bytree": 0.8,
+        "class_weight": "balanced"
+      },
+      "expected_cost": "medium",
+      "source": "baseline",
+      "rationale": "expected f1 ~ 0.976 using the 'class_balanced' preset; high cost (~118s of training); tolerates the 1.8% missing values"
+    },
+    {
+      "experiment_id": "exp_07e344f1a761",
+      "model": "xgboost",
+      "preprocessing": [
+        "impute_numeric",
+        "impute_categorical",
+        "missing_indicator",
+        "scale_robust",
+        "encode_categorical",
+        "clip_outliers",
+        "log_transform",
+        "datetime_features"
+      ],
+      "feature_selection": "mutual_info",
+      "preset_index": 4,
+      "hyperparameters": {
+        "n_estimators": 500,
+        "learning_rate": 0.05,
+        "max_depth": 6,
+        "subsample": 0.9,
+        "colsample_bytree": 0.8,
+        "scale_pos_weight": 4.0
+      },
+      "expected_cost": "medium",
+      "source": "baseline",
+      "rationale": "expected f1 ~ 0.976 using the 'class_balanced' preset; high cost (~118s of training); tolerates the 1.8% missing values"
+    }
+  ],
+  "approved_at": "2026-09-19T08:31:25+00:00",
+  "results": [
+    {
+      "experiment": {
+        "experiment_id": "exp_a938a356619d",
+        "model": "xgboost",
+        "preprocessing": [
+          "impute_numeric",
+          "impute_categorical",
+          "missing_indicator",
+          "scale_robust",
+          "encode_categorical",
+          "clip_outliers",
+          "log_transform",
+          "datetime_features"
+        ],
+        "feature_selection": "variance",
+        "preset_index": 4,
+        "hyperparameters": {
+          "n_estimators": 500,
+          "learning_rate": 0.05,
+          "max_depth": 6,
+          "subsample": 0.9,
+          "colsample_bytree": 0.8,
+          "scale_pos_weight": 4.0
+        },
+        "expected_cost": "medium",
+        "source": "baseline",
+        "rationale": "expected f1 ~ 0.976 using the 'class_balanced' preset; high cost (~118s of training); tolerates the 1.8% missing values"
+      },
+      "status": "success",
+      "error": null,
+      "error_type": null,
+      "primary_metric": "f1",
+      "metric_direction": "maximize",
+      "validation_score": 0.45317220543806647,
+      "test_score": 0.4883720930232558,
+      "validation_metrics": {
+        "accuracy": 0.6983333333333334,
+        "balanced_accuracy": 0.6247187990775195,
+        "precision": 0.4411764705882353,
+        "recall": 0.4658385093167702,
+        "f1": 0.45317220543806647,
+        "matthews": 0.24527225598309893,
+        "roc_auc": 0.7394275527384371,
+        "average_precision": 0.49137922405863516,
+        "pr_auc": 0.49137922405863516,
+        "log_loss": 0.6097573041915894
+      },
+      "test_metrics": {
+        "accuracy": 0.7066666666666667,
+        "balanced_accuracy": 0.6481133009804892,
+        "precision": 0.45901639344262296,
+        "recall": 0.5217391304347826,
+        "f1": 0.4883720930232558,
+        "matthews": 0.2850858634955967,
+        "roc_auc": 0.7171295575772153,
+        "average_precision": 0.4551156082968336,
+        "pr_auc": 0.4551156082968336,
+        "log_loss": 0.6383273005485535
+      },
+      "training_time_s": 4.901761100000385,
+      "inference_time_ms": 32.16950000023644,
+      "inference_time_per_1k_ms": 53.615833333727394,
+      "peak_memory_mb": 856.66796875,
+      "model_size_bytes": 1507272,
+      "n_parameters": 1,
+      "n_features_used": 23,
+      "artifact_path": "artifacts_string\\runs\\run_961c567816b3\\models\\exp_a938a356619d",
+      "warnings": [],
+      "started_at": "2026-09-19T08:31:25+00:00",
+      "finished_at": "2026-09-19T08:31:30+00:00"
+    },
+    {
+      "experiment": {
+        "experiment_id": "exp_b62c26363ba4",
+        "model": "lightgbm",
+        "preprocessing": [
+          "impute_numeric",
+          "impute_categorical",
+          "missing_indicator",
+          "scale_robust",
+          "encode_categorical",
+          "clip_outliers",
+          "log_transform",
+          "datetime_features"
+        ],
+        "feature_selection": "variance",
+        "preset_index": 4,
+        "hyperparameters": {
+          "n_estimators": 600,
+          "learning_rate": 0.04,
+          "num_leaves": 31,
+          "subsample": 0.9,
+          "colsample_bytree": 0.8,
+          "class_weight": "balanced"
+        },
+        "expected_cost": "medium",
+        "source": "baseline",
+        "rationale": "expected f1 ~ 0.976 using the 'class_balanced' preset; high cost (~118s of training); tolerates the 1.8% missing values"
+      },
+      "status": "success",
+      "error": null,
+      "error_type": null,
+      "primary_metric": "f1",
+      "metric_direction": "maximize",
+      "validation_score": 0.4473684210526316,
+      "test_score": 0.41042345276872966,
+      "validation_metrics": {
+        "accuracy": 0.72,
+        "balanced_accuracy": 0.6257587119229191,
+        "precision": 0.4755244755244755,
+        "recall": 0.422360248447205,
+        "f1": 0.4473684210526316,
+        "matthews": 0.26156953210141715,
+        "roc_auc": 0.7427524441488985,
+        "average_precision": 0.48040270288390113,
+        "pr_auc": 0.48040270288390113,
+        "log_loss": 0.6344757203398963
+      },
+      "test_metrics": {
+        "accuracy": 0.6983333333333334,
+        "balanced_accuracy": 0.6011191443002872,
+        "precision": 0.4315068493150685,
+        "recall": 0.391304347826087,
+        "f1": 0.41042345276872966,
+        "matthews": 0.2088354513712914,
+        "roc_auc": 0.7043676339506784,
+        "average_precision": 0.43291087457771427,
+        "pr_auc": 0.43291087457771427,
+        "log_loss": 0.690048191907101
+      },
+      "training_time_s": 12.133816900000056,
+      "inference_time_ms": 82.73619999999937,
+      "inference_time_per_1k_ms": 137.89366666666564,
+      "peak_memory_mb": 944.109375,
+      "model_size_bytes": 2092564,
+      "n_parameters": null,
+      "n_features_used": 23,
+      "artifact_path": "artifacts_string\\runs\\run_961c567816b3\\models\\exp_b62c26363ba4",
+      "warnings": [],
+      "started_at": "2026-09-19T08:31:30+00:00",
+      "finished_at": "2026-09-19T08:31:43+00:00"
+    },
+    {
+      "experiment": {
+        "experiment_id": "exp_07e344f1a761",
+        "model": "xgboost",
+        "preprocessing": [
+          "impute_numeric",
+          "impute_categorical",
+          "missing_indicator",
+          "scale_robust",
+          "encode_categorical",
+          "clip_outliers",
+          "log_transform",
+          "datetime_features"
+        ],
+        "feature_selection": "mutual_info",
+        "preset_index": 4,
+        "hyperparameters": {
+          "n_estimators": 500,
+          "learning_rate": 0.05,
+          "max_depth": 6,
+          "subsample": 0.9,
+          "colsample_bytree": 0.8,
+          "scale_pos_weight": 4.0
+        },
+        "expected_cost": "medium",
+        "source": "baseline",
+        "rationale": "expected f1 ~ 0.976 using the 'class_balanced' preset; high cost (~118s of training); tolerates the 1.8% missing values"
+      },
+      "status": "success",
+      "error": null,
+      "error_type": null,
+      "primary_metric": "f1",
+      "metric_direction": "maximize",
+      "validation_score": 0.456973293768546,
+      "test_score": 0.47126436781609193,
+      "validation_metrics": {
+        "accuracy": 0.695,
+        "balanced_accuracy": 0.6263741705457067,
+        "precision": 0.4375,
+        "recall": 0.4782608695652174,
+        "f1": 0.456973293768546,
+        "matthews": 0.24597685800019337,
+        "roc_auc": 0.7320137523168126,
+        "average_precision": 0.4968961047150561,
+        "pr_auc": 0.4968961047150561,
+        "log_loss": 0.6119568943977356
+      },
+      "test_metrics": {
+        "accuracy": 0.6933333333333334,
+        "balanced_accuracy": 0.635068407872211,
+        "precision": 0.4385026737967914,
+        "recall": 0.5093167701863354,
+        "f1": 0.47126436781609193,
+        "matthews": 0.25842417906349185,
+        "roc_auc": 0.7152761074718093,
+        "average_precision": 0.47151070997359557,
+        "pr_auc": 0.47151070997359557,
+        "log_loss": 0.6307039260864258
+      },
+      "training_time_s": 5.5065301999998155,
+      "inference_time_ms": 67.53449999996519,
+      "inference_time_per_1k_ms": 112.557499999942,
+      "peak_memory_mb": 883.5859375,
+      "model_size_bytes": 1493275,
+      "n_parameters": 1,
+      "n_features_used": 18,
+      "artifact_path": "artifacts_string\\runs\\run_961c567816b3\\models\\exp_07e344f1a761",
+      "warnings": [],
+      "started_at": "2026-09-19T08:31:43+00:00",
+      "finished_at": "2026-09-19T08:31:48+00:00"
+    }
+  ],
+  "comparison": {
+    "rows": [
+      {
+        "model": "xgboost",
+        "experiment_id": "exp_a938a356619d",
+        "status": "success",
+        "primary_metric": "f1",
+        "validation_score": 0.45317220543806647,
+        "test_score": 0.4883720930232558,
+        "training_time_s": 4.9018,
+        "inference_time_per_1k_ms": 53.6158,
+        "peak_memory_mb": 856.67,
+        "model_size_bytes": 1507272,
+        "error": null
+      },
+      {
+        "model": "lightgbm",
+        "experiment_id": "exp_b62c26363ba4",
+        "status": "success",
+        "primary_metric": "f1",
+        "validation_score": 0.4473684210526316,
+        "test_score": 0.41042345276872966,
+        "training_time_s": 12.1338,
+        "inference_time_per_1k_ms": 137.8937,
+        "peak_memory_mb": 944.11,
+        "model_size_bytes": 2092564,
+        "error": null
+      },
+      {
+        "model": "xgboost",
+        "experiment_id": "exp_07e344f1a761",
+        "status": "success",
+        "primary_metric": "f1",
+        "validation_score": 0.456973293768546,
+        "test_score": 0.47126436781609193,
+        "training_time_s": 5.5065,
+        "inference_time_per_1k_ms": 112.5575,
+        "peak_memory_mb": 883.59,
+        "model_size_bytes": 1493275,
+        "error": null
+      }
+    ],
+    "objective": "churn prediction",
+    "primary_metric": "f1",
+    "metric_direction": "maximize",
+    "best_validation": "xgboost",
+    "best_test": "xgboost",
+    "fastest": "xgboost",
+    "smallest": "xgboost",
+    "most_compute_efficient": "xgboost",
+    "trade_offs": [],
+    "table": "MODEL COMPARISON\n\nmodel                          f1   train(s)    mem(MB)   size(KB)        test f1  status\n-----------------------------------------------------------------------------------------\nxgboost                    0.4570       5.51        884     1458.3         0.4713  success\nxgboost                    0.4532       4.90        857     1471.9         0.4884  success\nlightgbm                   0.4474      12.13        944     2043.5         0.4104  success\n\ntest column is the held-out split, reported for transparency only; selection used validation"
+  },
+  "best_model": {
+    "model": "xgboost",
+    "experiment_id": "exp_07e344f1a761",
+    "primary_metric": "f1",
+    "metric_direction": "maximize",
+    "validation_score": 0.456973293768546,
+    "test_score": null,
+    "reason": "best validation f1 per the problem statement's objective; highest validation f1 (0.4570) among the 3 approved pipeline(s) that trained successfully",
+    "selection_basis": "validation only (test split reserved for final evaluation)",
+    "efficiency_alternative": null,
+    "hyperparameters": {
+      "n_estimators": 500,
+      "learning_rate": 0.05,
+      "max_depth": 6,
+      "subsample": 0.9,
+      "colsample_bytree": 0.8,
+      "scale_pos_weight": 4.0
+    },
+    "preprocessing": [
+      "impute_numeric",
+      "impute_categorical",
+      "missing_indicator",
+      "scale_robust",
+      "encode_categorical",
+      "clip_outliers",
+      "log_transform",
+      "datetime_features"
+    ],
+    "feature_selection": "mutual_info"
+  },
+  "pareto_frontier": [
+    {
+      "model": "xgboost",
+      "experiment_id": "exp_07e344f1a761",
+      "score": 0.456973293768546,
+      "cost_s": 5.5065301999998155,
+      "peak_memory_mb": 883.5859375,
+      "on_frontier": true
+    },
+    {
+      "model": "xgboost",
+      "experiment_id": "exp_a938a356619d",
+      "score": 0.45317220543806647,
+      "cost_s": 4.901761100000385,
+      "peak_memory_mb": 856.66796875,
+      "on_frontier": true
+    }
+  ],
+  "search_statistics": {
+    "searcher": "rl-ppo-planning",
+    "n_experiments": 3,
+    "n_failed": 0,
+    "n_distinct_models": 2,
+    "best_validation_score": 0.456973293768546,
+    "best_model": "xgboost",
+    "total_training_time_s": 22.542108200000257,
+    "total_compute_s": 22.542108200000257,
+    "time_to_best_s": null,
+    "stopping_reason": "completed",
+    "history": [
+      {
+        "step": 1,
+        "model": "xgboost",
+        "origin": "surrogate",
+        "expected_score": 0.97569,
+        "expected_cost_s": 118.425
+      },
+      {
+        "step": 2,
+        "model": "lightgbm",
+        "origin": "surrogate",
+        "expected_score": 0.97569,
+        "expected_cost_s": 118.425
+      },
+      {
+        "step": 3,
+        "model": "xgboost",
+        "origin": "surrogate",
+        "expected_score": 0.97569,
+        "expected_cost_s": 118.425
+      }
+    ]
+  },
+  "artifacts": {
+    "model_zip": "artifacts_string\\runs\\run_961c567816b3\\model_package.zip",
+    "model_zip_sha256": "70185ff9e87440528cd2c06b7f8f04a36cee8a383767973965dbc4cf942cbe27",
+    "model_dir": "artifacts_string\\runs\\run_961c567816b3\\package\\model_package",
+    "results_zip": "artifacts_string\\runs\\run_961c567816b3\\results.zip",
+    "results_zip_sha256": "510f0d3c95b75287cab36efc2a77c8f15bcc2e71ec7f39da3a1f3a24a57b7d99",
+    "verified": true,
+    "extras": {}
+  },
+  "config_snapshot": {
+    "runtime": {
+      "artifacts_dir": "artifacts_string",
+      "seed": 1234,
+      "n_jobs": -1,
+      "log_level": "INFO",
+      "log_json": false,
+      "num_threads": 0
+    },
+    "security": {
+      "max_upload_mb": 512.0,
+      "max_rows": 5000000,
+      "max_cols": 5000,
+      "allowed_extensions": [
+        ".csv",
+        ".tsv",
+        ".txt",
+        ".parquet",
+        ".jsonl",
+        ".json"
+      ],
+      "max_column_name_length": 128,
+      "reject_dunder_columns": true,
+      "max_zip_mb": 2048.0
+    },
+    "task": {
+      "default_metric_by_task": {},
+      "llm_extractor": false,
+      "llm_model": "gpt-4o-mini",
+      "min_confidence": 0.35
+    },
+    "dataset": {
+      "train_ratio": 0.6,
+      "val_ratio": 0.2,
+      "test_ratio": 0.2,
+      "min_rows": 50,
+      "stratify": true,
+      "temporal_split": false,
+      "max_cardinality_for_ohe": 50,
+      "high_cardinality_threshold": 0.5,
+      "near_duplicate_correlation": 0.98
+    },
+    "search": {
+      "max_experiments": 4,
+      "min_experiments": 3,
+      "n_recommendations": 3,
+      "time_budget_s": 3600.0,
+      "memory_budget_mb": 8192.0,
+      "target_score": null,
+      "patience": 4,
+      "stop_min_improvement": 0.001,
+      "recommendation_horizon": 6,
+      "recommendation_rollouts": 64,
+      "recommendation_temperature": 1.0,
+      "post_selection_refinement": false,
+      "refinement_trials": 8
+    },
+    "rl": {
+      "enabled": true,
+      "policy_path": "artifacts/policies/ppo_policy.pt",
+      "device": "auto",
+      "seed": null,
+      "hidden_sizes": [
+        256,
+        256
+      ],
+      "lr": 0.0003,
+      "gamma": 0.99,
+      "gae_lambda": 0.95,
+      "clip_ratio": 0.2,
+      "entropy_coef": 0.02,
+      "entropy_coef_final": 0.002,
+      "value_coef": 0.5,
+      "max_grad_norm": 0.5,
+      "update_epochs": 10,
+      "minibatch_size": 256,
+      "rollout_steps": 2048,
+      "total_steps": 200000,
+      "max_episode_steps": 20,
+      "normalize_reward": true,
+      "reward": {
+        "w_perf": 1.0,
+        "w_cost": 0.2,
+        "w_novelty": 0.1,
+        "stagnation_penalty": 0.05,
+        "invalid_penalty": 0.5,
+        "failure_penalty": 0.2,
+        "terminal_bonus": 1.0,
+        "perf_scale": 0.05
+      },
+      "warm_start_recommendation": true
+    },
+    "models": {
+      "enabled": [
+        "logistic_regression",
+        "random_forest",
+        "extra_trees",
+        "xgboost",
+        "lightgbm",
+        "mlp"
+      ],
+      "cost_reference_s": 60.0
+    },
+    "execution": {
+      "cv_folds": 0,
+      "fail_fast": false,
+      "max_parallel": 1,
+      "inference_benchmark_rows": 1000,
+      "memory_sample_interval_s": 0.1,
+      "allow_dimensionality_reduction": true
+    },
+    "packaging": {
+      "include_onnx": false,
+      "include_readme": true,
+      "include_results": true,
+      "inference_requirements": [
+        "numpy>=1.26",
+        "pandas>=2.2",
+        "scipy>=1.11",
+        "scikit-learn>=1.4",
+        "joblib>=1.3"
+      ]
+    },
+    "memory": {
+      "enabled": true,
+      "db_path": "artifacts/memory.db",
+      "similarity_k": 5,
+      "min_similarity": 0.0
+    },
+    "api": {
+      "host": "127.0.0.1",
+      "port": 8000,
+      "cors_origins": [
+        "*"
+      ],
+      "max_concurrent_runs": 2
+    },
+    "source_path": "C:\\Users\\Ibhan Mukherjee\\Desktop\\RLAGENT\\configs\\default.yaml"
+  },
+  "progress": [
+    {
+      "run_id": "run_961c567816b3",
+      "stage": "profiling",
+      "message": "Understanding the problem statement",
+      "sequence": 1,
+      "progress": 0.1,
+      "detail": {},
+      "timestamp": "2026-09-19T08:31:24+00:00"
+    },
+    {
+      "run_id": "run_961c567816b3",
+      "stage": "profiling",
+      "message": "Profiling the dataset",
+      "sequence": 2,
+      "progress": 0.1,
+      "detail": {},
+      "timestamp": "2026-09-19T08:31:24+00:00"
+    },
+    {
+      "run_id": "run_961c567816b3",
+      "stage": "understanding",
+      "message": "classification task, optimising f1",
+      "sequence": 3,
+      "progress": 0.18,
+      "detail": {
+        "task": {
+          "learning_type": "supervised",
+          "task_type": "classification",
+          "objective": "churn prediction",
+          "target": "churn",
+          "metric": "f1"
+        },
+        "confidence": 0.98
+      },
+      "timestamp": "2026-09-19T08:31:25+00:00"
+    },
+    {
+      "run_id": "run_961c567816b3",
+      "stage": "planning",
+      "message": "Planning experiments",
+      "sequence": 4,
+      "progress": 0.25,
+      "detail": {},
+      "timestamp": "2026-09-19T08:31:25+00:00"
+    },
+    {
+      "run_id": "run_961c567816b3",
+      "stage": "awaiting_approval",
+      "message": "3 pipeline(s) recommended; awaiting approval",
+      "sequence": 5,
+      "progress": 0.25,
+      "detail": {
+        "planner": "surrogate-greedy"
+      },
+      "timestamp": "2026-09-19T08:31:25+00:00"
+    },
+    {
+      "run_id": "run_961c567816b3",
+      "stage": "awaiting_approval",
+      "message": "3 pipeline(s) approved; ready to execute",
+      "sequence": 6,
+      "progress": 0.3,
+      "detail": {
+        "approved": [
+          "xgboost",
+          "lightgbm",
+          "xgboost"
+        ]
+      },
+      "timestamp": "2026-09-19T08:31:25+00:00"
+    },
+    {
+      "run_id": "run_961c567816b3",
+      "stage": "executing",
+      "message": "Training 3 approved pipeline(s)",
+      "sequence": 7,
+      "progress": 0.35,
+      "detail": {
+        "approved": [
+          "xgboost",
+          "lightgbm",
+          "xgboost"
+        ]
+      },
+      "timestamp": "2026-09-19T08:31:25+00:00"
+    },
+    {
+      "run_id": "run_961c567816b3",
+      "stage": "executing",
+      "message": "xgboost trained in 4.9s (f1=0.4532)",
+      "sequence": 8,
+      "progress": 0.6,
+      "detail": {
+        "model": "xgboost",
+        "status": "success",
+        "validation_score": 0.45317220543806647
+      },
+      "timestamp": "2026-09-19T08:31:48+00:00"
+    },
+    {
+      "run_id": "run_961c567816b3",
+      "stage": "executing",
+      "message": "lightgbm trained in 12.1s (f1=0.4474)",
+      "sequence": 9,
+      "progress": 0.6,
+      "detail": {
+        "model": "lightgbm",
+        "status": "success",
+        "validation_score": 0.4473684210526316
+      },
+      "timestamp": "2026-09-19T08:31:48+00:00"
+    },
+    {
+      "run_id": "run_961c567816b3",
+      "stage": "executing",
+      "message": "xgboost trained in 5.5s (f1=0.4570)",
+      "sequence": 10,
+      "progress": 0.6,
+      "detail": {
+        "model": "xgboost",
+        "status": "success",
+        "validation_score": 0.456973293768546
+      },
+      "timestamp": "2026-09-19T08:31:48+00:00"
+    },
+    {
+      "run_id": "run_961c567816b3",
+      "stage": "comparing",
+      "message": "Comparing models",
+      "sequence": 11,
+      "progress": 0.82,
+      "detail": {},
+      "timestamp": "2026-09-19T08:31:48+00:00"
+    },
+    {
+      "run_id": "run_961c567816b3",
+      "stage": "selecting",
+      "message": "Selecting the final model",
+      "sequence": 12,
+      "progress": 0.86,
+      "detail": {},
+      "timestamp": "2026-09-19T08:31:48+00:00"
+    },
+    {
+      "run_id": "run_961c567816b3",
+      "stage": "evaluating",
+      "message": "Evaluating on the held-out test split",
+      "sequence": 13,
+      "progress": 0.75,
+      "detail": {},
+      "timestamp": "2026-09-19T08:31:48+00:00"
+    },
+    {
+      "run_id": "run_961c567816b3",
+      "stage": "packaging",
+      "message": "Packaging the final model",
+      "sequence": 14,
+      "progress": 0.95,
+      "detail": {},
+      "timestamp": "2026-09-19T08:31:49+00:00"
+    },
+    {
+      "run_id": "run_961c567816b3",
+      "stage": "packaging",
+      "message": "Model package verified and archived",
+      "sequence": 15,
+      "progress": 0.95,
+      "detail": {
+        "zip": "artifacts_string\\runs\\run_961c567816b3\\model_package.zip",
+        "verified": true,
+        "sha256": "70185ff9e87440528cd2c06b7f8f04a36cee8a383767973965dbc4cf942cbe27"
+      },
+      "timestamp": "2026-09-19T08:31:55+00:00"
+    },
+    {
+      "run_id": "run_961c567816b3",
+      "stage": "complete",
+      "message": "Run complete",
+      "sequence": 16,
+      "progress": 1.0,
+      "detail": {},
+      "timestamp": "2026-09-19T08:31:55+00:00"
+    }
+  ],
+  "error": null,
+  "messages": [
+    "3 pipeline(s) approved by user at 2026-09-19T08:31:25+00:00"
+  ]
+}
