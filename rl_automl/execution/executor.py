@@ -32,6 +32,7 @@ import pandas as pd
 from rl_automl.core.config import AutoMLConfig
 from rl_automl.core.errors import (
     BudgetExceededError,
+    DatasetValidationError,
     NotApprovedError,
     RunStateError,
 )
@@ -148,9 +149,23 @@ class PipelineExecutor:
 
     # -- setup -------------------------------------------------------------------
 
-    def prepare(self, frame: pd.DataFrame) -> DataSplits:
-        """Build the split once. Must be called before :meth:`execute`."""
-        self.splits = make_splits(frame, self.task, self.config.dataset, seed=self.seed)
+    def prepare(self, frame: pd.DataFrame, holdout: pd.DataFrame | None = None) -> DataSplits:
+        """Build the split once. Must be called before :meth:`execute`.
+
+        ``holdout`` is an optional supplied test table. It is appended to the training
+        frame and marked as the reserved test split, so a train/test pair that arrived as
+        two files is honoured exactly rather than re-split.
+        """
+        combined, holdout_rows, note = self._combine_holdout(frame, holdout)
+        self.splits = make_splits(
+            combined,
+            self.task,
+            self.config.dataset,
+            seed=self.seed,
+            holdout_rows=holdout_rows,
+        )
+        if note:
+            self.splits.warnings.append(note)
 
         feature_columns = [
             str(column) for column in frame.columns if str(column) != self.task.target
@@ -173,6 +188,59 @@ class PipelineExecutor:
         self._started_at = time.perf_counter()
         self._run_dir.mkdir(parents=True, exist_ok=True)
         return self.splits
+
+    def _combine_holdout(
+        self, frame: pd.DataFrame, holdout: pd.DataFrame | None
+    ) -> tuple[pd.DataFrame, int | None, str | None]:
+        """Append a supplied test table to the training frame, aligned to its columns.
+
+        Alignment is by training-table columns: a test file routinely carries an id column
+        the training file has not got, and just as routinely omits one. Extra columns are
+        dropped and missing ones become NaN for the imputers, rather than refusing the run.
+        """
+        if holdout is None or len(holdout) == 0:
+            return frame, None, None
+
+        if self.task.task_type.is_supervised and (
+            not self.task.target or self.task.target not in holdout.columns
+        ):
+            raise DatasetValidationError(
+                f"the supplied test table has no '{self.task.target}' column, so its rows "
+                "cannot be scored. Predictions-only files (the usual Kaggle test.csv) need "
+                "labels to be a test set; leave the test set empty to split the training "
+                "table internally instead.",
+                target=self.task.target,
+                columns=[str(column) for column in holdout.columns][:50],
+            )
+
+        extra = [str(column) for column in holdout.columns if column not in frame.columns]
+        absent = [
+            str(column)
+            for column in frame.columns
+            if column not in holdout.columns and str(column) != self.task.target
+        ]
+        aligned = holdout.reindex(columns=frame.columns)
+        combined = pd.concat([frame, aligned], ignore_index=True)
+
+        notes = [f"using the supplied test table: {len(holdout)} rows held out verbatim"]
+        if extra:
+            notes.append(f"ignored {len(extra)} column(s) not present in the training table")
+        if absent:
+            notes.append(
+                f"{len(absent)} training column(s) were absent from the test table and are "
+                "imputed"
+            )
+        logger.info(
+            "supplied holdout attached",
+            extra={
+                "context": {
+                    "holdout_rows": len(holdout),
+                    "extra_columns": extra[:10],
+                    "absent_columns": absent[:10],
+                }
+            },
+        )
+        return combined, len(holdout), "; ".join(notes)
 
     def _prepare_target_encoding(self) -> None:
         """Encode non-contiguous / non-numeric class labels to ``0..k-1``.

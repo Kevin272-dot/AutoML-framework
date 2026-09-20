@@ -335,6 +335,7 @@ class AutoMLOrchestrator:
         run: RunObject,
         *,
         frame: pd.DataFrame | None = None,
+        holdout: pd.DataFrame | None = None,
         plan_only_no_artifacts: bool = False,
     ) -> RunObject:
         """Train the approved pipelines, compare, select and package."""
@@ -346,15 +347,25 @@ class AutoMLOrchestrator:
 
         try:
             executor = self._build_executor(run)
-            executor.prepare(dataset)
+            executor.prepare(dataset, holdout)
 
-            self._emit(
-                run,
-                RunStatus.EXECUTING.value,
-                f"Training {len(approved)} approved pipeline(s)",
-                progress=0.35,
-                detail={"approved": [experiment.model for experiment in approved]},
-            )
+            if holdout is not None and len(holdout):
+                self._emit(
+                    run,
+                    RunStatus.EXECUTING.value,
+                    f"Training {len(approved)} approved pipeline(s) and reserving "
+                    f"{len(holdout)} supplied test row(s)",
+                    progress=0.35,
+                    detail={"holdout_rows": int(len(holdout))},
+                )
+            else:
+                self._emit(
+                    run,
+                    RunStatus.EXECUTING.value,
+                    f"Training {len(approved)} approved pipeline(s)",
+                    progress=0.35,
+                    detail={"approved": [experiment.model for experiment in approved]},
+                )
             summary = executor.run(approved)
             run.results = summary.results
             run.search_statistics = _merge_statistics(run.search_statistics, summary)
@@ -753,15 +764,14 @@ class AutoMLOrchestrator:
 
     @staticmethod
     def _reload_dataset(run: RunObject) -> pd.DataFrame:
-        if not run.dataset_path:
-            raise RunStateError(
-                "the dataset is required for execution; pass a frame or set dataset_path",
-                run_id=run.run_id,
-            )
-        path = Path(run.dataset_path)
-        if path.suffix.lower() == ".parquet":
-            return pd.read_parquet(path)
-        return pd.read_csv(path)
+        return _read_table(run.dataset_path, "dataset", run.run_id)
+
+    @staticmethod
+    def _reload_holdout(run: RunObject) -> pd.DataFrame | None:
+        """The supplied test table, when the run was created with one."""
+        if not run.holdout_path:
+            return None
+        return _read_table(run.holdout_path, "test table", run.run_id)
 
     def _emit(
         self,

@@ -454,6 +454,12 @@ class RunObject(_Base):
     dataset_name: str = ""
     dataset_sha256: str = ""
 
+    #: An optional second table used verbatim as the held-out test set, instead of carving
+    #: one out of ``dataset_path``. This is how a supplied train/test pair is honoured: the
+    #: user's own test rows are the ones that must never be seen during selection.
+    holdout_path: str | None = None
+    holdout_name: str | None = None
+
     task: TaskSpec | None = None
     dataset_profile: DatasetProfile | None = None
     dataset_fingerprint: DatasetFingerprint | None = None

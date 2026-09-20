@@ -124,8 +124,18 @@ def make_splits(
     task: TaskSpec,
     config: DatasetConfig | None = None,
     seed: int = 0,
+    *,
+    holdout_rows: int | None = None,
 ) -> DataSplits:
-    """Build the split for a task. Deterministic for a given ``seed``."""
+    """Build the split for a task. Deterministic for a given ``seed``.
+
+    ``holdout_rows`` says that the last N rows of ``frame`` are a *supplied* test set (the
+    caller concatenated them onto the training table). Those rows become the reserved test
+    split verbatim and are never shuffled into train or validation, so a train/test pair
+    that arrived as two files keeps exactly the boundary its author intended. Train and
+    validation are then carved from the remaining rows, with the validation ratio
+    renormalised over that smaller pool.
+    """
     config = config or DatasetConfig()
     config.validate_ratios()
 
@@ -139,10 +149,22 @@ def make_splits(
 
     warnings: list[str] = []
     rng = np.random.default_rng(seed)
+
+    external = int(holdout_rows or 0)
+    if external < 0:
+        raise DatasetValidationError("holdout_rows cannot be negative")
+    if external and external >= n_rows:
+        raise DatasetValidationError(
+            f"the supplied test table has {external} rows, which leaves nothing to train on",
+            holdout_rows=external,
+            n_rows=n_rows,
+        )
     all_idx = np.arange(n_rows)
+    holdout_idx = all_idx[n_rows - external :] if external else None
+    all_idx = all_idx[: n_rows - external] if external else all_idx
 
     if not task.task_type.is_supervised:
-        return _unsupervised_splits(frame, task, config, seed, rng, all_idx)
+        return _unsupervised_splits(frame, task, config, seed, rng, all_idx, external)
 
     target_series = None
     if task.target and task.target in frame.columns:
@@ -154,11 +176,29 @@ def make_splits(
             columns=[str(c) for c in frame.columns][:50],
         )
 
-    if target_series.isna().any():
-        n_missing = int(target_series.isna().sum())
+    labels = target_series.to_numpy()
+
+    if external:
+        held = holdout_idx[~pd.isna(labels[holdout_idx])]
+        dropped = len(holdout_idx) - len(held)
+        if dropped:
+            warnings.append(
+                f"dropped {dropped} supplied test row(s) whose target value was missing"
+            )
+        if len(held) == 0:
+            raise DatasetValidationError(
+                f"none of the supplied test rows have a '{task.target}' value, so the test "
+                "table cannot be scored; pick a table that carries labels, or let the "
+                "training table be split internally",
+                target=task.target,
+            )
+        holdout_idx = held
+
+    missing_in_pool = pd.isna(labels[all_idx])
+    if missing_in_pool.any():
+        n_missing = int(missing_in_pool.sum())
         warnings.append(f"dropped {n_missing} rows with a missing target value")
-        all_idx = all_idx[~target_series.isna().to_numpy()]
-        target_series = target_series.dropna()
+        all_idx = all_idx[~missing_in_pool]
 
     if len(all_idx) < config.min_rows:
         raise DatasetValidationError(
@@ -167,7 +207,7 @@ def make_splits(
         )
 
     # Chronological split when the data is a time series and the caller asked for it.
-    if config.temporal_split:
+    if config.temporal_split and not external:
         datetime_column = _first_datetime_column(frame, task)
         if datetime_column is not None:
             return _temporal_splits(frame, task, config, seed, all_idx, datetime_column, warnings)
@@ -175,6 +215,60 @@ def make_splits(
             "temporal_split requested but no datetime column was found; "
             "falling back to a random split"
         )
+
+    stratify = config.stratify and task.task_type is TaskType.CLASSIFICATION
+
+    if external:
+        # Only train/validation remain to be divided, so the validation share is
+        # renormalised over the training pool rather than over the whole frame.
+        val_share = config.val_ratio / max(config.train_ratio + config.val_ratio, 1e-9)
+        n_val = round(len(all_idx) * val_share)
+        n_val = min(max(n_val, 1), max(len(all_idx) - 1, 1))
+        if len(all_idx) - n_val < 1:
+            raise DatasetValidationError(
+                f"the training table has only {len(all_idx)} rows once the supplied test set "
+                "is set aside; it is too small to also hold out a validation split"
+            )
+        labels_pool = labels[all_idx]
+        if stratify:
+            counts = pd.Series(labels_pool).value_counts()
+            if counts.min() < 2 or counts.shape[0] > 100:
+                warnings.append(
+                    "stratification skipped: a class has fewer than 2 members in the "
+                    "training pool or there are too many classes"
+                )
+                stratify = False
+
+        if stratify:
+            train_idx, val_idx = _stratified_two_way(
+                all_idx, labels_pool, len(all_idx) - n_val, n_val, seed
+            )
+            strategy = "stratified+supplied_test"
+        else:
+            shuffled = rng.permutation(all_idx)
+            train_idx = np.sort(shuffled[: len(all_idx) - n_val])
+            val_idx = np.sort(shuffled[len(all_idx) - n_val :])
+            strategy = "random+supplied_test"
+
+        splits = DataSplits(
+            train_idx=train_idx,
+            val_idx=val_idx,
+            test_idx=np.sort(holdout_idx),
+            frame=frame,
+            target=task.target,
+            strategy=strategy,
+            stratified=stratify,
+            seed=seed,
+            test_reserved=True,
+            warnings=warnings,
+            meta={
+                "val_ratio": config.val_ratio,
+                "supplied_test_rows": len(holdout_idx),
+                "test_source": "supplied",
+            },
+        )
+        _log_splits(splits, task)
+        return splits
 
     n_test = round(len(all_idx) * config.test_ratio)
     n_val = round(len(all_idx) * config.val_ratio)
@@ -269,6 +363,37 @@ def _stratified_three_way(
     )
 
 
+def _stratified_two_way(
+    pool_idx: np.ndarray,
+    labels: np.ndarray,
+    n_train: int,
+    n_val: int,
+    seed: int,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Stratified train/validation split, used when the test set is supplied externally."""
+    rng = np.random.default_rng(seed)
+    train_parts: list[np.ndarray] = []
+    val_parts: list[np.ndarray] = []
+
+    total = len(pool_idx)
+    for label in np.unique(labels):
+        class_idx = pool_idx[labels == label]
+        shuffled = rng.permutation(class_idx)
+        share = len(shuffled) / total
+
+        n_val_class = max(1, round(n_val * share))
+        if n_val_class >= len(shuffled):
+            n_val_class = max(1, len(shuffled) - 1)
+
+        val_parts.append(shuffled[:n_val_class])
+        train_parts.append(shuffled[n_val_class:])
+
+    return (
+        np.sort(np.concatenate(train_parts)),
+        np.sort(np.concatenate(val_parts)),
+    )
+
+
 def _temporal_splits(
     frame: pd.DataFrame,
     task: TaskSpec,
@@ -321,13 +446,42 @@ def _unsupervised_splits(
     seed: int,
     rng: np.random.Generator,
     all_idx: np.ndarray,
+    external: int = 0,
 ) -> DataSplits:
     """Fit/evaluate split for clustering, anomaly detection and dimensionality reduction.
 
     Metrics like silhouette are computed on data the model did not fit on, which is the
     closest unsupservised analogue of a held-out set. There is no "test" split because a
     second reserved set has no meaning without labels to score against.
+
+    A supplied second table is used as that evaluation set when one is given, since
+    unsupervised metrics need no labels to be meaningful.
     """
+    if external:
+        eval_idx = np.arange(len(frame) - external, len(frame))
+        splits = DataSplits(
+            train_idx=np.sort(all_idx),
+            val_idx=np.sort(eval_idx),
+            test_idx=np.array([], dtype=np.int64),
+            frame=frame,
+            target=None,
+            strategy="fit+supplied_eval",
+            stratified=False,
+            seed=seed,
+            test_reserved=False,
+            warnings=[
+                "unsupervised task: the supplied second table is used as the evaluation "
+                "set and the first table is fitted in full"
+            ],
+            meta={
+                "topic": task.task_type.value,
+                "eval_rows": len(eval_idx),
+                "test_source": "supplied",
+            },
+        )
+        _log_splits(splits, task)
+        return splits
+
     n_eval = max(1, round(len(all_idx) * (config.val_ratio + config.test_ratio)))
     n_fit = len(all_idx) - n_eval
     if n_fit < 1:
