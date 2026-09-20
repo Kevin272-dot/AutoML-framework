@@ -1,0 +1,11 @@
+logistic_regression  clf=5 reg=5
+random_forest        clf=5 reg=4
+extra_trees          clf=5 reg=4
+xgboost              clf=5 reg=4
+lightgbm             clf=5 reg=4
+mlp                  clf=4 reg=4
+xgboost clf presets: ['fast', 'balanced', 'regularized', 'deep', 'class_balanced']
+xgboost reg presets: ['fast', 'balanced', 'regularized', 'deep']
+random_forest clf presets: ['fast', 'balanced', 'regularized', 'deep', 'class_balanced']
+preset validation problems: none
+compileall: OK

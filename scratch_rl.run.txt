@@ -1,0 +1,49 @@
+== action space ==
+  layout head sizes: (7, 9, 5, 5)
+  model slots: 7 | models: ['logistic_regression', 'random_forest', 'extra_trees', 'xgboost', 'lightgbm', 'mlp']
+  mask at step 0: {'n_legal_models': 6, 'stop_legal': False, 'n_legal_preprocessing': 6} (STOP correctly illegal before min_experiments)
+  mask at step 5: {'n_legal_models': 7, 'stop_legal': True, 'n_legal_preprocessing': 6}
+
+== decode / encode round trip ==
+  mlp                  preset=2 fs=variance     pre=['impute_numeric', 'impute_categorical', 'missing_indicator'] cost=medium
+  lightgbm             preset=2 fs=none         pre=['impute_numeric', 'missing_indicator', 'scale_robust', 'log_transform', 'datetime_features'] cost=medium
+  logistic_regression  preset=0 fs=kbest        pre=['scale_standard'] cost=low
+  round trip OK
+
+== preprocessing conflict resolution ==
+  both scalers requested -> ['scale_robust']
+
+== state encoder ==
+  state dim: 74 | finite: True
+
+== surrogate prior sanity ==
+  lightgbm             score=0.956 cost=  72.6s fail=0.010
+  logistic_regression  score=0.690 cost=  15.6s fail=0.010
+  svm                  score=0.703 cost= 165.9s fail=0.010
+  mlp                  score=0.732 cost= 114.0s fail=0.010
+
+== simulator episode ==
+  rewards: [0.9, 0.9, -2.0, -0.256, -1.335, -0.023] | n_experiments: 6 | best: 0.985
+
+== PPO training (simulated) ==
+  4 training environments, all same action space: True
+  device: cpu | params: 252955
+  steps: 2500 updates: 10 episodes: 628
+  elapsed: 33.4 s | mean episode return: 1.654
+  explained variance (first/last): -0.006 -> 0.604
+  loss first 4: [1.593, 1.118, 0.939, 1.071]
+  loss last 4:  [0.246, 0.11, 0.131, 0.099]
+  all finite: True
+  entropy coef: 0.0182 -> 0.002
+
+== learning check: policy vs random on a held-out dataset ==
+  trained   : [0.985, 0.985, 0.985, 0.985, 0.985] mean: 0.985
+  untrained : [0.926, 0.926, 0.926, 0.926, 0.926] mean: 0.926
+  random    : [0.9763, 0.9697, 0.985, 0.9677, 0.9793] mean: 0.9756
+
+== save / load + version guard ==
+  loaded metadata: {'format_version': '1.0.0', 'state_schema_version': '1.1.0', 'action_space_version': '1.0.0', 'obs_dim': 74, 'head_sizes': [7, 9, 5, 5], 'hidden_sizes': [256, 256], 'model_keys': ['logistic_regression', 'random_forest', 'extra_trees', 'xgboost', 'lightgbm', 'mlp'], 'task_type': 'classification', 'created_at': '2026-09-19T12:45:50+00:00', 'trained_steps': 2500}
+  extra keys: ['reward']
+  guard OK: policy checkpoint is incompatible with the current configuration: head sizes [7, 9, 5, 5] != [3, 9, 5, 5]
+
+RL SMOKE OK

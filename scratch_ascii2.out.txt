@@ -1,0 +1,2 @@
+'§' U+00A7 count=  85 cp1252-safe files=33
+'·' U+00B7 count=   1 cp1252-safe files=1

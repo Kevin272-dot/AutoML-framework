@@ -1,0 +1,174 @@
+== dataset ==
+   churn_demo (20000, 10) | churn rate: 0.2132
+   dtypes: {'float64': np.int64(4), 'category': np.int64(3), 'int64': np.int64(2), 'datetime64[us]': np.int64(1)}
+
+== PHASE A: plan ==
+  status: awaiting_approval
+  task: classification | metric: f1 (maximize) | target: churn | confidence: 0.98
+  dataset: 20,000 rows x 10 features
+   numeric: 5 categorical: 3 datetime: 1
+   class dist: 2 | minority: 0.213 | imbalanced: True
+   profile warnings: ['class distribution is imbalanced (minority class 21.3%); prefer precision/recall/F1 or PR-AUC over accuracy']
+  planner: surrogate-greedy
+  requires_user_approval: True
+  estimated: 3 experiment(s) on 20,000 rows - estimated 397s of training total (xgboost, lightgbm, random_forest)
+   #1 xgboost              cost=high    expected=0.9850 fs=variance
+       pre=['impute_numeric', 'impute_categorical', 'missing_indicator', 'scale_robust', 'encode_categorical', 'clip_outliers', 'log_transform', 'datetime_features']
+       reason: expected f1 ~ 0.985 using the 'balanced' preset; high cost (~123s of training); tree ensembles usually hold up well on the 21% minority class; tolerates the 1.7% missing values
+   #2 lightgbm             cost=high    expected=0.9850 fs=variance
+       pre=['impute_numeric', 'impute_categorical', 'missing_indicator', 'scale_robust', 'encode_categorical', 'clip_outliers', 'log_transform', 'datetime_features']
+       reason: expected f1 ~ 0.985 using the 'balanced' preset; high cost (~123s of training); tree ensembles usually hold up well on the 21% minority class; tolerates the 1.7% missing values
+   #3 random_forest        cost=high    expected=0.9430 fs=variance
+       pre=['impute_numeric', 'impute_categorical', 'missing_indicator', 'scale_robust', 'encode_categorical', 'clip_outliers', 'log_transform', 'datetime_features']
+       reason: expected f1 ~ 0.943 using the 'balanced' preset; high cost (~150s of training); tree ensembles usually hold up well on the 21% minority class; tolerates the 1.7% missing values
+  baseline: for reference, 24 uniformly sampled experiments in the same space would be expected to average 0.926 f1 (best single draw 0.985); the recommended set averages 0.971. These are surrogate estimates, not measurements.
+  notes: ['the saved policy could not be used (policy weights could not be loaded: Error(s) in loading state_dict for ActorCritic:\n\tsize mismatch for trunk.mlp.0.weight: copying a param with shape torch.Size([16, 74]) from checkpoint, the shape in current model is torch.Size([256, 74]).\n\tsize mismatch for trunk.mlp.0.bias: copying a param with shape torch.Size([16]) from checkpoint, the shape in current model is torch.Size([256]).\n\tsize mismatch for trunk.mlp.2.weight: copying a param with shape torch.Size([16, 16]) from checkpoint, the shape in current model is torch.Size([256, 256]).\n\tsize mismatch for trunk.mlp.2.bias: copying a param with shape torch.Size([16]) from checkpoint, the shape in current model is torch.Size([256]).\n\tsize mismatch for actor.trunk.mlp.0.weight: copying a param with shape torch.Size([16, 74]) from checkpoint, the shape in current model is torch.Size([256, 74]).\n\tsize mismatch for actor.trunk.mlp.0.bias: copying a param with shape torch.Size([16]) from checkpoint, the shape in current model is torch.Size([256]).\n\tsize mismatch for actor.trunk.mlp.2.weight: copying a param with shape torch.Size([16, 16]) from checkpoint, the shape in current model is torch.Size([256, 256]).\n\tsize mismatch for actor.trunk.mlp.2.bias: copying a param with shape torch.Size([16]) from checkpoint, the shape in current model is torch.Size([256]).\n\tsize mismatch for actor.heads.0.0.weight: copying a param with shape torch.Size([128, 16]) from checkpoint, the shape in current model is torch.Size([128, 256]).\n\tsize mismatch for actor.heads.1.0.weight: copying a param with shape torch.Size([128, 16]) from checkpoint, the shape in current model is torch.Size([128, 256]).\n\tsize mismatch for actor.heads.2.0.weight: copying a param with shape torch.Size([128, 16]) from checkpoint, the shape in current model is torch.Size([128, 256]).\n\tsize mismatch for actor.heads.3.0.weight: copying a param with shape torch.Size([128, 16]) from checkpoint, the shape in current model is torch.Size([128, 256]).\n\tsize mismatch for critic.trunk.mlp.0.weight: copying a param with shape torch.Size([16, 74]) from checkpoint, the shape in current model is torch.Size([256, 74]).\n\tsize mismatch for critic.trunk.mlp.0.bias: copying a param with shape torch.Size([16]) from checkpoint, the shape in current model is torch.Size([256]).\n\tsize mismatch for critic.trunk.mlp.2.weight: copying a param with shape torch.Size([16, 16]) from checkpoint, the shape in current model is torch.Size([256, 256]).\n\tsize mismatch for critic.trunk.mlp.2.bias: copying a param with shape torch.Size([16]) from checkpoint, the shape in current model is torch.Size([256]).\n\tsize mismatch for critic.head.0.weight: copying a param with shape torch.Size([128, 16]) from checkpoint, the shape in current model is torch.Size([128, 256]).); using the surrogate planner']
+  progress stages: ['profiling', 'profiling', 'understanding', 'planning', 'awaiting_approval']
+
+== invariant: plan phase produced no model artifacts ==
+   joblib files after planning: 0
+   zip archives after planning: []
+
+== invariant: execution without approval is refused ==
+   OK: blocked -> execution requires an explicit list of approved experiments; call /approve with 
+
+== approval gate ==
+   OK: bad rank rejected -> no recommended pipeline has rank 99
+  approved: ['xgboost', 'lightgbm', 'random_forest']
+  status: awaiting_approval | approved_at: 2026-09-19T12:43:25+00:00
+
+== failure isolation ==
+  approved with an extra pipeline: ['xgboost', 'lightgbm', 'random_forest', 'svm']
+
+== PHASE B: execute ==
+C:\Users\Ibhan Mukherjee\AppData\Roaming\Python\Python314\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+C:\Users\Ibhan Mukherjee\AppData\Roaming\Python\Python314\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+C:\Users\Ibhan Mukherjee\AppData\Roaming\Python\Python314\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+C:\Users\Ibhan Mukherjee\AppData\Roaming\Python\Python314\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+C:\Users\Ibhan Mukherjee\AppData\Roaming\Python\Python314\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+C:\Users\Ibhan Mukherjee\AppData\Roaming\Python\Python314\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+C:\Users\Ibhan Mukherjee\AppData\Roaming\Python\Python314\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+  status: complete
+  error: None
+
+MODEL COMPARISON
+
+model                          f1   train(s)    mem(MB)   size(KB)        test f1  status
+-----------------------------------------------------------------------------------------
+lightgbm                   0.4614      14.11        960     2035.2         0.4657  success
+xgboost                    0.4297       9.08        865     1869.1         0.4403  success
+random_forest              0.4206      19.10       1045   155793.3         0.4227  success
+svm                        0.3379       9.76       1255      703.0         0.3624  success
+
+test column is the held-out split, reported for transparency only; selection used validation
+
+  trade-offs:
+   - xgboost trains fastest (9.08s) with a validation f1 difference of 0.0317
+   - 1 model(s) carried warnings; see the run report before trusting their scores as directly comparable
+
+  best model: lightgbm | validation: 0.4614 | test: None
+  reason: best validation f1 per the problem statement's objective; highest validation f1 (0.4614) among the 4 approved pipeline(s) that trained successfully
+  selection basis: validation only (test split reserved for final evaluation)
+
+  pareto frontier:
+   lightgbm             score=0.4614 cost=14.11s mem=960MB on_frontier=True
+   xgboost              score=0.4297 cost=9.08s mem=865MB on_frontier=True
+
+  search statistics: {'n_experiments': 4, 'n_failed': 0, 'best_model': 'lightgbm', 'total_training_time_s': 52.05190020000373, 'stopping_reason': 'completed'}
+
+  failure isolation check: [('xgboost', 'success'), ('lightgbm', 'success'), ('random_forest', 'success'), ('svm', 'success')]
+
+== artifacts ==
+  model zip: artifacts\runs\run_e285ccfaf11f\model_package.zip
+  verified: True | sha256: 80131f556a44a78f14d01a2f9ca1363829dc169ecef7887f757f3e3a83d6fe04
+  results zip: artifacts\runs\run_e285ccfaf11f\results.zip
+  messages: ['3 pipeline(s) approved by user at 2026-09-19T12:43:25+00:00', '4 pipeline(s) approved by user at 2026-09-19T12:43:25+00:00']
+
+== packaged contents ==
+    model_package/README.md
+    model_package/inference/example_input.csv
+    model_package/inference/model_loader.py
+    model_package/inference/predict.py
+    model_package/metadata/dataset_metadata.json
+    model_package/metadata/feature_schema.json
+    model_package/metadata/model_metadata.json
+    model_package/model/model.joblib
+    model_package/preprocessing/preprocessor.joblib
+    model_package/requirements.txt
+    model_package/runtime/core/errors.py
+    model_package/runtime/core/logging.py
+    model_package/runtime/execution/runtime_transformers.py
+    model_package/runtime/execution/torch_models.py
+   results bundle: ['results/comparison.csv', 'results/comparison.txt', 'results/experiment_history.json', 'results/results.json', 'results/search_statistics.json']
+
+== results.json keys (§22) ==
+   present: ['approved_experiments', 'artifacts', 'best_model', 'dataset_profile', 'pareto_frontier', 'results', 'rl_recommendations', 'run_id', 'search_statistics', 'task']
+   missing: []
+
+== clean-environment inference check ==
+  describe: {'model': 'LightGBM', 'task': 'classification', 'primary_metric': 'f1', 'validation_score': 0.46142322097378274, 'test_score': 0.4656543745480839, 'n_features': 9, 'classes': ['0', '1']}
+  predictions: [np.int64(0), np.int64(0), np.int64(0), np.int64(1), np.int64(0)]
+  probabilities: [[0.975, 0.025], [1.0, 0.0], [0.866, 0.134], [0.24, 0.76], [0.511, 0.489]]
+
+== generated README (first 45 lines) ==
+   # LightGBM model package
+   
+   Deployment-ready artifact produced by RL-AutoML.
+   
+   ## Model
+   
+   | Field | Value |
+   | --- | --- |
+   | Model | LightGBM (`lightgbm`) |
+   | Framework | lightgbm |
+   | Task | classification |
+   | Objective | churn prediction |
+   | Primary metric | f1 (maximize) |
+   | Validation score | 0.4614 |
+   | Test score | 0.4657 |
+   | Raw features | 9 |
+   | Transformed features | 23 |
+   | Training time | 14.109 s |
+   | Peak memory | 960.1 MB |
+   | Trained at | 2026-09-19T12:44:38+00:00 |
+   | Run id | run_e285ccfaf11f |
+   
+   This package was verified after being archived: the ZIP was re-opened, its checksums tested, and its model reloaded and compared against the in-process model.
+   
+   ## Installation
+   
+   ```
+   pip install -r requirements.txt
+   ```
+   
+   ## Expected input
+   
+   One row per prediction. Required columns:
+   
+   | Column | Kind | Required | Nullable | Unique values |
+   | --- | --- | --- | --- | --- |
+   | `contract_type` | categorical | yes | no | 3 |
+   | `payment_method` | categorical | yes | no | 4 |
+   | `internet_service` | categorical | yes | no | 3 |
+   | `tenure_months` | numeric | yes | no | 72 |
+   | `monthly_charges` | numeric | yes | yes | 8187 |
+   | `total_charges` | numeric | yes | yes | 17468 |
+   | `support_calls` | numeric | yes | no | 10 |
+   | `age` | numeric | yes | yes | 73 |
+   | `signup_date` | datetime | yes | no | 2190 |
+
+== generated requirements.txt ==
+    numpy>=1.26 | pandas>=2.2 | scipy>=1.11 | scikit-learn>=1.4 | joblib>=1.3 | # Model-specific dependency | lightgbm>=4.0 | 
+
+== run persistence round trip ==
+   status: complete | best: lightgbm | results: 4 | progress events: 18
+   list_runs: [{'run_id': 'run_e285ccfaf11f', 'status': 'complete', 'created_at': '2026-09-19T12:43:25+00:00', 'dataset': 'customers.csv', 'task': 'classification', 'best_model': 'lightgbm', 'validation_score': 0.46142322097378274, 'test_score': None, 'model_zip': 'artifacts\\runs\\run_e285ccfaf11f\\model_package.zip'}, {'run_id': 'run_dfca76034978', 'status': 'complete', 'created_at': '2026-09-19T09:25:51+00:00', 'dataset': 'customers.csv', 'task': 'classification', 'best_model': 'lightgbm', 'validation_score': 0.3821656050955414, 'test_score': None, 'model_zip': 'artifacts\\runs\\run_dfca76034978\\model_package.zip'}]
+
+END-TO-END OK

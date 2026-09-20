@@ -1,0 +1,28 @@
+# Runtime artifacts produced by AutoML runs
+artifacts/
+*.zip
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.python-version
+
+# Tooling caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+coverage.xml
+htmlcov/
+.idea/
+
+# Local overrides
+configs/local.yaml
+.env
+.commandcode

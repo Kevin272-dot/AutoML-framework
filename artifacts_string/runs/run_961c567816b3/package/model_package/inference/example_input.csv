@@ -1,0 +1,2 @@
+contract_type,payment_method,internet_service,tenure_months,monthly_charges,total_charges,support_calls,age,signup_date
+month-to-month,bank_transfer,fiber,0.0,0.0,0.0,0.0,0.0,2024-01-01

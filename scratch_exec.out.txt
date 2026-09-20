@@ -1,0 +1,68 @@
+task: classification | metric: f1 | target: diagnosis
+
+== experiments ==
+splits: {'strategy': 'stratified', 'stratified': True, 'n_train': 341, 'n_val': 114, 'n_test': 114, 'total': 569, 'seed': 1234, 'test_reserved': True, 'warnings': []}
+
+== test-set guard (before finalize) ==
+  OK: blocked -> the test set can only be evaluated during finalisation, after model selection, s
+
+== execute ==
+C:\Users\Ibhan Mukherjee\AppData\Roaming\Python\Python314\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+C:\Users\Ibhan Mukherjee\AppData\Roaming\Python\Python314\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+C:\Users\Ibhan Mukherjee\AppData\Roaming\Python\Python314\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+  logistic_regression  f1=0.9647 train=0.05s mem=663MB size=1.1KB params=31
+  random_forest        f1=0.9302 train=2.38s mem=668MB size=1422.7KB params=None
+  lightgbm             f1=0.9767 train=7.30s mem=762MB size=848.6KB params=None
+  mlp                  f1=0.9767 train=5.42s mem=1432MB size=52.3KB params=12289
+  totally_not_a_model  FAILED   RegistryError: unknown model: unknown model 'totally_not_a_model'
+  svm                  f1=0.9655 train=0.04s mem=1431MB size=23.8KB params=1
+summary: {'n_success': 5, 'n_failed': 1, 'n_skipped': 0, 'total_training_time_s': 15.193, 'elapsed_s': 23.557, 'stopping_reason': 'completed', 'warnings': []}
+
+== finalize + test ==
+best by validation: lightgbm 0.9767441860465116
+  logistic_regression  val=0.9647 test=0.9762 | acc=0.9825 roc_auc=0.9878
+  random_forest        val=0.9302 test=0.9524 | acc=0.9649 roc_auc=0.9970
+C:\Users\Ibhan Mukherjee\AppData\Roaming\Python\Python314\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+C:\Users\Ibhan Mukherjee\AppData\Roaming\Python\Python314\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+  lightgbm             val=0.9767 test=0.9639 | acc=0.9737 roc_auc=0.9974
+  mlp                  val=0.9767 test=0.9639 | acc=0.9737 roc_auc=0.9931
+  svm                  val=0.9655 test=1.0000 | acc=1.0000 roc_auc=1.0000
+test evaluations: 5
+test touched during search: True
+
+== regression path ==
+  task: regression | metric: rmse | target: disease_progression
+  linear_regression    rmse=53.473 test_rmse=58.534 r2=0.477 size=0.7KB
+  random_forest        rmse=53.228 test_rmse=61.192 r2=0.482 size=4705.4KB
+  xgboost              rmse=55.299 test_rmse=65.157 r2=0.441 size=411.9KB
+
+== clustering path ==
+  kmeans               silhouette=0.0736 n_clusters=5.0 | 
+  agglomerative        silhouette=0.0927 n_clusters=5.0 | agglomerative cannot label unseen points; clustering metrics are in-sa
+
+== label encoding path (string target) ==
+  needs label encoding: True | classes: ['churned' 'stayed']
+C:\Users\Ibhan Mukherjee\AppData\Roaming\Python\Python314\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+C:\Users\Ibhan Mukherjee\AppData\Roaming\Python\Python314\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+C:\Users\Ibhan Mukherjee\AppData\Roaming\Python\Python314\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+C:\Users\Ibhan Mukherjee\AppData\Roaming\Python\Python314\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+C:\Users\Ibhan Mukherjee\AppData\Roaming\Python\Python314\site-packages\sklearn\utils\validation.py:2827: UserWarning: X does not have valid feature names, but LGBMClassifier was fitted with feature names
+  warnings.warn(
+  lightgbm             f1=0.3288 test_f1=0.4384 skipped=[]
+      val_metrics={'accuracy': 0.3875, 'balanced_accuracy': 0.3831, 'precision': 0.3333, 'recall': 0.3243, 'f1': 0.3288, 'matthews': -0.2343, 'roc_auc': 0.3595, 'average_precision': 0.3772, 'pr_auc': 0.3772, 'log_loss': 1.0638}
+  logistic_regression  f1=0.3175 test_f1=0.4375 skipped=[]
+      val_metrics={'accuracy': 0.4625, 'balanced_accuracy': 0.4491, 'precision': 0.3846, 'recall': 0.2703, 'f1': 0.3175, 'matthews': -0.1084, 'roc_auc': 0.3941, 'average_precision': 0.4156, 'pr_auc': 0.4156, 'log_loss': 0.7116}
+
+== budget enforcement ==
+  executed: 1 skipped: 1 reason: experiment limit reached (1)
+
+EXEC SMOKE OK

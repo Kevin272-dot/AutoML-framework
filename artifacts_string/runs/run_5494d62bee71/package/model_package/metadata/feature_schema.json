@@ -1,0 +1,62 @@
+{
+  "schema_version": "1.0.0",
+  "task_type": "classification",
+  "metric": "f1",
+  "target": "species",
+  "n_features_expected": 4,
+  "excluded_columns": [
+    "name='species' kind=<ColumnKind.NUMERIC: 'numeric'> dtype='int64' n_missing=0 missing_ratio=0.0 n_unique=3 cardinality_ratio=0.02 is_constant=False mean=1.0 std=0.8192319205190405 minimum=0.0 maximum=2.0 median=1.0 skew=0.0 n_outliers=0 top_values=[] is_high_cardinality=False"
+  ],
+  "output": {
+    "type": "label",
+    "column": "prediction",
+    "classes": [
+      "0",
+      "1",
+      "2"
+    ],
+    "probabilities": "predict_proba() returns one column per class"
+  },
+  "features": [
+    {
+      "name": "sepal length (cm)",
+      "kind": "numeric",
+      "dtype": "float64",
+      "required": true,
+      "nullable": false,
+      "n_unique": 35,
+      "example_values": [],
+      "notes": ""
+    },
+    {
+      "name": "sepal width (cm)",
+      "kind": "numeric",
+      "dtype": "float64",
+      "required": true,
+      "nullable": false,
+      "n_unique": 23,
+      "example_values": [],
+      "notes": ""
+    },
+    {
+      "name": "petal length (cm)",
+      "kind": "numeric",
+      "dtype": "float64",
+      "required": true,
+      "nullable": false,
+      "n_unique": 43,
+      "example_values": [],
+      "notes": ""
+    },
+    {
+      "name": "petal width (cm)",
+      "kind": "numeric",
+      "dtype": "float64",
+      "required": true,
+      "nullable": false,
+      "n_unique": 22,
+      "example_values": [],
+      "notes": ""
+    }
+  ]
+}

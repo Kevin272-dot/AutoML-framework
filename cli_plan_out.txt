@@ -1,0 +1,11 @@
+Run: run_0384738a40f5
+Status: awaiting_approval
+Task: classification; target=churn; metric=f1
+Recommended pipelines:
+  1. xgboost (cost=high, expected=0.9850)
+     expected f1 ~ 0.985 using the 'balanced' preset; high cost (~103s of training); tree ensembles usually hold up well on the 21% minority class; tolerates the 1.8% missing values
+  2. lightgbm (cost=high, expected=0.9850)
+     expected f1 ~ 0.985 using the 'balanced' preset; high cost (~103s of training); tree ensembles usually hold up well on the 21% minority class; tolerates the 1.8% missing values
+  3. random_forest (cost=high, expected=0.9467)
+     expected f1 ~ 0.947 using the 'deep' preset; high cost (~144s of training); tree ensembles usually hold up well on the 21% minority class; tolerates the 1.8% missing values
+No models were trained. To execute: automl run run_0384738a40f5

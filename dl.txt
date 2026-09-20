@@ -1,0 +1,8 @@
+open_adult: already cached at artifacts\datasets\remote\open_adult.csv
+open_airfoil: already cached at artifacts\datasets\remote\open_airfoil.csv
+{"ts": "2026-09-20T01:55:17+0530", "level": "INFO", "logger": "rl_automl.dataset.remote", "message": "downloading curated dataset", "name": "open_titanic", "url": "https://raw.githubusercontent.com/datasciencedojo/datasets/master/titanic.csv"}
+open_titanic: FAILED could not download 'open_titanic': URLError: <urlopen error [WinError 10054] An existing connection was forcibly closed by the remote host>
+{"ts": "2026-09-20T01:55:27+0530", "level": "INFO", "logger": "rl_automl.dataset.remote", "message": "downloading curated dataset", "name": "open_wine_quality_red", "url": "https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv"}
+{"ts": "2026-09-20T01:55:29+0530", "level": "INFO", "logger": "rl_automl.dataset.remote", "message": "curated dataset cached", "name": "open_wine_quality_red", "rows": 1599, "path": "artifacts\\datasets\\remote\\open_wine_quality_red.csv"}
+open_wine_quality_red: artifacts\datasets\remote\open_wine_quality_red.csv  sha256 verified  licence: CC BY 4.0 (UCI Machine Learning Repository)
+error: 1 download(s) failed: open_titanic
