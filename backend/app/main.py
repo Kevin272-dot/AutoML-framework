@@ -4,6 +4,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from app.api import automl as automl_router
 from app.api import connections as connections_router
 from app.api import datasets as datasets_router
 from app.api import discovery as discovery_router
@@ -56,6 +57,7 @@ app.include_router(discovery_router.router)
 app.include_router(datasets_router.router)
 app.include_router(jobs_router.router)
 app.include_router(connections_router.router)
+app.include_router(automl_router.router)
 
 
 @app.on_event("startup")

@@ -143,6 +143,40 @@ export function startPreprocessing(id: string) {
   );
 }
 
+// ---------- AutoML runs (RL-AutoML engine) ----------
+export function startAutoMLRun(datasetId: string, target: string | null, task: string | null) {
+  return request<import("./api-types").AutoMLRunOut>("/api/automl/runs", {
+    method: "POST",
+    body: JSON.stringify({ dataset_id: datasetId, target, task }),
+  });
+}
+
+export function listAutoMLRuns() {
+  return request<import("./api-types").AutoMLRunOut[]>("/api/automl/runs");
+}
+
+export function getAutoMLRun(runId: string) {
+  return request<import("./api-types").AutoMLRunOut>(`/api/automl/runs/${runId}`);
+}
+
+export function approveAutoMLRun(runId: string, selection: string | number[]) {
+  return request<import("./api-types").AutoMLRunOut>(`/api/automl/runs/${runId}/approve`, {
+    method: "POST",
+    body: JSON.stringify({ selection }),
+  });
+}
+
+export function executeAutoMLRun(runId: string) {
+  return request<{ run_id: string; job_id: string; status: string }>(
+    `/api/automl/runs/${runId}/execute`,
+    { method: "POST" }
+  );
+}
+
+export function getAutoMLRunJob(runId: string) {
+  return request<import("./api-types").JobOut>(`/api/automl/runs/${runId}/job`);
+}
+
 // ---------- jobs / dashboard ----------
 export function getJob(id: string) {
   return request<import("./api-types").JobOut>(`/api/jobs/${id}`);

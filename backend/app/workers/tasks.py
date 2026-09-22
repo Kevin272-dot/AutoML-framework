@@ -24,6 +24,13 @@ def preprocess_task(self, dataset_id: str, job_id: str):
     run_preprocessing(dataset_id, job_id, SessionLocal)
 
 
+@celery_app.task(name="app.workers.tasks.automl_run_task", bind=True, max_retries=0)
+def automl_run_task(self, run_id: str, job_id: str):
+    from app.automl.runner import execute_run
+
+    execute_run(run_id, job_id, SessionLocal)
+
+
 @celery_app.task(name="app.workers.tasks.discovery_search_task", bind=True, max_retries=0)
 def discovery_search_task(self, request_id: str, job_id: str):
     from app.discovery.service import run_discovery_search

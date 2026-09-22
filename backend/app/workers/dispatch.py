@@ -60,6 +60,19 @@ def dispatch_preprocess(dataset_id: str, job_id: str, db_factory) -> str:
     return "eager"
 
 
+def dispatch_automl_run(run_id: str, job_id: str, db_factory) -> str:
+    settings = get_settings()
+    if settings.job_backend == "celery":
+        from app.workers.tasks import automl_run_task
+
+        automl_run_task.delay(run_id, job_id)
+        return "queued"
+    from app.automl.runner import execute_run
+
+    _run_in_thread(execute_run, run_id, job_id, db_factory)
+    return "eager"
+
+
 def dispatch_discovery_search(request_id: str, job_id: str, db_factory) -> str:
     settings = get_settings()
     if settings.job_backend == "celery":

@@ -13,7 +13,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { getDataset, getDatasetFiles, getDatasetJobs, getEda, confirmTarget, deleteDataset, getPreprocessReport, startPreprocessing } from "@/lib/api-client";
+import { getDataset, getDatasetFiles, getDatasetJobs, getEda, confirmTarget, deleteDataset, getPreprocessReport, startPreprocessing, startAutoMLRun } from "@/lib/api-client";
 import type { ColumnStats, PreprocessReportOut } from "@/lib/api-types";
 import { Badge, StatusBadge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -136,10 +136,13 @@ function TopValues({ stats }: { stats: ColumnStats }) {
 }
 
 function TargetConfirmation({ datasetId }: { datasetId: string }) {
+  const router = useRouter();
   const [selected, setSelected] = useState<string>("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [done, setDone] = useState(false);
+  const [starting, setStarting] = useState(false);
+  const [startError, setStartError] = useState<Error | null>(null);
 
   const { data: eda } = useQuery({ queryKey: ["dataset", datasetId, "eda"], queryFn: () => getEda(datasetId) });
   if (!eda) return null;
@@ -219,9 +222,29 @@ function TargetConfirmation({ datasetId }: { datasetId: string }) {
           </Button>
         </div>
         {done ? (
-          <p className="mt-2 text-xs text-success">
-            Target saved. The AutoML training pipeline (Optuna tuning, leaderboard, SHAP) arrives in the next phase.
-          </p>
+          <div className="mt-2 rounded-md border border-success/30 bg-success/5 p-3">
+            <p className="text-xs text-success">Target saved — the dataset is ready for model training.</p>
+            <Button
+              size="sm"
+              className="mt-2"
+              disabled={starting}
+              onClick={async () => {
+                setStarting(true);
+                setStartError(null);
+                try {
+                  const res = await startAutoMLRun(datasetId, effectiveTarget, effectiveTask === "regression" ? "regression" : "classification");
+                  router.push(`/automl-runs/${res.run_id}`);
+                } catch (err) {
+                  setStartError(err as Error);
+                  setStarting(false);
+                }
+              }}
+            >
+              {starting ? <Spinner className="border-t-text" /> : null}
+              Start AutoML run
+            </Button>
+            {startError ? <p className="mt-2 text-xs text-danger">{startError.message}</p> : null}
+          </div>
         ) : null}
         {error ? (
           <ErrorState className="mt-2" what={error.message} whatToDo="Pick a column that exists in the dataset and retry." />

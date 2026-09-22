@@ -24,6 +24,11 @@ export function formatPct(value: number | null | undefined, digits = 0): string 
   return `${(value * 100).toFixed(digits)}%`;
 }
 
+export function formatScore(v: number | null | undefined, digits = 4): string {
+  if (v === null || v === undefined) return "—";
+  return v.toFixed(digits);
+}
+
 export function formatDate(iso: string | null | undefined): string {
   if (!iso) return "—";
   return new Date(iso).toLocaleString("en-US", {

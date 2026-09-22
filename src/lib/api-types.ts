@@ -261,3 +261,42 @@ export interface PreprocessReportOut {
   outliers: Record<string, number>;
   steps: string[];
 }
+
+export interface AutoMLRecommendation {
+  rank: number;
+  model: string;
+  preprocessing: string[];
+  reason: string;
+  expected_performance: number | null;
+  expected_cost: string;
+}
+
+export interface AutoMLLeaderboardEntry {
+  model: string;
+  status: string;
+  validation_score: number | null;
+  test_score: number | null;
+  primary_metric: string;
+  training_time_s: number;
+  inference_time_ms: number;
+  error: string | null;
+}
+
+export interface AutoMLRunOut {
+  run_id: string;
+  dataset_id: string;
+  problem_statement: string;
+  target: string | null;
+  task: string | null;
+  metric: string | null;
+  status: string;
+  planner_note: string | null;
+  recommendations: AutoMLRecommendation[];
+  leaderboard: AutoMLLeaderboardEntry[];
+  best_model: string | null;
+  best_test_score: number | null;
+  artifacts: { model_zip?: string | null; results_zip?: string | null; verified?: boolean };
+  error: string | null;
+  created_at: string;
+  updated_at: string;
+}

@@ -268,3 +268,32 @@ class PreprocessReport(Base):
     dataset_id: Mapped[str] = mapped_column(String(36), ForeignKey("datasets.id"), index=True)
     report: Mapped[dict] = mapped_column(JSON)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+
+class AutoMLRun(Base):
+    """An RL-AutoML pipeline-search run (rl_automl orchestrator), mirrored into our DB.
+
+    Authoritative run state lives in the orchestrator's own run files; this row is the
+    product-facing mirror: status, recommendations, leaderboard and artifact paths."""
+
+    __tablename__ = "automl_runs"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)  # == orchestrator run_id
+    dataset_id: Mapped[str] = mapped_column(String(36), ForeignKey("datasets.id"), index=True)
+    problem_statement: Mapped[str] = mapped_column(Text, default="")
+    target: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    task: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    metric: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    status: Mapped[str] = mapped_column(String(48), default="created", index=True)
+    planner_note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    recommendations: Mapped[list] = mapped_column(JSON, default=list)
+    leaderboard: Mapped[list] = mapped_column(JSON, default=list)
+    best_model: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    best_test_score: Mapped[float | None] = mapped_column(Float, nullable=True)
+    artifacts: Mapped[dict] = mapped_column(JSON, default=dict)
+    job_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow, onupdate=utcnow)
+
+    dataset = relationship("Dataset")
