@@ -292,6 +292,7 @@ export interface AutoMLRunOut {
   status: string;
   planner_note: string | null;
   recommendations: AutoMLRecommendation[];
+  approved: string[];
   leaderboard: AutoMLLeaderboardEntry[];
   best_model: string | null;
   best_test_score: number | null;

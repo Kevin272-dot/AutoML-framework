@@ -287,6 +287,7 @@ class AutoMLRun(Base):
     status: Mapped[str] = mapped_column(String(48), default="created", index=True)
     planner_note: Mapped[str | None] = mapped_column(Text, nullable=True)
     recommendations: Mapped[list] = mapped_column(JSON, default=list)
+    approved: Mapped[list] = mapped_column(JSON, default=list)  # approved model names
     leaderboard: Mapped[list] = mapped_column(JSON, default=list)
     best_model: Mapped[str | None] = mapped_column(String(255), nullable=True)
     best_test_score: Mapped[float | None] = mapped_column(Float, nullable=True)

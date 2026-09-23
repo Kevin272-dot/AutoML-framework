@@ -78,6 +78,7 @@ def _mirror(run_obj, db: Session, row: AutoMLRun) -> AutoMLRun:
             }
             for rec in run_obj.recommendation_set.recommended_experiments
         ]
+    row.approved = [spec.model for spec in run_obj.approved_experiments]
     row.leaderboard = [
         {
             "model": r.experiment.model if r.experiment else "?",

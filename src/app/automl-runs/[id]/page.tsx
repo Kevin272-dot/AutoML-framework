@@ -12,9 +12,11 @@ import { formatNumber, formatScore } from "@/lib/utils";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-function RecommendationsPanel({ run, onDone }: { run: AutoMLRunOut; onDone: () => void }) {
+function RecommendationsPanel({ run, onDone, onExecute }: { run: AutoMLRunOut; onDone: () => void; onExecute: () => void }) {
+  const approvedModels = new Set(run.approved);
+  const alreadyApproved = approvedModels.size > 0;
   const [selected, setSelected] = useState<Set<number>>(
-    () => new Set(run.recommendations.map((r) => r.rank))
+    () => new Set(run.recommendations.filter((r) => !approvedModels.has(r.model)).map((r) => r.rank))
   );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<Error | null>(null);
@@ -43,58 +45,93 @@ function RecommendationsPanel({ run, onDone }: { run: AutoMLRunOut; onDone: () =
   return (
     <Card>
       <CardHeader
-        title="Recommended pipelines"
-        subtitle="The RL/surrogate planner proposes these pipelines. Approve the ones we may train — nothing is trained without your approval."
+        title={alreadyApproved ? "Pipelines approved — ready to train" : "Recommended pipelines"}
+        subtitle={
+          alreadyApproved
+            ? `Approved: ${run.approved.join(", ")}. Nothing is trained until you execute.`
+            : "The RL/surrogate planner proposes these pipelines. Approve the ones we may train."
+        }
         actions={
-          <Button size="sm" variant="secondary" onClick={() => void approve("all")} disabled={busy}>
-            Approve all
-          </Button>
+          !alreadyApproved ? (
+            <Button size="sm" variant="secondary" onClick={() => void approve("all")} disabled={busy}>
+              Approve all
+            </Button>
+          ) : (
+            <Button size="sm" onClick={onExecute}>
+              Execute now
+            </Button>
+          )
         }
       />
       <div className="space-y-2 p-4">
-        {run.recommendations.map((rec) => (
-          <label
-            key={rec.rank}
-            className={[
-              "flex cursor-pointer items-center justify-between gap-4 rounded-md border px-3 py-2.5",
-              selected.has(rec.rank) ? "border-accent/60 bg-accent/5" : "border-border hover:border-border-strong",
-            ].join(" ")}
-          >
-            <span className="flex min-w-0 items-center gap-3">
-              <input
-                type="checkbox"
-                checked={selected.has(rec.rank)}
-                onChange={() => toggle(rec.rank)}
-                className="size-3.5 accent-[var(--color-accent)]"
-                aria-label={`Approve ${rec.model}`}
-              />
-              <span className="num text-xs text-faint">#{rec.rank}</span>
-              <span className="text-sm font-medium text-text">{rec.model}</span>
-              {rec.preprocessing.map((p) => (
-                <Badge key={p} tone="neutral">{p}</Badge>
-              ))}
-            </span>
-            <span className="max-w-md text-right text-xs text-faint">
-              {rec.expected_performance !== null ? (
-                <span className="num mr-2 text-muted">est. {formatScore(rec.expected_performance)}</span>
+        {run.recommendations.map((rec) => {
+          const isApproved = approvedModels.has(rec.model);
+          return (
+            <div
+              key={rec.rank}
+              className={[
+                "rounded-md border px-3 py-2.5",
+                isApproved
+                  ? "border-success/40 bg-success/5"
+                  : selected.has(rec.rank)
+                    ? "border-accent/60 bg-accent/5"
+                    : "border-border",
+              ].join(" ")}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <label className="flex min-w-0 cursor-pointer items-center gap-3">
+                  {!isApproved ? (
+                    <input
+                      type="checkbox"
+                      checked={selected.has(rec.rank)}
+                      onChange={() => toggle(rec.rank)}
+                      className="size-3.5 accent-[var(--color-accent)]"
+                      aria-label={`Approve ${rec.model}`}
+                    />
+                  ) : (
+                    <span className="text-xs font-medium text-success">approved</span>
+                  )}
+                  <span className="num text-xs text-faint">#{rec.rank}</span>
+                  <span className="text-sm font-medium text-text">{rec.model}</span>
+                </label>
+                <div className="flex shrink-0 items-center gap-2">
+                  <Badge tone={rec.expected_cost === "high" ? "warning" : "neutral"}>
+                    {rec.expected_cost} cost
+                  </Badge>
+                  {rec.expected_performance !== null ? (
+                    <span className="num text-xs text-muted">
+                      est. f1 {formatScore(rec.expected_performance, 3)}
+                    </span>
+                  ) : null}
+                </div>
+              </div>
+              {rec.preprocessing.length > 0 ? (
+                <div className="mt-1.5 flex flex-wrap gap-1">
+                  {rec.preprocessing.map((p) => (
+                    <span key={p} className="rounded bg-elevated px-1.5 py-0.5 text-[10px] text-muted">
+                      {p}
+                    </span>
+                  ))}
+                </div>
               ) : null}
-              {rec.reason}
-            </span>
-          </label>
-        ))}
+              {rec.reason ? <p className="mt-1.5 text-xs leading-relaxed text-faint">{rec.reason}</p> : null}
+            </div>
+          );
+        })}
+
         {error ? <ErrorState what={error.message} whatToDo="Retry the approval." /> : null}
-        <div className="flex items-center justify-between rounded-lg border border-border bg-surface px-4 py-3">
-          <p className="text-xs text-muted">
-            <span className="num font-medium text-text">{selected.size}</span> pipeline(s) selected
-          </p>
-          <Button
-            onClick={() => void approve(Array.from(selected))}
-            disabled={selected.size === 0 || busy}
-          >
-            {busy ? <Spinner className="border-t-text" /> : null}
-            Approve selected pipelines
-          </Button>
-        </div>
+
+        {!alreadyApproved ? (
+          <div className="flex items-center justify-between rounded-lg border border-border bg-surface px-4 py-3">
+            <p className="text-xs text-muted">
+              <span className="num font-medium text-text">{selected.size}</span> pipeline(s) selected
+            </p>
+            <Button onClick={() => void approve(Array.from(selected))} disabled={selected.size === 0 || busy}>
+              {busy ? <Spinner className="border-t-text" /> : null}
+              Approve selected pipelines
+            </Button>
+          </div>
+        ) : null}
       </div>
     </Card>
   );
@@ -253,7 +290,7 @@ export default function AutoMLRunPage({ params }: { params: Promise<{ id: string
         </div>
       ) : null}
 
-      {awaiting ? <RecommendationsPanel run={run} onDone={() => void refetch()} /> : null}
+      {awaiting ? <RecommendationsPanel run={run} onDone={() => void refetch()} onExecute={() => void doExecute()} /> : null}
 
       <Leaderboard run={run} />
 

@@ -37,6 +37,7 @@ def _run_out(row: AutoMLRun) -> dict:
         "status": row.status,
         "planner_note": row.planner_note,
         "recommendations": row.recommendations or [],
+        "approved": row.approved or [],
         "leaderboard": row.leaderboard or [],
         "best_model": row.best_model,
         "best_test_score": row.best_test_score,
