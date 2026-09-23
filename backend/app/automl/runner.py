@@ -25,7 +25,14 @@ def _build_config():
     settings = get_settings()
     artifacts_root = Path(settings.local_storage_dir).parent / "automl-artifacts"
     return AutoMLConfig(
-        runtime=RuntimeConfig(artifacts_dir=str(artifacts_root)),
+        runtime=RuntimeConfig(
+            artifacts_dir=str(artifacts_root),
+            # Cap thread pools: unbounded n_jobs/OpenMP inside the API process causes
+            # pathological oversubscription (xgboost: 120s on 600 rows vs 1.2s capped).
+            n_jobs=2,
+            num_threads=4,
+            log_level="WARNING",
+        ),
         search=SearchConfig(max_experiments=8, n_recommendations=3),
     )
 
@@ -171,13 +178,22 @@ def execute_run(run_id: str, job_id: str, db_factory) -> None:
             # Runs in the orchestrator's thread; refresh a short-lived session.
             session = db_factory()
             try:
+                stage = str(event.stage)
                 j = session.get(Job, job_id)
                 if j is None:
                     return
                 j.status = "RUNNING"
-                j.stage = str(event.stage).upper()
+                j.stage = stage.upper()
                 j.progress = min(1.0, max(0.0, float(event.progress)))
                 j.detail = event.message
+                # Keep the product-facing run mirror in sync so the UI shows the
+                # live stage instead of a stale "queued" while training runs.
+                r = session.get(AutoMLRun, run_id)
+                if r is not None and stage in {
+                    "profiling", "understanding", "planning", "awaiting_approval",
+                    "executing", "evaluating", "comparing", "selecting", "packaging",
+                }:
+                    r.status = stage
                 session.commit()
             finally:
                 session.close()

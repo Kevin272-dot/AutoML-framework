@@ -113,6 +113,16 @@ def execute_run(run_id: str, db: Session = Depends(get_db)):
             status_code=409,
             detail=f"Run is in status '{row.status}'; approve pipelines before executing.",
         )
+    existing = (
+        db.query(Job)
+        .filter(Job.dataset_id == row.dataset_id, Job.kind == "AUTOML_RUN", Job.status.in_(["QUEUED", "RUNNING"]))
+        .first()
+    )
+    if existing is not None:
+        raise HTTPException(
+            status_code=409,
+            detail={"code": "RUN_ALREADY_RUNNING", "message": "This run already has a job in progress."},
+        )
     job = Job(id=new_uuid(), dataset_id=row.dataset_id, kind="AUTOML_RUN", status="QUEUED")
     db.add(job)
     row.job_id = job.id

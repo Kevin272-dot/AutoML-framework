@@ -68,3 +68,28 @@ def create_tables():
     import app.models  # noqa: F401  (registers ORM models on Base metadata)
 
     Base.metadata.create_all(bind=engine)
+    _recover_stale_jobs()
+
+
+def _recover_stale_jobs():
+    """Eager in-process jobs die with the backend process; mark them failed so
+    runs are never permanently blocked by a job that no longer exists.
+    (With JOB_BACKEND=celery, jobs survive restarts and are left alone.)"""
+    from app.config import get_settings
+    from app.models import Job, utcnow
+
+    if get_settings().job_backend != "eager":
+        return
+    from app.db import SessionLocal
+
+    db = SessionLocal()
+    try:
+        stale = db.query(Job).filter(Job.status.in_(["QUEUED", "RUNNING"])).all()
+        for job in stale:
+            job.status = "FAILED"
+            job.error_code = "STALE_JOB"
+            job.error_message = "The backend restarted while this job was in progress. Re-run it."
+            job.finished_at = utcnow()
+        db.commit()
+    finally:
+        db.close()
