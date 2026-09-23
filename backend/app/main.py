@@ -74,13 +74,20 @@ def create_tables():
 def _recover_stale_jobs():
     """Eager in-process jobs die with the backend process; mark them failed so
     runs are never permanently blocked by a job that no longer exists.
+    AutoML run mirrors are reset from the orchestrator's authoritative run file,
+    so a run interrupted mid-execution returns to its approval gate.
     (With JOB_BACKEND=celery, jobs survive restarts and are left alone.)"""
+    import json
+    from pathlib import Path
+
     from app.config import get_settings
-    from app.models import Job, utcnow
+    from app.models import AutoMLRun, Job, utcnow
 
     if get_settings().job_backend != "eager":
         return
     from app.db import SessionLocal
+
+    IN_FLIGHT_RUN_STATUSES = {"queued", "executing", "evaluating", "comparing", "selecting", "packaging"}
 
     db = SessionLocal()
     try:
@@ -90,6 +97,33 @@ def _recover_stale_jobs():
             job.error_code = "STALE_JOB"
             job.error_message = "The backend restarted while this job was in progress. Re-run it."
             job.finished_at = utcnow()
+
+        settings = get_settings()
+        runs_root = Path(settings.local_storage_dir).parent / "automl-artifacts" / "runs"
+        stuck_runs = (
+            db.query(AutoMLRun)
+            .filter(AutoMLRun.status.in_(IN_FLIGHT_RUN_STATUSES))
+            .all()
+        )
+        for run_row in stuck_runs:
+            run_file = runs_root / run_row.id / "run.json"
+            recovered = None
+            if run_file.is_file():
+                try:
+                    recovered = json.loads(run_file.read_text()).get("status")
+                except (OSError, ValueError):
+                    recovered = None
+            if recovered == "awaiting_approval" or (
+                recovered in (None, "created") and run_row.recommendations
+            ):
+                # The orchestrator never started (or never finished) execution;
+                # its saved state is still at the approval gate.
+                run_row.status = "awaiting_approval"
+                run_row.error = None
+                run_row.job_id = None
+            else:
+                run_row.status = "failed"
+                run_row.error = "The backend restarted while this run was executing."
         db.commit()
     finally:
         db.close()
