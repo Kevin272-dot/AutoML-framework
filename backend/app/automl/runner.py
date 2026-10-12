@@ -230,8 +230,16 @@ def execute_run(run_id: str, job_id: str, db_factory) -> None:
             db.commit()
         row = db.get(AutoMLRun, run_id)
         if row is not None:
-            row.status = "failed"
-            row.error = str(exc)[:500]
+            # Mirror the orchestrator's authoritative status: a pre-execution
+            # rejection (e.g. nothing approved) leaves the run at its approval
+            # gate so it can be recovered without starting over.
+            try:
+                fresh = orchestrator.load_run(run_id)
+                row.status = fresh.status.value
+                row.error = fresh.error or str(exc)[:500]
+            except Exception:
+                row.status = "failed"
+                row.error = str(exc)[:500]
             db.commit()
     finally:
         db.close()

@@ -95,5 +95,10 @@ def test_execute_blocked_without_approval(db, db_factory, tmp_path):
     runner.execute_run(row.id, job.id, db_factory)
 
     db.refresh(row)
-    assert row.status == "failed"
+    # The orchestrator's run file is untouched by a pre-execution rejection, so the
+    # mirror returns to the approval gate instead of dying — the run is recoverable.
+    assert row.status == "awaiting_approval"
     assert "approve" in (row.error or "").lower()
+    job = db.get(Job, "job-automl2")
+    db.expire_all()
+    assert db.get(Job, "job-automl2").status == "FAILED"

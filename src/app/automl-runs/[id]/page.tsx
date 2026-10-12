@@ -256,7 +256,7 @@ export default function AutoMLRunPage({ params }: { params: Promise<{ id: string
             <p className="mt-2 max-w-2xl text-xs text-muted">{run.problem_statement}</p>
             {run.planner_note ? <p className="mt-1 text-xs text-faint">Planner: {run.planner_note}</p> : null}
           </div>
-          {awaiting ? (
+          {awaiting && run.approved.length > 0 ? (
             <Button onClick={() => void doExecute()} disabled={executing}>
               {executing ? <Spinner className="border-t-text" /> : null}
               Execute approved pipelines

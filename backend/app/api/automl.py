@@ -103,6 +103,15 @@ def approve_run(run_id: str, payload: ApproveIn, db: Session = Depends(get_db)):
             status_code=409,
             detail={"code": "AUTOML_APPROVE_FAILURE", "message": str(exc)},
         ) from exc
+
+    # Approving the pipelines is the user's consent to train them — start execution
+    # immediately instead of requiring another click.
+    job = Job(id=new_uuid(), dataset_id=row.dataset_id, kind="AUTOML_RUN", status="QUEUED")
+    db.add(job)
+    row.job_id = job.id
+    row.status = "queued"
+    db.commit()
+    dispatch_automl_run(run_id, job.id, SessionLocal)
     return _run_out(row)
 
 
@@ -113,6 +122,14 @@ def execute_run(run_id: str, db: Session = Depends(get_db)):
         raise HTTPException(
             status_code=409,
             detail=f"Run is in status '{row.status}'; approve pipelines before executing.",
+        )
+    if not row.approved:
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "code": "NOTHING_APPROVED",
+                "message": "No pipelines approved yet. Approve at least one recommended pipeline first.",
+            },
         )
     existing = (
         db.query(Job)

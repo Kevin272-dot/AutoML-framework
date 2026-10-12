@@ -68,7 +68,22 @@ def create_tables():
     import app.models  # noqa: F401  (registers ORM models on Base metadata)
 
     Base.metadata.create_all(bind=engine)
+    _ensure_schema_upgrades(engine)
     _recover_stale_jobs()
+
+
+def _ensure_schema_upgrades(engine) -> None:
+    """Lightweight column additions for existing dev databases (create_all does not
+    ALTER existing tables). Production should use Alembic migrations instead."""
+    from sqlalchemy import inspect, text
+
+    inspector = inspect(engine)
+    if "automl_runs" not in inspector.get_table_names():
+        return
+    existing = {c["name"] for c in inspector.get_columns("automl_runs")}
+    with engine.begin() as conn:
+        if "approved" not in existing:
+            conn.execute(text("ALTER TABLE automl_runs ADD COLUMN approved JSON"))
 
 
 def _recover_stale_jobs():
