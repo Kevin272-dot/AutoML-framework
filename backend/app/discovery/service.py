@@ -16,6 +16,7 @@ from app.db import new_uuid
 from app.datasets.dedupe import dedupe_candidates
 from app.datasets.normalize import normalize_search_result
 from app.datasets.rank import score_candidates
+from app.discovery.adapters.eu import EUOpenDataAdapter
 from app.discovery.adapters.huggingface import HuggingFaceAdapter
 from app.discovery.audit import audit_source, persist_audit
 from app.discovery.registry import seed_sources
@@ -32,7 +33,7 @@ from app.models import (
 from app.parsing.requirement_parser import parse_requirements
 from app.schemas import ParsedRequirements
 
-ADAPTERS = {"huggingface": HuggingFaceAdapter}
+ADAPTERS = {"huggingface": HuggingFaceAdapter, "eu-open-data": EUOpenDataAdapter}
 
 
 def create_request(db: Session, query: str, project_id: str | None = None) -> DiscoveryRequest:

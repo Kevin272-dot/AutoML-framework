@@ -54,7 +54,8 @@ def _location_variants(req: ParsedRequirements) -> list[str]:
 
 
 def _build_queries(req: ParsedRequirements) -> list[str]:
-    """Multiple deep-search query formulations, most specific first."""
+    """Deep-search ladder, most specific first. Designed to degrade gracefully:
+    broad rungs guarantee results for almost any query with a known domain."""
     locations = _location_variants(req)
     domain_terms: list[str] = []
     for domain in req.domain:
@@ -71,15 +72,18 @@ def _build_queries(req: ParsedRequirements) -> list[str]:
 
     if base:
         add(base + locations[:1])
-        add(base)  # keywords alone — location terms are often absent from dataset titles
+        add(base)
+        add(base[:2])          # fewer terms match more datasets
+        add(base[:1])          # top keyword alone
     if domain_terms:
         add(domain_terms[:4] + locations[:1])
-        add(domain_terms[:4])
+        add(domain_terms[:2])
+        add(domain_terms[:1])
     for loc in locations[:2]:
-        add(loc + " " + (domain_terms[0] if domain_terms else " ".join(base[:2])))
+        add(loc)
     if not queries:
         add(req.domain)
-    return queries[:6]
+    return queries[:10]
 
 
 def _guess_format(raw: dict) -> str | None:
@@ -290,6 +294,8 @@ class HuggingFaceAdapter(DatasetSourceAdapter):
         searches = [{"search": q, "limit": 40, "full": "false"} for q in queries]
 
         seen_ids: set[str] = set()
+        # Progressive degradation: run the ladder and stop early once enough results
+        # accumulated, so specific matches win but broad rungs guarantee coverage.
         for params in searches:
             try:
                 resp = await self._request_with_retry(f"{self._api_base}/datasets", params=params)
@@ -316,6 +322,8 @@ class HuggingFaceAdapter(DatasetSourceAdapter):
                         raw=item,
                     )
                 )
+            if len(results) >= 12:
+                break  # enough specific matches; don't burn the broad rungs
         return results
 
     async def get_metadata(self, dataset_id: str) -> AdapterMetadata:

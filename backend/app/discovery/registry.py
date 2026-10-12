@@ -128,7 +128,7 @@ KNOWN_SOURCES: list[dict] = [
         "supports_download": True,
         "supports_api": True,
         "requires_auth": False,
-        "adapter": None,
+        "adapter": "eu",  # EU Open Data Search API
     },
 ]
 
