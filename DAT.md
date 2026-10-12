@@ -119,7 +119,8 @@ never hammer sources repeatedly.
 ## 4. Source adapters (`app/discovery/adapters/`)
 
 **Purpose:** all source-specific logic lives behind one interface; the engine core
-never knows what source it is talking to.
+never knows what source it is talking to. Two real adapters exist today:
+`huggingface.py` and `eu.py` (EU Open Data Portal).
 
 ```python
 class DatasetSourceAdapter(ABC):
@@ -151,6 +152,18 @@ are deduplicated by dataset id. Reasoning: single-query search is the #1 cause o
 **Resilience** (`_request_with_retry`): transient upstream failures (429/5xx) are
 retried with short backoff. This matters because HF's datasets-server itself
 periodically 504s — surfacing that as a hard error made datasets look broken.
+
+**EU Open Data adapter** (`eu.py`): data.gov's CKAN API was retired (404s on every
+variant — verified live), so the second adapter targets the **data.europa.eu hub
+search API** (`/api/hub/search/search`, public, no auth). Its fields are multilingual
+dicts (`{"en": ..., "fr": ...}`) normalized to English text; format labels arrive as
+str or nested dicts (both handled). Distributions carry `download_url`/`access_url`
+— tabular ones (CSV/JSON/Parquet) are previewed via direct capped download and are
+what `download()` streams; landing-page-only datasets fail with an honest error.
+
+**Progressive degradation:** both adapters run their query ladder in order and stop
+early once enough specific matches accumulate — so precise queries win, but the broad
+rungs guarantee that almost any query with a recognized domain returns results.
 
 **Preview fallback chain** (`_preview_fallback`): when the rows endpoint fails —
 1. Converted parquet files (datasets-server `/parquet`), read with **pandas + pyarrow**
