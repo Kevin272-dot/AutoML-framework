@@ -85,7 +85,7 @@ export default async function LandingPage() {
             <p className="text-xs font-medium uppercase tracking-[0.18em] text-accent">
               Dataset discovery + AutoML
             </p>
-            <h1 className="mt-4 text-4xl font-semibold leading-[1.1] tracking-tight sm:text-5xl">
+            <h1 className="mt-4 text-4xl font-semibold leading-[1.05] sm:text-5xl lg:text-[3.4rem]">
               The right data first.
               <br />
               <span className="text-muted">Then the right model.</span>
@@ -112,14 +112,27 @@ export default async function LandingPage() {
                 Discover datasets
               </Link>
             </div>
-            <p className="mt-6 flex items-center gap-2 text-xs text-faint">
+            <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-3 border-t border-border pt-6">
+              {[
+                ["3", "approval gates"],
+                ["2", "live data sources"],
+                ["17", "models in the registry"],
+                ["6", "published ranking factors"],
+              ].map(([n, label]) => (
+                <div key={label} className="flex items-baseline gap-1.5">
+                  <span className="num text-lg font-semibold text-text">{n}</span>
+                  <span className="text-xs text-muted">{label}</span>
+                </div>
+              ))}
+            </div>
+            <p className="mt-5 flex items-center gap-2 text-xs text-faint">
               <ShieldCheck className="size-3.5" />
-              Three approval gates. Only documented APIs. Every artifact carries provenance.
+              Only documented APIs. Every artifact carries provenance.
             </p>
           </div>
 
           {/* Proof object: the gated pipeline, rendered as the product renders it */}
-          <div className="rounded-lg border border-border bg-surface p-4 shadow-sm">
+          <div className="rounded-xl border border-border bg-surface p-5 shadow-[var(--shadow-raised)]">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <span className="text-xs font-medium uppercase tracking-wider text-muted">
                 Discovery request

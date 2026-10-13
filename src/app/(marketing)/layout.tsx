@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -9,10 +10,13 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
             <span className="flex size-7 items-center justify-center rounded bg-accent/15 text-xs font-bold text-accent">IA</span>
             <span className="text-sm font-semibold tracking-tight">Intelligent AutoML</span>
           </Link>
-          <nav className="hidden items-center gap-6 text-sm text-muted sm:flex" aria-label="Marketing">
-            <a href="#pipeline" className="hover:text-text">How it works</a>
-            <a href="#features" className="hover:text-text">Platform</a>
-          </nav>
+          <div className="flex items-center gap-6">
+            <nav className="hidden items-center gap-6 text-sm text-muted sm:flex" aria-label="Marketing">
+              <a href="#pipeline" className="hover:text-text">How it works</a>
+              <a href="#features" className="hover:text-text">Platform</a>
+            </nav>
+            <ThemeToggle />
+          </div>
         </div>
       </header>
       {children}

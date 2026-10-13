@@ -7,6 +7,7 @@ import Link from "next/link";
 import { getDashboardStats } from "@/lib/api-client";
 import { useClerkEnabled } from "@/app/providers";
 import { StatusBadge } from "@/components/ui/Badge";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 export function TopBar() {
   const clerkEnabled = useClerkEnabled();
@@ -26,6 +27,7 @@ export function TopBar() {
       </div>
 
       <div className="flex items-center gap-3">
+        <ThemeToggle />
         {activeJobs.length > 0 ? (
           <div className="flex items-center gap-2 rounded-md border border-border bg-surface px-2.5 py-1 text-xs">
             <Activity className="size-3.5 animate-pulse text-accent" />

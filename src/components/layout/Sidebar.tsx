@@ -58,13 +58,19 @@ export function Sidebar() {
               href={href}
               title={collapsed ? label : undefined}
               className={cn(
-                "flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors",
+                "relative flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition-colors",
                 active
                   ? "bg-accent/10 font-medium text-accent"
                   : "text-muted hover:bg-hover hover:text-text",
                 collapsed && "justify-center px-0"
               )}
             >
+              {active ? (
+                <span
+                  className="absolute left-0 top-1/2 h-4 w-0.5 -translate-y-1/2 rounded-full bg-accent"
+                  aria-hidden
+                />
+              ) : null}
               <Icon className="size-4 shrink-0" />
               {!collapsed ? label : null}
             </Link>
