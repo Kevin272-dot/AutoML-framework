@@ -27,8 +27,8 @@ export function DiscoverySearchForm({ compact = false }: { compact?: boolean }) 
     setError(null);
     try {
       const req = await createDiscoveryRequest(q.trim());
-      // Kick off source discovery + audit immediately; the wizard page tracks status.
-      await auditRequestSources(req.id);
+      // Navigate immediately; the wizard audits sources in the background with
+      // live progress, instead of blocking on a multi-second audit here.
       router.push(`/discovery/${req.id}`);
     } catch (err) {
       setError(err as Error);

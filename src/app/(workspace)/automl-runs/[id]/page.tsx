@@ -266,6 +266,9 @@ export default function AutoMLRunPage({ params }: { params: Promise<{ id: string
         {run.error ? (
           <ErrorState className="mt-3" title="Run failed" what={run.error} whatToDo="Adjust the pipeline selection and execute again, or start a new run." />
         ) : null}
+        {!run.error && error ? (
+          <ErrorState className="mt-3" what={error.message} whatToDo="Resolve the issue and retry." />
+        ) : null}
       </div>
 
       {isRunning && job ? (

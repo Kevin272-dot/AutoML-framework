@@ -75,10 +75,13 @@ def discover_and_audit_sources(db: Session, request: DiscoveryRequest) -> list[d
 
 
 async def _audit_all(sources):
-    results = {}
-    for source in sources:
-        results[source.id] = await audit_source(source)
-    return results
+    """Audit all candidate sources concurrently — each source's probes are also
+    concurrent (reachability, API liveness, robots, terms are independent)."""
+    async def _one(source):
+        return source.id, await audit_source(source)
+
+    pairs = await asyncio.gather(*[_one(s) for s in sources])
+    return dict(pairs)
 
 
 def _match_sources(sources, parsed: ParsedRequirements):

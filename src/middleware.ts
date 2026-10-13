@@ -10,7 +10,8 @@ const isProtectedRoute = createRouteMatcher([
 
 export default CLERK_ENABLED
   ? clerkMiddleware(async (auth, req) => {
-      if (isProtectedRoute(req)) {
+      // The marketing landing page is public; everything else requires sign-in.
+      if (req.nextUrl.pathname !== "/" && isProtectedRoute(req)) {
         await auth.protect();
       }
     })

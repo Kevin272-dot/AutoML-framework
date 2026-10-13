@@ -3,10 +3,14 @@
 For each candidate source, probe (with plain HTTP only — no scraping):
   reachability, documented API liveness, robots.txt posture, terms/license availability.
 
+All probes for a source run concurrently, and all sources are audited concurrently —
+a full audit pass takes the slowest single probe, not the sum.
+
 Produces a SourceAudit row with explicit technical_status and policy_status.
 robots.txt results are reported as a technical signal only.
 """
 
+import asyncio
 from datetime import datetime, timedelta, timezone
 
 import httpx
@@ -43,49 +47,66 @@ def _api_probe_path(source: DataSource) -> str | None:
     """A cheap documented endpoint that proves API liveness + search capability."""
     probes = {
         "huggingface": "https://huggingface.co/api/datasets?limit=1",
-        "data-gov": "https://catalog.data.gov/api/3/action/package_search?q=agriculture&rows=1",
         "eu-open-data": "https://data.europa.eu/api/hub/search/search?q=agriculture&limit=1",
     }
     return probes.get(source.slug)
 
 
+async def _audit_robots(client: httpx.AsyncClient, source: DataSource):
+    if source.robots_url:
+        robots_txt, robots_code = await fetch_robots(client, source.robots_url)
+        target_path = source.api_url or source.base_url
+        return evaluate_robots(robots_txt, robots_code, target_path)
+    return evaluate_robots(None, None, source.base_url)
+
+
+async def _audit_api(client: httpx.AsyncClient, source: DataSource):
+    if not source.api_url:
+        return False, None
+    probe = _api_probe_path(source) or source.api_url
+    return await probe_api(client, probe)
+
+
 async def audit_source(source: DataSource) -> dict:
     settings = get_settings()
     notes: list[str] = []
+
+    async def _check_terms(client: httpx.AsyncClient) -> bool:
+        if not source.terms_url:
+            return False
+        ok, _, _ = await check_url_reachable(client, source.terms_url)
+        if not ok:
+            notes.append("Terms URL unreachable.")
+        return ok
+
+    async def _check_license(client: httpx.AsyncClient) -> bool:
+        if not source.license_url:
+            return False
+        ok, _, _ = (await check_url_reachable(client, source.license_url))[:3]
+        return ok
+
     async with httpx.AsyncClient(timeout=settings.http_timeout_seconds) as client:
-        reachable, status_code, _ = await check_url_reachable(client, source.base_url)
-        if not reachable:
-            notes.append(f"Base URL {source.base_url} did not respond (HTTP {status_code}).")
+        (
+            (reachable, _status_code, _),
+            robots_result,
+            terms_found,
+            license_found,
+            (api_available, api_error),
+        ) = await asyncio.gather(
+            check_url_reachable(client, source.base_url),
+            _audit_robots(client, source),
+            _check_terms(client),
+            _check_license(client),
+            _audit_api(client, source),
+        )
 
-        api_available = False
-        search_available = False
-        if source.api_url:
-            probe = _api_probe_path(source) or source.api_url
-            api_available, err = await probe_api(client, probe)
-            if api_available:
-                search_available = source.supports_search
-            elif err:
-                notes.append(f"API probe failed: {err}.")
-        elif source.supports_api:
-            notes.append("No documented API endpoint registered for this source.")
-
-        if source.robots_url:
-            robots_txt, robots_code = await fetch_robots(client, source.robots_url)
-            target_path = source.api_url or source.base_url
-            robots_result = evaluate_robots(robots_txt, robots_code, target_path)
-        else:
-            robots_result = evaluate_robots(None, None, source.base_url)
-
-        terms_found = False
-        if source.terms_url:
-            ok, _, _ = await check_url_reachable(client, source.terms_url)
-            terms_found = ok
-            if not ok:
-                notes.append("Terms URL unreachable.")
-
-        license_found = False
-        if source.license_url:
-            license_found, _, _ = (await check_url_reachable(client, source.license_url))[:3]
+    search_available = api_available and source.supports_search
+    if not reachable:
+        notes.append(f"Base URL {source.base_url} did not respond.")
+    if api_error:
+        notes.append(f"API probe failed: {api_error}.")
+    if source.supports_api and not source.api_url:
+        notes.append("No documented API endpoint registered for this source.")
 
     download_available = source.supports_download and reachable and robots_result.allowed is not False
 

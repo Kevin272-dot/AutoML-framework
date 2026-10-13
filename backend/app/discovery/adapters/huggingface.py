@@ -293,17 +293,21 @@ class HuggingFaceAdapter(DatasetSourceAdapter):
 
         searches = [{"search": q, "limit": 40, "full": "false"} for q in queries]
 
-        seen_ids: set[str] = set()
-        # Progressive degradation: run the ladder and stop early once enough results
-        # accumulated, so specific matches win but broad rungs guarantee coverage.
-        for params in searches:
+        # All ladder rungs fire concurrently; results merge in ladder priority order
+        # (specific rungs first). Total time = slowest single query, not the sum.
+        async def _run(params: dict) -> list[dict]:
             try:
                 resp = await self._request_with_retry(f"{self._api_base}/datasets", params=params)
             except (httpx.HTTPError, AdapterError):
-                continue
+                return []
             if resp.status_code != 200:
-                continue
-            for item in resp.json():
+                return []
+            return resp.json()
+
+        batches = await asyncio.gather(*[_run(p) for p in searches])
+        seen_ids: set[str] = set()
+        for items in batches:
+            for item in items:
                 ds_id = item.get("id")
                 if not ds_id or ds_id in seen_ids:
                     continue
@@ -322,8 +326,6 @@ class HuggingFaceAdapter(DatasetSourceAdapter):
                         raw=item,
                     )
                 )
-            if len(results) >= 12:
-                break  # enough specific matches; don't burn the broad rungs
         return results
 
     async def get_metadata(self, dataset_id: str) -> AdapterMetadata:

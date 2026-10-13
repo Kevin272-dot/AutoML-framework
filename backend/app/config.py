@@ -21,7 +21,10 @@ class Settings(BaseSettings):
     local_storage_dir: str = "./data/artifacts"
 
     # CORS
-    cors_origins: list[str] = ["http://localhost:3000"]
+    cors_origins: list[str] = [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ]
 
     # External service tuning
     audit_cache_ttl_seconds: int = 3600

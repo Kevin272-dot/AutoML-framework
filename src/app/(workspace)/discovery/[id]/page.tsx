@@ -1,8 +1,8 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getDiscoveryRequest, getJob, getSearchResults, startSearch } from "@/lib/api-client";
+import { getDiscoveryRequest, getJob, getSearchResults, startSearch, auditRequestSources } from "@/lib/api-client";
 import type { RankedCandidateOut } from "@/lib/api-types";
 import { Stepper } from "@/components/ui/Stepper";
 import { StatusBadge } from "@/components/ui/Badge";
@@ -52,6 +52,7 @@ export default function DiscoveryWizardPage({ params }: { params: Promise<{ id: 
   const [searchJobId, setSearchJobId] = useState<string | null>(null);
   const [approved, setApproved] = useState(false);
   const [searchError, setSearchError] = useState<Error | null>(null);
+  const auditStarted = useRef(false);
 
   const { data: request, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["discovery", id],
@@ -62,6 +63,17 @@ export default function DiscoveryWizardPage({ params }: { params: Promise<{ id: 
       return 10000;
     },
   });
+
+  // Kick off source discovery + audit in the background as soon as the request
+  // exists, so the user watches live progress instead of a blocking spinner.
+  useEffect(() => {
+    if (request?.status === "REQUEST_CREATED" && !auditStarted.current) {
+      auditStarted.current = true;
+      auditRequestSources(id)
+        .then(() => refetch())
+        .catch(() => refetch());
+    }
+  }, [request?.status, id, refetch]);
 
   // Poll the search job while it runs.
   const { data: job } = useQuery({
