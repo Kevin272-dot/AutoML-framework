@@ -6,9 +6,14 @@ unavailable — same task functions, different dispatch. Job state is always
 persisted in the database either way.
 """
 
+import json
+import subprocess
+import sys
 import threading
+from pathlib import Path
 
 from app.config import get_settings
+from app.models import Job
 
 
 def get_celery_app():
@@ -61,16 +66,39 @@ def dispatch_preprocess(dataset_id: str, job_id: str, db_factory) -> str:
 
 
 def dispatch_automl_run(run_id: str, job_id: str, db_factory) -> str:
+    """Eager profile: execute in a DETACHED subprocess so backend restarts
+    (--reload, deploys) never kill an in-flight training run. The pid is recorded
+    on the job so recovery can tell a live run from a dead one."""
     settings = get_settings()
     if settings.job_backend == "celery":
         from app.workers.tasks import automl_run_task
 
         automl_run_task.delay(run_id, job_id)
         return "queued"
-    from app.automl.runner import execute_run
 
-    _run_in_thread(execute_run, run_id, job_id, db_factory)
-    return "eager"
+    import json
+    import subprocess
+    import sys
+
+    proc = subprocess.Popen(
+        [sys.executable, "-m", "app.automl.exec_one", run_id, job_id],
+        cwd=str(Path(__file__).resolve().parents[2]),
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        start_new_session=True,
+    )
+    # Record the pid on the job so recovery can check liveness.
+    session = db_factory()
+    try:
+        job = session.get(Job, job_id)
+        if job is not None:
+            detail: dict = json.loads(job.detail) if job.detail and job.detail.startswith("{") else {}
+            detail["pid"] = proc.pid
+            job.detail = json.dumps(detail)
+            session.commit()
+    finally:
+        session.close()
+    return "subprocess"
 
 
 def dispatch_discovery_search(request_id: str, job_id: str, db_factory) -> str:

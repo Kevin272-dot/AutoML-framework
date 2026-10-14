@@ -126,7 +126,7 @@ function SourceCard({
           {audit.notes.length > 0 ? (
             <ul className="list-inside list-disc text-faint">
               {audit.notes.slice(0, 2).map((n, i) => (
-                <li key={i}>{n}</li>
+                <li key={`note-${i}`}>{n}</li>
               ))}
             </ul>
           ) : null}

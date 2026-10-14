@@ -72,6 +72,27 @@ def create_tables():
     _recover_stale_jobs()
 
 
+def _job_pid(job) -> int | None:
+    import json
+
+    try:
+        detail = json.loads(job.detail) if job.detail else {}
+        pid = detail.get("pid")
+        return int(pid) if pid else None
+    except (ValueError, TypeError):
+        return None
+
+
+def _pid_alive(pid: int) -> bool:
+    import os
+
+    try:
+        os.kill(pid, 0)
+        return True
+    except (ProcessLookupError, PermissionError, ValueError):
+        return False
+
+
 def _ensure_schema_upgrades(engine) -> None:
     """Lightweight column additions for existing dev databases (create_all does not
     ALTER existing tables). Production should use Alembic migrations instead."""
@@ -108,9 +129,14 @@ def _recover_stale_jobs():
     try:
         stale = db.query(Job).filter(Job.status.in_(["QUEUED", "RUNNING"])).all()
         for job in stale:
+            # AutoML runs execute in detached subprocesses; if the pid is still
+            # alive the run legitimately outlived a backend restart — leave it.
+            pid = _job_pid(job)
+            if pid is not None and _pid_alive(pid):
+                continue
             job.status = "FAILED"
             job.error_code = "STALE_JOB"
-            job.error_message = "The backend restarted while this job was in progress. Re-run it."
+            job.error_message = "The process running this job is gone. Re-run it."
             job.finished_at = utcnow()
 
         settings = get_settings()
@@ -121,6 +147,12 @@ def _recover_stale_jobs():
             .all()
         )
         for run_row in stuck_runs:
+            # A live detached subprocess owns this run — leave it alone.
+            if run_row.job_id:
+                job = db.get(Job, run_row.job_id)
+                pid = _job_pid(job) if job else None
+                if pid is not None and _pid_alive(pid):
+                    continue
             run_file = runs_root / run_row.id / "run.json"
             recovered = None
             if run_file.is_file():

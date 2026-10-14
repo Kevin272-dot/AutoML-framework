@@ -97,7 +97,10 @@ def _match_sources(sources, parsed: ParsedRequirements):
 
 
 def approve_sources(db: Session, request: DiscoveryRequest, source_ids: list[str]) -> dict:
-    """Approve only sources that were part of this request AND passed the audit."""
+    """Approve only sources that were part of this request AND passed the audit.
+    Sources that require credentials are approvable once a Connection exists."""
+    from app.models import SourceConnection
+
     eligible = {
         a.source_id: a
         for a in db.query(SourceApproval).filter(SourceApproval.request_id == request.id).all()
@@ -115,14 +118,26 @@ def approve_sources(db: Session, request: DiscoveryRequest, source_ids: list[str
             .order_by(SourceAudit.audited_at.desc())
             .first()
         )
-        usable = (
-            source is not None
-            and source.adapter is not None
-            and latest_audit is not None
-            and latest_audit.technical_status in ("API_AVAILABLE", "DOWNLOAD_AVAILABLE", "ELIGIBLE")
+        has_adapter = source is not None and source.adapter is not None
+        has_connection = (
+            db.query(SourceConnection)
+            .filter(SourceConnection.source_id == sid, SourceConnection.status == "CONNECTED")
+            .first()
+            is not None
         )
-        if not usable:
-            rejected[sid] = "Source failed the audit or has no implemented adapter; it cannot be approved."
+        auth_ok = (not source.requires_auth) or has_connection
+        audit_ok = latest_audit is not None and latest_audit.technical_status in (
+            "API_AVAILABLE", "DOWNLOAD_AVAILABLE", "ELIGIBLE", "AUTH_REQUIRED",
+        )
+        if not (has_adapter and auth_ok and audit_ok):
+            if source is not None and source.requires_auth and not has_connection:
+                rejected[sid] = (
+                    f"{source.name} requires credentials. Add an API key under Profile → Connections, then approve."
+                )
+            elif not has_adapter:
+                rejected[sid] = "No adapter implemented for this source yet."
+            else:
+                rejected[sid] = "Source failed the audit; it cannot be approved."
             continue
         approval.approved = True
         approval.approved_at = utcnow()
@@ -167,16 +182,46 @@ def run_discovery_search(request_id: str, job_id: str, db_factory) -> None:
             sources = db.query(DataSource).filter(DataSource.id.in_(approved_ids)).all()
 
             raw_results = []
+            search_notes: list[str] = []
             for source in sources:
                 adapter_cls = ADAPTERS.get(source.adapter)
                 if adapter_cls is None:
+                    search_notes.append(f"{source.slug}: no adapter implemented; skipped.")
                     continue
-                adapter = adapter_cls()
-                found = asyncio.run(adapter.search(parsed))
+                credentials = None
+                if source.requires_auth:
+                    from app.api.connections import get_connection_secret
+
+                    credentials = get_connection_secret(db, source.id)
+                    if credentials is None:
+                        search_notes.append(
+                            f"{source.slug}: no saved connection (Profile → Connections); skipped."
+                        )
+                        continue
+                try:
+                    adapter = adapter_cls(credentials=credentials) if credentials else adapter_cls()
+                    found = asyncio.run(adapter.search(parsed))
+                except Exception as exc:
+                    # One failing source must not starve the whole search.
+                    search_notes.append(f"{source.slug}: search failed ({exc.__class__.__name__}).")
+                    continue
                 for r in found:
                     rec = normalize_search_result(source.id, r)
                     rec["source_slug"] = source.slug
                     raw_results.append(rec)
+
+            if not raw_results:
+                # Zero results is an honest outcome, not a failure: complete with notes
+                # so the UI can explain exactly why (e.g. missing connections).
+                request.status = "DATASETS_READY"
+                job.status = "COMPLETED"
+                job.stage = "DONE"
+                job.progress = 1.0
+                note_text = "; ".join(search_notes) if search_notes else "Try a broader query."
+                job.detail = f"0 unique datasets found. {note_text}"
+                job.finished_at = utcnow()
+                db.commit()
+                return
 
             job.progress = 0.6
             job.stage = "NORMALIZING"

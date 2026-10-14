@@ -108,9 +108,16 @@ async def preview_candidate(candidate_id: str, db: Session = Depends(get_db)):
     if cand is None:
         raise HTTPException(status_code=404, detail="Dataset candidate not found.")
     source = db.get(DataSource, cand.source_id)
-    if source is None or source.adapter != "huggingface":
+    if source is None or source.adapter not in ("huggingface", "kaggle"):
         raise HTTPException(status_code=400, detail="Preview is not available for this source.")
-    adapter = HuggingFaceAdapter()
+
+    if source.adapter == "kaggle":
+        from app.datasets.download import _credentials_for
+        from app.discovery.adapters.kaggle import KaggleAdapter
+
+        adapter = KaggleAdapter(credentials=_credentials_for(db, source))
+    else:
+        adapter = HuggingFaceAdapter()
     try:
         columns, rows = await adapter.get_preview(cand.source_dataset_id, limit=get_settings().max_preview_rows)
     except AdapterError as exc:

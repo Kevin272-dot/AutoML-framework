@@ -167,7 +167,7 @@ export default function CandidateDetailPage({ params }: { params: Promise<{ id: 
             <h3 className="text-xs font-semibold uppercase tracking-wider text-faint">Tags</h3>
             <div className="mt-2 flex flex-wrap gap-1.5">
               {candidate.tags.length ? (
-                candidate.tags.slice(0, 24).map((t) => <Badge key={t} tone="neutral">{t}</Badge>)
+                candidate.tags.slice(0, 24).filter(Boolean).map((t, i) => <Badge key={`${i}-${t}`} tone="neutral">{t}</Badge>)
               ) : (
                 <span className="text-sm text-faint">No tags published by the source.</span>
               )}

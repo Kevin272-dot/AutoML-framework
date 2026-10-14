@@ -56,7 +56,7 @@ def setup(db):
 
 def _run_chain(db, db_factory, ds_id):
     orig = download_mod.get_adapter
-    download_mod.get_adapter = lambda source: FakeAdapter()
+    download_mod.get_adapter = lambda source, credentials=None: FakeAdapter()
     try:
         job = db.query(Job).filter(Job.dataset_id == ds_id, Job.kind == "DATASET_DOWNLOAD").first()
         run_download(ds_id, job.id, db_factory)

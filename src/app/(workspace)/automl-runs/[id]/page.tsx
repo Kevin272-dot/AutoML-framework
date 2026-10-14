@@ -107,9 +107,12 @@ function RecommendationsPanel({ run, onDone, onExecute }: { run: AutoMLRunOut; o
               </div>
               {rec.preprocessing.length > 0 ? (
                 <div className="mt-1.5 flex flex-wrap gap-1">
-                  {rec.preprocessing.map((p) => (
-                    <span key={p} className="rounded bg-elevated px-1.5 py-0.5 text-[10px] text-muted">
-                      {p}
+                  {rec.preprocessing.map((p, idx) => (
+                    <span
+                      key={`${rec.rank}-${idx}-${p}`}
+                      className="rounded bg-elevated px-1.5 py-0.5 text-[10px] text-muted"
+                    >
+                      {p || "preprocess"}
                     </span>
                   ))}
                 </div>

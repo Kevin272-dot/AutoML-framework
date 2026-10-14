@@ -119,8 +119,9 @@ never hammer sources repeatedly.
 ## 4. Source adapters (`app/discovery/adapters/`)
 
 **Purpose:** all source-specific logic lives behind one interface; the engine core
-never knows what source it is talking to. Two real adapters exist today:
-`huggingface.py` and `eu.py` (EU Open Data Portal).
+never knows what source it is talking to. Three real adapters exist today:
+`huggingface.py`, `eu.py` (EU Open Data Portal), and `kaggle.py` (authenticated via
+stored Connections).
 
 ```python
 class DatasetSourceAdapter(ABC):
@@ -160,6 +161,15 @@ dicts (`{"en": ..., "fr": ...}`) normalized to English text; format labels arriv
 str or nested dicts (both handled). Distributions carry `download_url`/`access_url`
 — tabular ones (CSV/JSON/Parquet) are previewed via direct capped download and are
 what `download()` streams; landing-page-only datasets fail with an honest error.
+
+**Kaggle adapter** (`kaggle.py`): fully authenticated via the user's stored Connection
+(`username:key`, decrypted server-side only — the adapter refuses to run without one,
+raising `API_KEY_REQUIRED`). Uses Kaggle API v1 with basic auth: catalog search
+(`/datasets/list`), metadata (`/datasets/list/{owner}/{slug}`), and download
+(`/datasets/download/{owner}/{slug}`), which returns a ZIP — the largest tabular file
+inside is extracted and returned as the primary data file (CSV/Parquet/TSV). Preview
+is served the same way (Kaggle has no server-side preview API). Per-source search
+failures are isolated: one failing source never starves the whole search.
 
 **Progressive degradation:** both adapters run their query ladder in order and stop
 early once enough specific matches accumulate — so precise queries win, but the broad

@@ -109,10 +109,23 @@ def load_dataframe(path: str, file_format: str) -> tuple[pd.DataFrame, int]:
         raise ValidationError("PARSE_FAILURE", f"The file could not be parsed as {file_format}: {exc}") from exc
 
 
-def get_adapter(source: DataSource):
+def get_adapter(source: DataSource, credentials: str | None = None):
     if source.adapter == "huggingface":
         return HuggingFaceAdapter()
+    if source.adapter == "kaggle":
+        from app.discovery.adapters.kaggle import KaggleAdapter
+
+        return KaggleAdapter(credentials=credentials)
     raise AdapterError("SOURCE_UNSUPPORTED", f"No adapter implemented for source '{source.slug}'.")
+
+
+def _credentials_for(db: Session, source: DataSource) -> str | None:
+    """Decrypt the stored connection secret for auth-required sources."""
+    if not source.requires_auth:
+        return None
+    from app.api.connections import get_connection_secret
+
+    return get_connection_secret(db, source.id)
 
 
 def run_download(dataset_id: str, job_id: str, db_factory) -> None:
@@ -137,7 +150,7 @@ def run_download(dataset_id: str, job_id: str, db_factory) -> None:
         db.commit()
 
         source = db.get(DataSource, candidate.source_id)
-        adapter = get_adapter(source)
+        adapter = get_adapter(source, credentials=_credentials_for(db, source))
 
         with tempfile.TemporaryDirectory(prefix="automl-download-") as tmp:
             try:
