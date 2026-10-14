@@ -2,6 +2,16 @@
 
 import { use, useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { approveAutoMLRun, executeAutoMLRun, getAutoMLRun, getAutoMLRunJob } from "@/lib/api-client";
 import type { AutoMLRunOut } from "@/lib/api-types";
 import { Badge, StatusBadge } from "@/components/ui/Badge";
@@ -135,6 +145,37 @@ function RecommendationsPanel({ run, onDone, onExecute }: { run: AutoMLRunOut; o
             </Button>
           </div>
         ) : null}
+      </div>
+    </Card>
+  );
+}
+
+function LeaderboardChart({ run }: { run: AutoMLRunOut }) {
+  const succeeded = run.leaderboard.filter((e) => e.status === "success");
+  if (succeeded.length === 0) return null;
+  const data = succeeded.map((e) => ({
+    model: e.model,
+    validation: e.validation_score ?? 0,
+    test: e.test_score ?? 0,
+  }));
+  return (
+    <Card>
+      <CardHeader title="Model comparison" subtitle={`Validation vs test ${run.metric ?? "score"} by pipeline`} />
+      <div className="h-64 p-4">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={data} margin={{ top: 4, right: 8, bottom: 0, left: -8 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+            <XAxis dataKey="model" tick={{ fontSize: 10, fill: "var(--muted)" }} />
+            <YAxis domain={[0, 1]} tick={{ fontSize: 10, fill: "var(--muted)" }} width={44} />
+            <Tooltip
+              contentStyle={{ background: "var(--surface)", border: "1px solid var(--border)", color: "var(--text)", fontSize: 11 }}
+              cursor={{ fill: "var(--hover)", opacity: 0.4 }}
+            />
+            <Legend wrapperStyle={{ fontSize: 11 }} />
+            <Bar dataKey="validation" fill="var(--accent)" radius={[3, 3, 0, 0]} maxBarSize={36} />
+            <Bar dataKey="test" fill="var(--success)" radius={[3, 3, 0, 0]} maxBarSize={36} />
+          </BarChart>
+        </ResponsiveContainer>
       </div>
     </Card>
   );
@@ -297,6 +338,8 @@ export default function AutoMLRunPage({ params }: { params: Promise<{ id: string
       ) : null}
 
       {awaiting ? <RecommendationsPanel run={run} onDone={() => void refetch()} onExecute={() => void doExecute()} /> : null}
+
+      <LeaderboardChart run={run} />
 
       <Leaderboard run={run} />
 

@@ -13,8 +13,14 @@ inspect and select one, download and validate the actual data, run automatic EDA
 it into an ML-ready copy, and finally train models via an RL-driven pipeline-search engine —
 whose proposed pipelines you also approve before anything trains.
 
-- Full extraction-engine deep dive: [`DAT.md`](DAT.md)
-- Pre-rebuild audit: [`docs/CURRENT_UI_AUDIT.md`](docs/CURRENT_UI_AUDIT.md)
+## Documentation
+
+| Doc | What it covers |
+|---|---|
+| [`docs/USER_GUIDE.md`](docs/USER_GUIDE.md) | **How to use the app end-to-end**, plus every way to integrate it (model packages, REST API, Python library) |
+| [`docs/DATA_EXTRACTION.md`](docs/DATA_EXTRACTION.md) | Concept-by-concept deep dive into the extraction engine — every stage, library, and design decision |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | How the whole system works: modules, jobs, the RL engine, frontend structure |
+| [`docs/CURRENT_UI_AUDIT.md`](docs/CURRENT_UI_AUDIT.md) | Pre-rebuild audit (historical) |
 
 ---
 

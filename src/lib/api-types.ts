@@ -301,3 +301,17 @@ export interface AutoMLRunOut {
   created_at: string;
   updated_at: string;
 }
+
+export interface RunFeatures {
+  task_type: string;
+  target: string | null;
+  features: { name: string; kind: string; required: boolean }[];
+  classes: string[] | null;
+}
+
+export interface PredictOut {
+  predictions: (string | number | null)[];
+  count: number;
+  probabilities?: number[][] | null;
+  classes?: string[] | null;
+}

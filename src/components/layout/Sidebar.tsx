@@ -7,6 +7,7 @@ import {
   Beaker,
   Bot,
   Boxes,
+  BookOpen,
   ChevronsLeft,
   Compass,
   Database,
@@ -24,6 +25,7 @@ const NAV = [
   { href: "/automl-runs", label: "AutoML Runs", icon: Bot },
   { href: "/models", label: "Models", icon: Boxes },
   { href: "/profile", label: "Profile & Preferences", icon: UserCircle },
+  { href: "/guide", label: "Guide", icon: BookOpen },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 

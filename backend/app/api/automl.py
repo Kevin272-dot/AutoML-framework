@@ -172,6 +172,41 @@ def run_job(run_id: str, db: Session = Depends(get_db)):
     )
 
 
+@router.get("/runs/{run_id}/features")
+def run_features(run_id: str, db: Session = Depends(get_db)):
+    """Feature schema for building dynamic prediction forms."""
+    _get_row(db, run_id)
+    from app.automl import predictor
+
+    try:
+        return predictor.get_features(run_id)
+    except predictor.ModelNotAvailable as exc:
+        raise HTTPException(status_code=404, detail=exc.reason) from exc
+
+
+class PredictIn(BaseModel):
+    records: list[dict] = Field(min_length=1, max_length=1000)
+
+
+@router.post("/runs/{run_id}/predict")
+def predict_records(run_id: str, payload: PredictIn, db: Session = Depends(get_db)):
+    """Serve the trained model directly: POST rows matching the feature schema."""
+    _get_row(db, run_id)
+    from app.automl import predictor
+
+    try:
+        return predictor.predict(run_id, payload.records)
+    except predictor.ModelNotAvailable as exc:
+        raise HTTPException(status_code=404, detail=exc.reason) from exc
+    except (ValueError, TypeError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(
+            status_code=400,
+            detail={"code": "PREDICT_FAILURE", "message": str(exc)[:300]},
+        ) from exc
+
+
 @router.get("/runs/{run_id}/artifacts/{kind}")
 def download_artifact(run_id: str, kind: str, db: Session = Depends(get_db)):
     """Download the packaged model.zip or results.zip produced by the run."""

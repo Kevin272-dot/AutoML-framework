@@ -177,6 +177,17 @@ export function getAutoMLRunJob(runId: string) {
   return request<import("./api-types").JobOut>(`/api/automl/runs/${runId}/job`);
 }
 
+export function getRunFeatures(runId: string) {
+  return request<import("./api-types").RunFeatures>(`/api/automl/runs/${runId}/features`);
+}
+
+export function predictWithModel(runId: string, records: Record<string, string | number>[]) {
+  return request<import("./api-types").PredictOut>(`/api/automl/runs/${runId}/predict`, {
+    method: "POST",
+    body: JSON.stringify({ records }),
+  });
+}
+
 // ---------- jobs / dashboard ----------
 export function getJob(id: string) {
   return request<import("./api-types").JobOut>(`/api/jobs/${id}`);
