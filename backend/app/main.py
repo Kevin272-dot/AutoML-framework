@@ -59,6 +59,15 @@ app.include_router(jobs_router.router)
 app.include_router(connections_router.router)
 app.include_router(automl_router.router)
 
+# Serve the standalone demo client at /demo (same origin as the API — no CORS needed).
+from pathlib import Path as _Path
+
+_demo = (_Path(__file__).resolve().parents[2] / get_settings().demo_dir).resolve()
+if _demo.is_dir():
+    from fastapi.staticfiles import StaticFiles
+
+    app.mount("/demo", StaticFiles(directory=str(_demo), html=True), name="demo")
+
 
 @app.on_event("startup")
 def create_tables():

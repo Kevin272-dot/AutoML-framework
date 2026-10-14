@@ -44,6 +44,9 @@ class Settings(BaseSettings):
     # Cap on concurrently stored (downloaded) datasets per workspace.
     max_stored_datasets: int = 25
 
+    # Standalone demo client (sibling folder, served at /demo by the backend).
+    demo_dir: str = "../automl-api-demo"
+
 
 @lru_cache
 def get_settings() -> Settings:
